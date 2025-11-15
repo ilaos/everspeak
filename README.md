@@ -61,6 +61,34 @@ http://localhost:PORT/api-docs
   - Returns: `{ ok: true }`
   - Purpose: Verify the API is running
 
+### Message Endpoint
+- **POST** `/api/message` - Process a conversational message
+  ```json
+  {
+    "user_message": "Hello EverSpeak!",
+    "emotional_state": "excited",
+    "tone_mode": "friendly",
+    "memory_bank": "session_123"
+  }
+  ```
+  - **Required**: `user_message` (string)
+  - **Optional**: `emotional_state`, `tone_mode`, `memory_bank`
+  - Returns:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "reply": "Yo Ish… I hear you: 'Hello EverSpeak!'. I'm not fully wired up yet, but this is where EverSpeak will answer you in my voice.",
+      "meta": {
+        "emotional_state": "excited",
+        "tone_mode": "friendly",
+        "memories_used": "session_123"
+      }
+    },
+    "message": "Message processed successfully"
+  }
+  ```
+
 ### Examples CRUD
 - **GET** `/api/examples` - Get all examples
 - **GET** `/api/examples/:id` - Get example by ID
@@ -89,6 +117,7 @@ everspeak-backend/
 ├── src/
 │   ├── controllers/
 │   │   ├── testController.js      # Test endpoint logic
+│   │   ├── messageController.js   # Message processing endpoint
 │   │   └── exampleController.js   # Example CRUD operations
 │   ├── routes/
 │   │   └── index.js               # Route definitions with Swagger docs

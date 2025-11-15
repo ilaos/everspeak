@@ -17,6 +17,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ Implemented robust error handling with custom error classes
 - ✅ Added input validation middleware with partial update support
 - ✅ Set up Swagger/OpenAPI documentation at /api-docs
+- ✅ Added POST /api/message endpoint for conversational AI (stub response)
 - ✅ All endpoints tested and verified working
 
 ## System Architecture
@@ -41,6 +42,7 @@ Preferred communication style: Simple, everyday language.
 - `/src/routes/index.js` - API route definitions with Swagger JSDoc comments
 - `/src/controllers/` - Business logic and request handlers
   - `testController.js` - Simple test endpoint
+  - `messageController.js` - Message processing for EverSpeak AI
   - `exampleController.js` - Full CRUD operations with in-memory storage
 - `/src/utils/` - Utility functions and middleware
   - `errorHandler.js` - Centralized error handling middleware and custom error classes
@@ -71,6 +73,12 @@ Preferred communication style: Simple, everyday language.
 
 **Test Endpoint**
 - `GET /api/test` - Returns `{ok: true}` to verify API is operational
+
+**Message Endpoint**
+- `POST /api/message` - Process conversational message with EverSpeak AI
+  - Required: `user_message` (string)
+  - Optional: `emotional_state`, `tone_mode`, `memory_bank`
+  - Returns stub response with reply and metadata
 
 **Examples Resource (CRUD)**
 - `GET /api/examples` - List all examples with count

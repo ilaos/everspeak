@@ -17,6 +17,7 @@ Your **Everspeak Backend** API is fully implemented and operational!
 
 2. **✅ API Endpoints**
    - `GET /api/test` - Test endpoint returning `{ok: true}`
+   - `POST /api/message` - Conversational AI message endpoint
    - Full CRUD operations for examples resource:
      - `GET /api/examples` - List all examples
      - `GET /api/examples/:id` - Get single example
@@ -50,6 +51,7 @@ Your **Everspeak Backend** API is fully implemented and operational!
 /src
   /controllers          # Business logic
     testController.js
+    messageController.js
     exampleController.js
   /routes              # Route definitions + Swagger docs
     index.js
@@ -73,6 +75,13 @@ The server will start on port 5000 (or the PORT environment variable if set).
 ```bash
 curl http://localhost:5000/api/test
 # Response: {"ok":true}
+```
+
+**Send a message:**
+```bash
+curl -X POST http://localhost:5000/api/message \
+  -H "Content-Type: application/json" \
+  -d '{"user_message":"Hello EverSpeak!","emotional_state":"excited"}'
 ```
 
 **Create an example:**
@@ -101,6 +110,9 @@ Open in browser: `http://localhost:5000/api-docs`
 
 All endpoints have been tested and verified:
 - ✅ GET /api/test returns {ok: true}
+- ✅ POST /api/message processes messages with stub response
+- ✅ POST /api/message validates user_message is required
+- ✅ POST /api/message handles optional fields correctly
 - ✅ GET /api/examples returns list with data
 - ✅ GET /api/examples/:id returns single item
 - ✅ POST /api/examples creates new items

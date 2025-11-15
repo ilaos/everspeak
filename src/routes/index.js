@@ -2,6 +2,7 @@ import express from 'express';
 import { testController } from '../controllers/testController.js';
 import { exampleController } from '../controllers/exampleController.js';
 import { handleMessage } from '../controllers/messageController.js';
+import { personaController } from '../controllers/personaController.js';
 import { validateExample } from '../utils/validation.js';
 
 const router = express.Router();
@@ -59,6 +60,10 @@ router.get('/test', testController.getTest);
  *                 type: string
  *                 description: Optional memory context
  *                 example: "previous_conversation_id"
+ *               persona_id:
+ *                 type: string
+ *                 description: Optional persona ID to load memories from
+ *                 example: "uuid-of-persona"
  *     responses:
  *       200:
  *         description: Message processed successfully
@@ -84,10 +89,18 @@ router.get('/test', testController.getTest);
  *                           type: string
  *                         memories_used:
  *                           type: string
+ *                         persona_id:
+ *                           type: string
+ *                         persona_name:
+ *                           type: string
+ *                         memory_count:
+ *                           type: number
  *                 message:
  *                   type: string
  *       400:
  *         description: Validation error - user_message is required
+ *       404:
+ *         description: Persona not found (if persona_id provided)
  */
 router.post('/message', handleMessage);
 
@@ -220,5 +233,302 @@ router.put('/examples/:id', validateExample, exampleController.update);
  *         description: Example not found
  */
 router.delete('/examples/:id', exampleController.delete);
+
+// Persona Routes
+
+/**
+ * @swagger
+ * /api/personas:
+ *   get:
+ *     summary: Get all personas
+ *     description: Retrieve a list of all loved one personas
+ *     tags: [Personas]
+ *     responses:
+ *       200:
+ *         description: List of personas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       relationship:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       memories:
+ *                         type: array
+ *                       created_at:
+ *                         type: string
+ *                       updated_at:
+ *                         type: string
+ *                 count:
+ *                   type: number
+ */
+router.get('/personas', personaController.getAll);
+
+/**
+ * @swagger
+ * /api/personas:
+ *   post:
+ *     summary: Create a new persona
+ *     description: Create a new loved one persona
+ *     tags: [Personas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Jimmy"
+ *               relationship:
+ *                 type: string
+ *                 example: "Brother"
+ *               description:
+ *                 type: string
+ *                 example: "Funny, caring brother who loved fishing"
+ *     responses:
+ *       201:
+ *         description: Persona created successfully
+ *       400:
+ *         description: Validation error
+ */
+router.post('/personas', personaController.create);
+
+/**
+ * @swagger
+ * /api/personas/{id}:
+ *   get:
+ *     summary: Get persona by ID
+ *     description: Retrieve a single persona by its ID
+ *     tags: [Personas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     responses:
+ *       200:
+ *         description: Persona found
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:id', personaController.getById);
+
+/**
+ * @swagger
+ * /api/personas/{id}:
+ *   put:
+ *     summary: Update a persona
+ *     description: Update an existing persona
+ *     tags: [Personas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               relationship:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Persona updated successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.put('/personas/:id', personaController.update);
+
+/**
+ * @swagger
+ * /api/personas/{id}:
+ *   delete:
+ *     summary: Delete a persona
+ *     description: Delete a persona by ID
+ *     tags: [Personas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Persona deleted successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.delete('/personas/:id', personaController.delete);
+
+// Memory Routes
+
+/**
+ * @swagger
+ * /api/personas/{id}/memories:
+ *   get:
+ *     summary: Get all memories for a persona
+ *     description: Retrieve all memories associated with a persona
+ *     tags: [Memories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     responses:
+ *       200:
+ *         description: List of memories
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:id/memories', personaController.getMemories);
+
+/**
+ * @swagger
+ * /api/personas/{id}/memories:
+ *   post:
+ *     summary: Add a memory to a persona
+ *     description: Create a new memory for a persona
+ *     tags: [Memories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - category
+ *               - text
+ *             properties:
+ *               category:
+ *                 type: string
+ *                 enum: [humor, regrets, childhood, advice, personality, misc]
+ *                 example: "childhood"
+ *               text:
+ *                 type: string
+ *                 example: "We used to go fishing every summer at the lake"
+ *               weight:
+ *                 type: number
+ *                 minimum: 0.1
+ *                 maximum: 5.0
+ *                 example: 1.5
+ *     responses:
+ *       201:
+ *         description: Memory created successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Persona not found
+ */
+router.post('/personas/:id/memories', personaController.createMemory);
+
+/**
+ * @swagger
+ * /api/personas/{id}/memories/{memoryId}:
+ *   put:
+ *     summary: Update a memory
+ *     description: Update an existing memory
+ *     tags: [Memories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *       - in: path
+ *         name: memoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The memory ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *                 enum: [humor, regrets, childhood, advice, personality, misc]
+ *               text:
+ *                 type: string
+ *               weight:
+ *                 type: number
+ *                 minimum: 0.1
+ *                 maximum: 5.0
+ *     responses:
+ *       200:
+ *         description: Memory updated successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Persona or memory not found
+ */
+router.put('/personas/:id/memories/:memoryId', personaController.updateMemory);
+
+/**
+ * @swagger
+ * /api/personas/{id}/memories/{memoryId}:
+ *   delete:
+ *     summary: Delete a memory
+ *     description: Delete a memory from a persona
+ *     tags: [Memories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *       - in: path
+ *         name: memoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The memory ID
+ *     responses:
+ *       200:
+ *         description: Memory deleted successfully
+ *       404:
+ *         description: Persona or memory not found
+ */
+router.delete('/personas/:id/memories/:memoryId', personaController.deleteMemory);
 
 export { router };

@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
-import { ValidationError } from '../utils/errorHandler.js';
+import { ValidationError, AppError } from '../utils/errorHandler.js';
+import { loadPersonas, findPersonaById } from '../personas/utils.js';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -7,7 +8,7 @@ const openai = new OpenAI({
 
 export const handleMessage = async (req, res, next) => {
   try {
-    const { user_message, emotional_state, tone_mode, memory_bank } = req.body;
+    const { user_message, emotional_state, tone_mode, memory_bank, persona_id } = req.body;
 
     // Validate required field
     if (!user_message || typeof user_message !== 'string') {
@@ -19,18 +20,67 @@ export const handleMessage = async (req, res, next) => {
       ]);
     }
 
-    // Construct AI prompt
-    const prompt = `You are simulating the personality of a deceased loved one based ONLY on the memories provided.
+    let personaInfo = null;
+    let formattedMemories = memory_bank || 'none provided';
+    let personaName = null;
+    let personaRelationship = null;
+
+    // Load persona if persona_id is provided
+    if (persona_id) {
+      const data = await loadPersonas();
+      const persona = findPersonaById(data.personas, persona_id);
+
+      if (!persona) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      personaInfo = persona;
+      personaName = persona.name;
+      personaRelationship = persona.relationship;
+
+      // Format persona memories by category with weights
+      if (persona.memories && persona.memories.length > 0) {
+        const memoryTexts = persona.memories.map(m => 
+          `[${m.category} | weight: ${m.weight}] ${m.text}`
+        );
+        formattedMemories = memoryTexts.join('\n');
+
+        // Append ad-hoc memory_bank if provided
+        if (memory_bank) {
+          formattedMemories += '\n[Additional context] ' + memory_bank;
+        }
+      } else if (memory_bank) {
+        // Persona has no memories, use memory_bank
+        formattedMemories = memory_bank;
+      } else {
+        // No memories and no memory_bank
+        formattedMemories = 'none provided';
+      }
+    }
+
+    // Construct AI prompt with persona context
+    let systemPrompt = `You are simulating the personality of a deceased loved one based ONLY on the memories provided.
 You are NOT the real person.
 You must NOT imply supernatural awareness.
 You must NOT reference information you were not explicitly given.
 
 Your goal is to respond in a comforting, grounded, realistic, emotionally intelligent way.
-You may reflect their quirks, humor, tone, and personality—but only using the user's memory inputs.
+You may reflect their quirks, humor, tone, and personality—but only using the user's memory inputs.`;
+
+    if (personaName) {
+      systemPrompt += `\n\nPersona Name: ${personaName}`;
+      if (personaRelationship) {
+        systemPrompt += `\nRelationship: ${personaRelationship}`;
+      }
+    }
+
+    systemPrompt += `
 
 Tone Mode: ${tone_mode || 'not specified'}
 Emotional State: ${emotional_state || 'not specified'}
-Memories Provided: ${memory_bank || 'none provided'}
+Memories Provided:
+${formattedMemories}
+
 User Message: ${user_message}`;
 
     let reply;
@@ -42,7 +92,7 @@ User Message: ${user_message}`;
         messages: [
           {
             role: 'system',
-            content: prompt
+            content: systemPrompt
           },
           {
             role: 'user',
@@ -65,7 +115,10 @@ User Message: ${user_message}`;
       meta: {
         emotional_state: emotional_state || null,
         tone_mode: tone_mode || null,
-        memories_used: memory_bank || null
+        memories_used: memory_bank || null,
+        persona_id: persona_id || null,
+        persona_name: personaName || null,
+        memory_count: personaInfo ? personaInfo.memories.length : null
       }
     };
 

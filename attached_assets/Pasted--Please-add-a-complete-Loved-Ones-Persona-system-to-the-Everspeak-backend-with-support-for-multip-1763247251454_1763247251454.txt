@@ -1,0 +1,96 @@
+**Please add a complete “Loved Ones Persona” system to the Everspeak backend with support for multiple personas per user.
+
+Requirements:
+
+Create a new folder: src/personas/
+
+Add a new data model (JSON-based for now) stored in a file named:
+src/personas/personas.json
+
+The structure should look like:
+
+{
+  "personas": [
+    {
+      "id": "uuid",
+      "name": "Jimmy",
+      "relationship": "Brother",
+      "description": "Short summary of personality",
+      "memories": [
+        {
+          "id": "uuid",
+          "category": "humor | regrets | childhood | advice | personality | misc",
+          "text": "Memory text here",
+          "weight": 1.0
+        }
+      ],
+      "created_at": "...",
+      "updated_at": "..."
+    }
+  ]
+}
+
+
+Create new REST API endpoints under the prefix /api/personas:
+
+GET /api/personas → list all personas
+
+POST /api/personas → create new persona
+Fields: name, relationship, description
+
+GET /api/personas/:id → get single persona
+
+PUT /api/personas/:id → update persona
+
+DELETE /api/personas/:id → delete persona
+
+Create memory-bank endpoints under the same persona:
+
+POST /api/personas/:id/memories
+Fields: category, text, weight
+
+GET /api/personas/:id/memories
+
+PUT /api/personas/:id/memories/:memoryId
+
+DELETE /api/personas/:id/memories/:memoryId
+
+Add validation:
+
+persona name required
+
+memory text required
+
+category must be from approved list
+
+weight must be a number from 0.1 to 5.0
+
+Implement helper functions in src/personas/utils.js for:
+
+loading the JSON file
+
+saving the JSON file
+
+generating UUIDs
+
+safe updating
+
+The /api/message endpoint must be updated so that:
+
+it accepts a persona_id
+
+it automatically loads all memories for that persona
+
+it passes those memories into the AI prompt as contextual grounding
+
+Update Swagger docs to include:
+
+Persona model
+
+Memory model
+
+All new endpoints
+
+Ensure everything continues to run on port 5000 and remains consistent with project structure.
+
+Keep consistent error handling and return the same response format used in other endpoints.**

@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 export const handleMessage = async (req, res, next) => {
   try {
-    const { user_message, emotional_state, tone_mode, memory_bank, persona_id } = req.body;
+    const { user_message, emotional_state, tone_mode, memory_bank, persona_id, strict_persona } = req.body;
 
     // Validate required field
     if (!user_message || typeof user_message !== 'string') {
@@ -74,6 +74,11 @@ You may reflect their quirks, humor, tone, and personality—but only using the 
       }
     }
 
+    // Add strict persona instruction if enabled
+    if (strict_persona === true) {
+      systemPrompt += `\n\nIMPORTANT: The user has indicated that some previous replies did not feel like this person. You MUST now adhere very closely to the documented traits and memories. Do not invent new attitudes, life perspectives, or emotional styles that were not implied by the memories. It is okay to be simpler or less talkative if that is more accurate to who they were.`;
+    }
+
     systemPrompt += `
 
 Tone Mode: ${tone_mode || 'not specified'}
@@ -118,7 +123,8 @@ User Message: ${user_message}`;
         memories_used: memory_bank || null,
         persona_id: persona_id || null,
         persona_name: personaName || null,
-        memory_count: personaInfo ? personaInfo.memories.length : null
+        memory_count: personaInfo ? personaInfo.memories.length : null,
+        strict_persona: strict_persona === true ? true : false
       }
     };
 

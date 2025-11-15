@@ -17,10 +17,25 @@
           "category": "humor",
           "text": "Jimmy had the best jokes and could make anyone laugh even on their worst day.",
           "weight": 1.8
+        },
+        {
+          "id": "8e2f28c3-ac38-435c-8622-e9e1da07a587",
+          "category": "humor",
+          "text": "Always made jokes about pineapple on pizza",
+          "weight": 2.5
         }
       ],
       "created_at": "2025-11-15T22:58:00.603Z",
-      "updated_at": "2025-11-15T22:58:00.603Z"
+      "updated_at": "2025-11-15T23:35:39.260Z"
+    },
+    {
+      "id": "54508638-730e-4cbb-97c8-66855def227a",
+      "name": "TestGroundingquB0oy",
+      "relationship": "Friend",
+      "description": "Test persona for grounding features",
+      "memories": [],
+      "created_at": "2025-11-15T23:35:53.098Z",
+      "updated_at": "2025-11-15T23:35:53.098Z"
     }
   ]
 }

@@ -40,6 +40,14 @@ Preferred communication style: Simple, everyday language.
   - Clean, professional design with mobile support
   - Updated server to serve static files
   - All flows tested and working (create persona, add memories, chat with AI)
+- ✅ **Implemented Grounding & Healthy-Use Features**:
+  - Dismissible grounding banner explaining memory-based companion (not supernatural awareness)
+  - Banner dismissal persists in session memory (in-memory flag, resets on page refresh)
+  - Grounding line under AI replies: "Based on the memories you've shared about [PersonaName]"
+  - Healthy-use nudge appears after 12 user messages (once per session, non-blocking)
+  - Nudge encourages taking breaks and processing emotions
+  - Message counter and nudge reset when switching personas
+  - All features tested with Playwright (100% pass rate)
 - ✅ Architect-approved and production-ready
 - ✅ All endpoints and UI tested and verified working
 

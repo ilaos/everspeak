@@ -1,0 +1,68 @@
+Please enhance EverSpeak with a simple “OOC / stay in character” mechanism, without breaking any existing behavior.
+
+Goal:
+Give the user a way to say “that didn’t sound like them” and tighten how strictly the AI sticks to the persona’s memories.
+
+A. Frontend changes (public/app.js, public/index.html, public/styles.css)
+
+1) Add a per-session strict mode flag in app.js:
+- For the currently selected persona, track a boolean flag in memory (e.g. `strictMode = false` initially).
+- When strict mode is ON, all calls to POST /api/message should include an extra field in the JSON body:
+  `strict_persona: true`
+- When strict mode is OFF, either omit the field or send `strict_persona: false`.
+
+2) Under each AI reply bubble in the chat:
+- Add a small, subtle link or button, e.g.:
+  Text: “Doesn’t sound like them?”
+- When clicked:
+  - Set `strictMode = true` for the current persona.
+  - Optionally show a one-time, small notice near the chat input like:
+    “Okay, I’ll stick closer to how you described them.”
+  - Do NOT resend the previous message; this only affects future replies.
+- Style this link to be small, gray, and unobtrusive under the AI message (similar style to the grounding line, but clickable).
+
+3) Add a visible indicator when strict mode is active:
+- Near the chat controls (e.g., above the input), show a small badge or text like:
+  “Strict mode: staying closer to their real personality.”
+- Allow the user to turn it off with a tiny “Turn off” link or toggle.
+- When turning off:
+  - Set `strictMode = false`.
+  - Hide the badge.
+- No need to persist across refresh; it’s session-only.
+
+B. Backend changes (src/controllers/messageController.js)
+
+1) Update the /api/message controller to read `strict_persona` from the request body:
+- It should be optional.
+- Default to false if not provided.
+
+2) When constructing the AI prompt:
+- If `strict_persona` is true, append an extra instruction to the system/user prompt context, something like:
+
+  “The user has indicated that some previous replies did not feel like this person. You MUST now adhere very closely to the documented traits and memories. Do not invent new attitudes, life perspectives, or emotional styles that were not implied by the memories. It is okay to be simpler or less talkative if that is more accurate to who they were.”
+
+- If `strict_persona` is false or absent, keep behavior as it currently is.
+
+3) Do NOT change the response format.
+- Keep returning the same JSON structure:
+  `{ success, data: { reply, meta: { ... } } }`
+- You may optionally include `strict_persona` inside `meta` if that fits the existing pattern, but don’t break anything the UI depends on.
+
+C. Validation and consistency
+
+- No existing routes should be removed or renamed.
+- The new `strict_persona` field should be:
+  - optional
+  - boolean-like
+- Ensure:
+  - Chat still works when `strict_persona` is not sent at all.
+  - The UI still works on mobile.
+  - Grounding banner, grounding line, and healthy-use nudge are unaffected.
+
+After implementation:
+- Test flow:
+  1) Select a persona and send a few messages.
+  2) Click “Doesn’t sound like them?” under a reply.
+  3) Confirm strict mode indicator appears.
+  4) Send another message and verify `strict_persona` is included in the request body.
+  5) Confirm everything still behaves normally if strict mode is turned back off.

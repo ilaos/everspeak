@@ -5,6 +5,8 @@ let memories = [];
 let bannerDismissed = false;
 let userMessageCount = 0;
 let healthyUseNudgeShown = false;
+let strictMode = false;
+let strictModeNoticeShown = false;
 
 // DOM Elements
 const personaDropdown = document.getElementById('persona-dropdown');
@@ -16,6 +18,8 @@ const chatMessages = document.getElementById('chat-messages');
 const groundingBanner = document.getElementById('grounding-banner');
 const bannerDismissBtn = document.getElementById('banner-dismiss');
 const healthyUseNudge = document.getElementById('healthy-use-nudge');
+const strictModeIndicator = document.getElementById('strict-mode-indicator');
+const strictModeTurnOff = document.getElementById('strict-mode-turn-off');
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -30,6 +34,39 @@ function setupEventListeners() {
   memoryForm.addEventListener('submit', handleAddMemory);
   chatForm.addEventListener('submit', handleSendMessage);
   bannerDismissBtn.addEventListener('click', handleBannerDismiss);
+  strictModeTurnOff.addEventListener('click', handleStrictModeTurnOff);
+}
+
+// Enable strict mode
+function enableStrictMode() {
+  strictMode = true;
+  strictModeIndicator.style.display = 'block';
+  
+  // Show one-time notice
+  if (!strictModeNoticeShown) {
+    const noticeDiv = document.createElement('div');
+    noticeDiv.className = 'strict-mode-notice';
+    noticeDiv.textContent = "Okay, I'll stick closer to how you described them.";
+    noticeDiv.setAttribute('data-testid', 'strict-mode-notice');
+    
+    // Insert before chat controls
+    const chatControls = document.querySelector('.chat-controls');
+    chatControls.parentNode.insertBefore(noticeDiv, chatControls);
+    
+    // Auto-hide after 4 seconds
+    setTimeout(() => {
+      noticeDiv.remove();
+    }, 4000);
+    
+    strictModeNoticeShown = true;
+  }
+}
+
+// Handle strict mode turn off
+function handleStrictModeTurnOff(event) {
+  event.preventDefault();
+  strictMode = false;
+  strictModeIndicator.style.display = 'none';
 }
 
 // Handle banner dismiss
@@ -331,17 +368,25 @@ async function handleSendMessage(event) {
   const typingIndicator = addTypingIndicator();
   
   try {
+    // Build request body
+    const requestBody = {
+      user_message: userMessage,
+      persona_id: selectedPersonaId,
+      emotional_state: emotionalState,
+      tone_mode: toneMode
+    };
+    
+    // Include strict_persona if strict mode is enabled
+    if (strictMode) {
+      requestBody.strict_persona = true;
+    }
+    
     const response = await fetch('/api/message', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        user_message: userMessage,
-        persona_id: selectedPersonaId,
-        emotional_state: emotionalState,
-        tone_mode: toneMode
-      })
+      body: JSON.stringify(requestBody)
     });
     
     const result = await response.json();
@@ -388,6 +433,20 @@ function addMessageToChat(sender, message, isUser) {
   
   messageDiv.innerHTML = messageHTML;
   
+  // Add "Doesn't sound like them?" link for persona messages (not system messages)
+  if (!isUser && sender !== 'System') {
+    const strictLink = document.createElement('a');
+    strictLink.href = '#';
+    strictLink.className = 'strict-mode-link';
+    strictLink.textContent = "Doesn't sound like them?";
+    strictLink.setAttribute('data-testid', 'link-strict-mode');
+    strictLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      enableStrictMode();
+    });
+    messageDiv.appendChild(strictLink);
+  }
+  
   // Remove placeholder if exists
   const placeholder = chatMessages.querySelector('.placeholder');
   if (placeholder) {
@@ -423,6 +482,11 @@ function clearChat() {
   userMessageCount = 0;
   healthyUseNudgeShown = false;
   healthyUseNudge.style.display = 'none';
+  
+  // Reset strict mode when switching personas
+  strictMode = false;
+  strictModeNoticeShown = false;
+  strictModeIndicator.style.display = 'none';
 }
 
 // Utility: Escape HTML

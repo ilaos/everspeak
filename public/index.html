@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Everspeak - Talk to Your Loved Ones</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Everspeak</h1>
+      <p>Keep the conversation going with those you love</p>
+    </header>
+
+    <main class="panels">
+      <!-- Persona Panel -->
+      <section class="panel persona-panel">
+        <h2>Persona</h2>
+        
+        <div class="persona-selector">
+          <label for="persona-dropdown">Select Persona:</label>
+          <select id="persona-dropdown" data-testid="select-persona">
+            <option value="">-- Choose a persona --</option>
+          </select>
+        </div>
+
+        <div class="persona-info" id="persona-info">
+          <p class="info-item"><strong>Name:</strong> <span id="info-name" data-testid="text-persona-name">-</span></p>
+          <p class="info-item"><strong>Relationship:</strong> <span id="info-relationship" data-testid="text-persona-relationship">-</span></p>
+          <p class="info-item"><strong>Description:</strong> <span id="info-description" data-testid="text-persona-description">-</span></p>
+        </div>
+
+        <div class="create-persona-form">
+          <h3>Create New Persona</h3>
+          <form id="persona-form">
+            <div class="form-group">
+              <label for="persona-name">Name *</label>
+              <input type="text" id="persona-name" data-testid="input-persona-name" required>
+            </div>
+            <div class="form-group">
+              <label for="persona-relationship">Relationship</label>
+              <input type="text" id="persona-relationship" data-testid="input-persona-relationship" placeholder="e.g., Brother, Mother, Friend">
+            </div>
+            <div class="form-group">
+              <label for="persona-description">Description</label>
+              <textarea id="persona-description" data-testid="input-persona-description" rows="3" placeholder="Tell us about this person..."></textarea>
+            </div>
+            <button type="submit" data-testid="button-save-persona">Save Persona</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Memory Panel -->
+      <section class="panel memory-panel">
+        <h2>Memories</h2>
+        
+        <div id="memories-list" data-testid="list-memories">
+          <p class="placeholder">Select a persona to view memories</p>
+        </div>
+
+        <div class="add-memory-form">
+          <h3>Add Memory</h3>
+          <form id="memory-form">
+            <div class="form-group">
+              <label for="memory-category">Category *</label>
+              <select id="memory-category" data-testid="select-memory-category" required>
+                <option value="">-- Choose category --</option>
+                <option value="humor">Humor</option>
+                <option value="regrets">Regrets</option>
+                <option value="childhood">Childhood</option>
+                <option value="advice">Advice</option>
+                <option value="personality">Personality</option>
+                <option value="misc">Misc</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="memory-text">Memory *</label>
+              <textarea id="memory-text" data-testid="input-memory-text" rows="3" required placeholder="Describe this memory..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="memory-weight">Weight (0.1 - 5.0)</label>
+              <input type="number" id="memory-weight" data-testid="input-memory-weight" min="0.1" max="5.0" step="0.1" value="1.0">
+            </div>
+            <button type="submit" data-testid="button-add-memory">Add Memory</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Chat Panel -->
+      <section class="panel chat-panel">
+        <h2>Chat</h2>
+        
+        <div class="chat-messages" id="chat-messages" data-testid="chat-messages">
+          <p class="placeholder">Select a persona and start chatting</p>
+        </div>
+
+        <div class="chat-input-area">
+          <form id="chat-form">
+            <div class="chat-controls">
+              <div class="form-group">
+                <label for="emotional-state">Emotional State</label>
+                <select id="emotional-state" data-testid="select-emotional-state">
+                  <option value="neutral">Neutral</option>
+                  <option value="sad">Sad</option>
+                  <option value="reflective">Reflective</option>
+                  <option value="anxious">Anxious</option>
+                  <option value="excited">Excited</option>
+                  <option value="nostalgic">Nostalgic</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="tone-mode">Tone Mode</label>
+                <select id="tone-mode" data-testid="select-tone-mode">
+                  <option value="auto">Auto</option>
+                  <option value="gentle">Gentle</option>
+                  <option value="casual">Casual</option>
+                  <option value="real_talk">Real Talk</option>
+                </select>
+              </div>
+            </div>
+            <div class="chat-input-wrapper">
+              <textarea id="chat-input" data-testid="input-chat-message" rows="2" placeholder="Type your message..." required></textarea>
+              <button type="submit" data-testid="button-send-message">Send</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

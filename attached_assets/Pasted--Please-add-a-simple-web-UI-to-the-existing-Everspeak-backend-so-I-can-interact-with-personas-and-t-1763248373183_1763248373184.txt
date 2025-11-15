@@ -1,0 +1,207 @@
+**Please add a simple web UI to the existing Everspeak backend so I can interact with personas and the /api/message endpoint without touching code.
+
+Requirements:
+
+Static Frontend Setup
+
+Create a public/ folder with:
+
+public/index.html
+
+public/styles.css
+
+public/app.js
+
+In the Express server (entry file), add static serving:
+
+app.use(express.static('public'));
+
+Root URL / should serve index.html.
+
+Page Layout (index.html)
+Design a clean, simple single-page layout with three main sections:
+
+A) Persona Panel (left/top on mobile)
+
+A dropdown to select an existing persona
+
+A list showing basic info of the selected persona:
+
+name
+
+relationship
+
+description
+
+A "Create New Persona" form with fields:
+
+Name (required)
+
+Relationship (optional)
+
+Description (optional)
+
+A "Save Persona" button that calls:
+
+POST /api/personas for new
+
+PUT /api/personas/:id for updates (only if editing mode is added)
+
+B) Memory Panel (middle)
+
+Shows a list of memories for the selected persona:
+
+category
+
+text
+
+weight
+
+A form to add a new memory with fields:
+
+Category (dropdown with:
+humor, regrets, childhood, advice, personality, misc)
+
+Memory text (required)
+
+Weight (number, default 1.0)
+
+A "Add Memory" button that calls:
+
+POST /api/personas/:id/memories
+
+Each memory entry should have a small "Delete" button:
+
+Calls DELETE /api/personas/:id/memories/:memoryId
+
+C) Chat Panel (right/bottom)
+
+Shows a scrollable conversation area:
+
+User messages aligned right
+
+Persona (EverSpeak) messages aligned left
+
+An input box for user message
+
+A dropdown for:
+
+Emotional State (e.g. neutral, sad, reflective, anxious, excited)
+
+Tone Mode (e.g. auto, gentle, casual, real_talk)
+
+A "Send" button that:
+
+Calls POST /api/message with JSON:
+{
+"user_message": "...",
+"emotional_state": "...",
+"tone_mode": "...",
+"persona_id": "<selected persona id>"
+}
+
+The reply should be rendered in the chat area as a new message from the persona.
+
+Frontend Logic (app.js)
+Implement the following behaviors using plain JavaScript (no frameworks):
+
+On page load:
+
+Fetch all personas from GET /api/personas
+
+Populate the persona dropdown
+
+Automatically select the first persona (if any), and:
+
+Load its memories from GET /api/personas/:id/memories
+
+Display them in the Memory Panel
+
+When creating a new persona:
+
+Submit form to POST /api/personas
+
+On success:
+
+Add new persona to dropdown
+
+Select it
+
+Clear memory list for that persona
+
+When changing personas from the dropdown:
+
+Load its memories via GET /api/personas/:id/memories
+
+Update persona info section (name/relationship/description)
+
+Clear the chat and start a fresh conversation context (UI only; backend already handles state per request)
+
+When adding a memory:
+
+POST to /api/personas/:id/memories
+
+On success, append it to the memory list
+
+When deleting a memory:
+
+Call DELETE /api/personas/:id/memories/:memoryId
+
+Remove it from the list in the UI
+
+When sending a chat message:
+
+If no persona is selected, show an alert asking to create or select one.
+
+POST to /api/message with:
+
+user_message (from input)
+
+emotional_state (from dropdown)
+
+tone_mode (from dropdown)
+
+persona_id (from selected persona)
+
+On success:
+
+Append the user message to chat as “You”
+
+Append the reply as persona’s name (e.g., "Jimmy")
+
+Keep messages in chronological order
+
+Styling (styles.css)
+
+Use a simple, clean layout:
+
+On desktop: three columns (persona, memories, chat)
+
+On mobile: stacked vertically
+
+Neutral, calm colors (light grays, soft blue accents)
+
+Make chat area scrollable with a max height
+
+Keep it basic but neat; this is a prototype, not final marketing UI.
+
+Constraints / Consistency
+
+Do NOT break existing API endpoints.
+
+Do NOT change backend response structures.
+
+Reuse the existing /api/message and /api/personas routes exactly as currently implemented.
+
+Keep all JavaScript on the frontend in public/app.js.
+
+Ensure CORS and static serving are configured so this UI works inside Replit’s web preview.
+
+After implementing, please:
+
+Confirm the key flows:
+
+Create persona → Add memories → Send message → Get AI reply
+
+Ensure the app loads at / in the browser.
+**

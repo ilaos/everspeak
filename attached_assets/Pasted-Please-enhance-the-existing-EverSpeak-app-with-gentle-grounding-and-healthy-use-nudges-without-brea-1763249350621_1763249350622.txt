@@ -1,0 +1,47 @@
+Please enhance the existing EverSpeak app with gentle grounding and healthy-use nudges, without breaking any current functionality.
+
+Goals:
+1) Make it clear in the UI that this is a memory-based companion, not the real person.
+2) Add a subtle grounding line to AI replies in the chat.
+3) Add a light, non-blocking “you’ve been chatting a while” nudge after many messages in a single session.
+
+Implementation details:
+
+A. UI Grounding Banner
+- In public/index.html and public/styles.css:
+  - Add a small banner at the top of the page (above the three panels) with calm styling.
+  - Text (or very close to):
+    "EverSpeak is a memory-based companion. It’s not the real person, not a ghost, and not a therapist. It’s here to help you reflect using your own memories."
+  - Make it:
+    - subtle
+    - dismissible with a small “Got it” / “Hide” link
+  - Once dismissed for the session, don’t show it again until reload (use a simple in-memory flag in app.js, no need for localStorage yet).
+
+B. Grounding Line in Chat Replies
+- In public/app.js:
+  - When rendering the AI reply in the chat, add a small secondary line under the persona’s message bubble, in lighter text.
+  - Text should be something like:
+    "Based on the memories you’ve shared about [personaName]."
+  - Use the currently selected persona’s name.
+  - Style it in styles.css as smaller, softer text so it doesn’t feel intrusive.
+
+C. Healthy Use Nudge
+- In public/app.js:
+  - Track, in JavaScript only, how many user messages have been sent in the current session (per page load).
+  - After, for example, 12 user messages in one session:
+    - Show a small, non-blocking notice above the chat input, with text like:
+      "You’ve been talking for a while. It might help to take a short break, stretch, or write down how you’re feeling. I’ll be here when you come back."
+    - This should NOT block sending more messages.
+    - Once shown, don’t show it again in that session (simple boolean flag).
+
+D. No Backend Breaking Changes
+- Do NOT change the /api/message response format.
+- Do NOT modify existing backend routes/contracts.
+- Only adjust frontend rendering and, if needed, the AI prompt text in the controller to slightly reinforce the “memory-based companion” framing (but keep the existing behavior and structure).
+
+After implementing:
+- Verify:
+  - The banner shows on load and can be dismissed.
+  - AI replies show the grounding line with the persona’s name.
+  - After sending 12+ user messages, the healthy-use nudge appears once and does not block further messages.
+  - All existing flows (create persona, add memories, chat) still work.

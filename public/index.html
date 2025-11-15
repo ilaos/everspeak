@@ -13,6 +13,15 @@
       <p>Keep the conversation going with those you love</p>
     </header>
 
+    <!-- Grounding Banner -->
+    <div class="grounding-banner" id="grounding-banner" data-testid="grounding-banner">
+      <p>
+        EverSpeak is a memory-based companion. It's not the real person, not a ghost, and not a therapist. 
+        It's here to help you reflect using your own memories.
+      </p>
+      <button class="banner-dismiss" id="banner-dismiss" data-testid="button-dismiss-banner">Got it</button>
+    </div>
+
     <main class="panels">
       <!-- Persona Panel -->
       <section class="panel persona-panel">
@@ -93,6 +102,14 @@
         
         <div class="chat-messages" id="chat-messages" data-testid="chat-messages">
           <p class="placeholder">Select a persona and start chatting</p>
+        </div>
+
+        <!-- Healthy Use Nudge -->
+        <div class="healthy-use-nudge" id="healthy-use-nudge" data-testid="healthy-use-nudge" style="display: none;">
+          <p>
+            You've been talking for a while. It might help to take a short break, stretch, or write down how you're feeling. 
+            I'll be here when you come back.
+          </p>
         </div>
 
         <div class="chat-input-area">

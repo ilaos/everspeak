@@ -38,6 +38,49 @@ header p {
   font-size: 1rem;
 }
 
+/* Grounding Banner */
+.grounding-banner {
+  background: #fff9e6;
+  border: 1px solid #f0e5c5;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.grounding-banner p {
+  color: #6b5d3f;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+  padding-right: 16px;
+}
+
+.banner-dismiss {
+  padding: 6px 16px;
+  background: #f0e5c5;
+  color: #6b5d3f;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.banner-dismiss:hover {
+  background: #e5d9b5;
+}
+
+.grounding-banner.hidden {
+  display: none;
+}
+
 .panels {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -285,6 +328,30 @@ button[type="submit"]:active {
   color: #2c3e50;
   border: 1px solid #e0e6ed;
   border-bottom-left-radius: 4px;
+}
+
+.message-grounding {
+  font-size: 0.75rem;
+  color: #95a5a6;
+  font-style: italic;
+  margin-top: 4px;
+  max-width: 80%;
+}
+
+/* Healthy Use Nudge */
+.healthy-use-nudge {
+  background: #e8f4f8;
+  border: 1px solid #b8dce8;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.healthy-use-nudge p {
+  color: #34495e;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .chat-controls {

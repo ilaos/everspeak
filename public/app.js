@@ -2,6 +2,9 @@
 let personas = [];
 let selectedPersonaId = null;
 let memories = [];
+let bannerDismissed = false;
+let userMessageCount = 0;
+let healthyUseNudgeShown = false;
 
 // DOM Elements
 const personaDropdown = document.getElementById('persona-dropdown');
@@ -10,6 +13,9 @@ const memoryForm = document.getElementById('memory-form');
 const chatForm = document.getElementById('chat-form');
 const memoriesList = document.getElementById('memories-list');
 const chatMessages = document.getElementById('chat-messages');
+const groundingBanner = document.getElementById('grounding-banner');
+const bannerDismissBtn = document.getElementById('banner-dismiss');
+const healthyUseNudge = document.getElementById('healthy-use-nudge');
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -23,6 +29,13 @@ function setupEventListeners() {
   personaForm.addEventListener('submit', handleCreatePersona);
   memoryForm.addEventListener('submit', handleAddMemory);
   chatForm.addEventListener('submit', handleSendMessage);
+  bannerDismissBtn.addEventListener('click', handleBannerDismiss);
+}
+
+// Handle banner dismiss
+function handleBannerDismiss() {
+  bannerDismissed = true;
+  groundingBanner.classList.add('hidden');
 }
 
 // Load all personas
@@ -302,6 +315,15 @@ async function handleSendMessage(event) {
   // Add user message to chat
   addMessageToChat('You', userMessage, true);
   
+  // Increment user message count
+  userMessageCount++;
+  
+  // Show healthy-use nudge after 12 messages (once per session)
+  if (userMessageCount >= 12 && !healthyUseNudgeShown) {
+    healthyUseNudge.style.display = 'block';
+    healthyUseNudgeShown = true;
+  }
+  
   // Clear input
   document.getElementById('chat-input').value = '';
   
@@ -351,10 +373,20 @@ function addMessageToChat(sender, message, isUser) {
   messageDiv.className = `message ${isUser ? 'user' : 'persona'}`;
   messageDiv.setAttribute('data-testid', `message-${isUser ? 'user' : 'persona'}`);
   
-  messageDiv.innerHTML = `
+  let messageHTML = `
     <div class="message-header">${escapeHtml(sender)}</div>
     <div class="message-bubble">${escapeHtml(message)}</div>
   `;
+  
+  // Add grounding line for persona messages (not for user or system messages)
+  if (!isUser && sender !== 'System') {
+    const personaName = sender;
+    messageHTML += `
+      <div class="message-grounding">Based on the memories you've shared about ${escapeHtml(personaName)}.</div>
+    `;
+  }
+  
+  messageDiv.innerHTML = messageHTML;
   
   // Remove placeholder if exists
   const placeholder = chatMessages.querySelector('.placeholder');
@@ -386,6 +418,11 @@ function addTypingIndicator() {
 // Clear chat
 function clearChat() {
   chatMessages.innerHTML = '<p class="placeholder">Select a persona and start chatting</p>';
+  
+  // Reset message counter and healthy-use nudge when switching personas
+  userMessageCount = 0;
+  healthyUseNudgeShown = false;
+  healthyUseNudge.style.display = 'none';
 }
 
 // Utility: Escape HTML

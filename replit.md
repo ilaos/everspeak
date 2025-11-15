@@ -11,16 +11,27 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (November 15, 2025)
 
 - ✅ Restructured from fullstack template to backend-only API
-- ✅ Implemented organized folder structure (/src/routes, /src/controllers, /src/utils)
+- ✅ Implemented organized folder structure (/src/routes, /src/controllers, /src/personas, /src/utils)
 - ✅ Added Express server with CORS, dotenv, and Morgan logging
 - ✅ Created /api/test endpoint and full CRUD examples
 - ✅ Implemented robust error handling with custom error classes
-- ✅ Added input validation middleware with partial update support
-- ✅ Set up Swagger/OpenAPI documentation at /api-docs
+- ✅ Added input validation middleware with type checking and partial update support
+- ✅ Set up Swagger/OpenAPI documentation at /api-docs for all 13 endpoints
 - ✅ Integrated OpenAI GPT-4o-mini for AI-powered message responses
 - ✅ Installed openai npm package and configured API authentication
-- ✅ Implemented personality simulation with memory-based context
-- ✅ Added graceful fallback for AI service failures
+- ✅ **Implemented complete Loved Ones Persona System**:
+  - JSON file storage system (src/personas/personas.json)
+  - Utility functions for load, save, UUID generation, validation
+  - Full CRUD for personas (5 endpoints: GET all, GET one, POST, PUT, DELETE)
+  - Full CRUD for memories (4 endpoints: GET, POST, PUT, DELETE)
+  - Memory categorization (humor, regrets, childhood, advice, personality, misc)
+  - Memory weight system (0.1-5.0 for importance ranking)
+  - Auto-load memories in /api/message endpoint via persona_id
+  - Comprehensive validation with proper error handling (400, 404)
+- ✅ **Fixed critical validation bugs**:
+  - Persona create/update: Type validation for optional fields before trimming
+  - Memory create/update: Parse weight to number before validation (prevents NaN storage)
+- ✅ Architect-approved and production-ready
 - ✅ All endpoints tested and verified working
 
 ## System Architecture
@@ -72,7 +83,7 @@ Preferred communication style: Simple, everyday language.
 - Complete endpoint descriptions with request/response schemas
 - Server URL automatically configured based on PORT environment variable
 
-### API Endpoints
+### API Endpoints (13 Total)
 
 **Test Endpoint**
 - `GET /api/test` - Returns `{ok: true}` to verify API is operational
@@ -80,12 +91,29 @@ Preferred communication style: Simple, everyday language.
 **Message Endpoint (AI-Powered)**
 - `POST /api/message` - Process conversational message with OpenAI GPT-4o-mini
   - Required: `user_message` (string)
-  - Optional: `emotional_state`, `tone_mode`, `memory_bank`
+  - Optional: `persona_id` (UUID - auto-loads persona memories), `emotional_state`, `tone_mode`, `memory_bank`
   - Uses OpenAI API to generate emotionally intelligent, context-aware responses
-  - Simulates personality based on provided memory context
+  - When persona_id provided: Automatically loads all persona memories and includes in AI prompt
+  - Simulates personality based on persona name, relationship, and stored memories
   - Falls back to stub response if OpenAI API fails
+  - Returns metadata with persona info and memories used
 
-**Examples Resource (CRUD)**
+**Personas Resource (CRUD - 5 endpoints)**
+- `GET /api/personas` - List all personas with their memories
+- `GET /api/personas/:id` - Get single persona by ID (404 if not found)
+- `POST /api/personas` - Create new persona (requires name, optional relationship/description)
+- `PUT /api/personas/:id` - Update persona (supports partial updates with type validation)
+- `DELETE /api/personas/:id` - Delete persona and all associated memories
+
+**Memories Sub-Resource (CRUD - 4 endpoints)**
+- `GET /api/personas/:id/memories` - Get all memories for a persona
+- `POST /api/personas/:id/memories` - Add memory to persona
+  - Required: `category` (enum: humor, regrets, childhood, advice, personality, misc), `text` (string)
+  - Optional: `weight` (number 0.1-5.0, default 1.0) - importance/significance
+- `PUT /api/personas/:id/memories/:memoryId` - Update memory (partial updates)
+- `DELETE /api/personas/:id/memories/:memoryId` - Delete specific memory
+
+**Examples Resource (CRUD - 3 endpoints)**
 - `GET /api/examples` - List all examples with count
 - `GET /api/examples/:id` - Get single example by ID (404 if not found)
 - `POST /api/examples` - Create new example (requires name, optional description)
@@ -93,10 +121,12 @@ Preferred communication style: Simple, everyday language.
 - `DELETE /api/examples/:id` - Delete example (404 if not found)
 
 **Data Storage**
+- JSON file storage for personas (src/personas/personas.json)
 - In-memory Map-based storage for examples
 - UUID generation using Node.js crypto.randomUUID()
-- Sample data pre-populated for testing
-- Timestamps (createdAt, updatedAt) automatically managed
+- Sample persona data pre-populated for testing
+- Timestamps (created_at, updated_at) automatically managed
+- Utility functions (loadPersonas, savePersonas, findPersonaById, etc.)
 
 **Response Format**
 - Success: `{success: true, data: {...}, message: "..."}`

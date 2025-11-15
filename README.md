@@ -4,6 +4,12 @@ A professional Node.js + Express REST API with organized folder structure, compr
 
 ## 🚀 Features
 
+- **🌐 Web UI** - Simple, clean interface to interact with personas and chat without code
+  - Three-panel layout (Persona, Memories, Chat)
+  - Responsive design (desktop 3-column, mobile stacked)
+  - Create and manage personas with memories
+  - Chat with AI using persona context
+  - Accessible at the root URL `/`
 - **Express Server** configured via environment variable (default port 3000, Replit uses 5000)
 - **AI-Powered Conversations** using OpenAI GPT-4o-mini
 - **Loved Ones Persona System** - Store and manage deceased loved ones' personalities with memories
@@ -23,6 +29,10 @@ A professional Node.js + Express REST API with organized folder structure, compr
     /controllers  - Business logic and request handlers
     /personas     - Persona storage and utilities
     /utils        - Utility functions, validation, error handling
+  /public
+    index.html    - Web UI layout
+    styles.css    - UI styling
+    app.js        - Frontend logic
   /server
     index.ts      - Main server entry point
   ```
@@ -60,6 +70,35 @@ npm run dev
 ```
 
 The server will start on the port specified in the PORT environment variable (defaults to 3000, or 5000 on Replit)
+
+## 🌐 Using the Web UI
+
+Once the server is running, open your browser and navigate to:
+```
+http://localhost:PORT
+```
+(Replace PORT with your configured port - 3000 by default, 5000 on Replit)
+
+### Web UI Features
+
+The web interface provides three main panels:
+
+**Persona Panel (Left)**
+- Select from existing personas in the dropdown
+- View persona details (name, relationship, description)
+- Create new personas with the form below
+
+**Memory Panel (Middle)**
+- View all memories for the selected persona
+- Add new memories with category, text, and importance weight (0.1-5.0)
+- Delete memories with a confirmation dialog
+- Memory categories: humor, regrets, childhood, advice, personality, misc
+
+**Chat Panel (Right)**
+- Have conversations with the selected persona
+- AI responses are grounded in the persona's stored memories
+- Control emotional state and tone mode for nuanced conversations
+- Chat history is preserved within each session
 
 ## 📚 API Documentation
 

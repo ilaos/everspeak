@@ -5,11 +5,13 @@ A professional Node.js + Express REST API with organized folder structure, compr
 ## 🚀 Features
 
 - **Express Server** configured via environment variable (default port 3000, Replit uses 5000)
+- **AI-Powered Conversations** using OpenAI GPT-4o-mini
 - **Environment Configuration** using dotenv
 - **Request Logging** with Morgan
 - **Error Handling Middleware** for robust error management
 - **Input Validation** middleware with partial update support
 - **Swagger/OpenAPI Documentation** at `/api-docs`
+- **Graceful Fallbacks** - AI endpoint falls back to stub response if OpenAI is unavailable
 - **Organized Folder Structure**:
   ```
   /src
@@ -33,7 +35,15 @@ Create a `.env` file in the root directory (see `.env.example`):
 ```env
 PORT=3000
 NODE_ENV=development
+OPENAI_API_KEY=sk-your-api-key-here
 ```
+
+**Required Environment Variables:**
+- `OPENAI_API_KEY` - Your OpenAI API key for AI-powered message responses (get one at https://platform.openai.com/api-keys)
+
+**Optional Environment Variables:**
+- `PORT` - Server port (default: 3000, Replit: 5000)
+- `NODE_ENV` - Environment mode (development/production)
 
 **Note**: On Replit, the PORT environment variable is automatically set to 5000 (the only non-firewalled port). The server will use PORT from environment if set, otherwise defaults to 3000.
 
@@ -61,28 +71,33 @@ http://localhost:PORT/api-docs
   - Returns: `{ ok: true }`
   - Purpose: Verify the API is running
 
-### Message Endpoint
-- **POST** `/api/message` - Process a conversational message
+### Message Endpoint (AI-Powered)
+- **POST** `/api/message` - Process a conversational message using OpenAI
   ```json
   {
-    "user_message": "Hello EverSpeak!",
-    "emotional_state": "excited",
-    "tone_mode": "friendly",
-    "memory_bank": "session_123"
+    "user_message": "Tell me about your favorite memory",
+    "emotional_state": "nostalgic",
+    "tone_mode": "warm",
+    "memory_bank": "We used to go fishing every summer at the lake."
   }
   ```
   - **Required**: `user_message` (string)
   - **Optional**: `emotional_state`, `tone_mode`, `memory_bank`
+  - **Uses**: OpenAI GPT-4o-mini for AI-powered responses
+  - **Features**:
+    - Simulates personality based on provided memories
+    - Emotionally intelligent and context-aware responses
+    - Falls back to stub response if AI service is unavailable
   - Returns:
   ```json
   {
     "success": true,
     "data": {
-      "reply": "Yo Ish… I hear you: 'Hello EverSpeak!'. I'm not fully wired up yet, but this is where EverSpeak will answer you in my voice.",
+      "reply": "One of my favorite memories has to be those summers...",
       "meta": {
-        "emotional_state": "excited",
-        "tone_mode": "friendly",
-        "memories_used": "session_123"
+        "emotional_state": "nostalgic",
+        "tone_mode": "warm",
+        "memories_used": "We used to go fishing every summer at the lake."
       }
     },
     "message": "Message processed successfully"

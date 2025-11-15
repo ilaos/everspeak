@@ -1,6 +1,11 @@
+import OpenAI from 'openai';
 import { ValidationError } from '../utils/errorHandler.js';
 
-export const handleMessage = (req, res, next) => {
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+export const handleMessage = async (req, res, next) => {
   try {
     const { user_message, emotional_state, tone_mode, memory_bank } = req.body;
 
@@ -14,8 +19,46 @@ export const handleMessage = (req, res, next) => {
       ]);
     }
 
-    // Stub response
-    const reply = `Yo Ish… I hear you: '${user_message}'. I'm not fully wired up yet, but this is where EverSpeak will answer you in my voice.`;
+    // Construct AI prompt
+    const prompt = `You are simulating the personality of a deceased loved one based ONLY on the memories provided.
+You are NOT the real person.
+You must NOT imply supernatural awareness.
+You must NOT reference information you were not explicitly given.
+
+Your goal is to respond in a comforting, grounded, realistic, emotionally intelligent way.
+You may reflect their quirks, humor, tone, and personality—but only using the user's memory inputs.
+
+Tone Mode: ${tone_mode || 'not specified'}
+Emotional State: ${emotional_state || 'not specified'}
+Memories Provided: ${memory_bank || 'none provided'}
+User Message: ${user_message}`;
+
+    let reply;
+
+    try {
+      // Call OpenAI API
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: prompt
+          },
+          {
+            role: 'user',
+            content: user_message
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      });
+
+      reply = completion.choices[0].message.content;
+    } catch (aiError) {
+      // Fallback to stub response if AI call fails
+      console.error('OpenAI API error:', aiError.message);
+      reply = `Yo Ish… I hear you: '${user_message}'. I'm not fully wired up yet, but this is where EverSpeak will answer you in my voice.`;
+    }
 
     const response = {
       reply,

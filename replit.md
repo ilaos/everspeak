@@ -62,6 +62,10 @@ Preferred communication style: Simple, everyday language.
   - `POST /api/personas/:id/memories` (supports categorization and weighting)
   - `PUT /api/personas/:id/memories/:memoryId` (inline editing supported on frontend)
   - `DELETE /api/personas/:id/memories/:memoryId`
+  - `POST /api/personas/:id/memories/bulk-import` (bulk memory import with AI categorization/weighting)
+- **Setup Wizard**:
+  - `POST /api/personas/:id/wizard` (6-step guided persona setup with AI memory extraction)
+  - Creates snapshot, extracts memories from wizard inputs, applies tone preferences
 - **Snapshots Sub-Resource**:
   - `GET /api/personas/:id/snapshots`
   - `POST /api/personas/:id/snapshots` (creates versioned persona states)

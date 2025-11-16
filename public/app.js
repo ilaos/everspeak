@@ -10,6 +10,7 @@ let healthyUseNudgeShown = false;
 let strictMode = false;
 let strictModeNoticeShown = false;
 let editingMemoryId = null;
+let wizardCurrentStep = 1;
 
 // DOM Elements
 let personaDropdown, personaForm, memoryForm, chatForm, memoriesList, chatMessages;
@@ -20,6 +21,9 @@ let settingsSection, toneModeSelect, saveSettingsBtn, settingsFeedback;
 let humorSlider, honestySlider, sentimentalitySlider, energySlider, adviceSlider;
 let humorValue, honestyValue, sentimentalityValue, energyValue, adviceValue;
 let avoidRegretSpirals, noParanormalLanguage, softenSensitiveTopics, preferReassurance;
+let bulkImportBtn, bulkImportModal, bulkImportForm, closeBulkImport, cancelBulkImport;
+let wizardSection, setupWizardBtn, wizardModal, wizardForm, closeWizard, wizardPrev, wizardNext, wizardGenerate;
+let wizardProgressFill, wizardCurrentStepText;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -63,6 +67,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   noParanormalLanguage = document.getElementById('no-paranormal-language');
   softenSensitiveTopics = document.getElementById('soften-sensitive-topics');
   preferReassurance = document.getElementById('prefer-reassurance');
+  
+  // Bulk import elements
+  bulkImportBtn = document.getElementById('bulk-import-btn');
+  bulkImportModal = document.getElementById('bulk-import-modal');
+  bulkImportForm = document.getElementById('bulk-import-form');
+  closeBulkImport = document.getElementById('close-bulk-import');
+  cancelBulkImport = document.getElementById('cancel-bulk-import');
+  
+  // Wizard elements
+  wizardSection = document.getElementById('wizard-section');
+  setupWizardBtn = document.getElementById('setup-wizard-btn');
+  wizardModal = document.getElementById('wizard-modal');
+  wizardForm = document.getElementById('wizard-form');
+  closeWizard = document.getElementById('close-wizard');
+  wizardPrev = document.getElementById('wizard-prev');
+  wizardNext = document.getElementById('wizard-next');
+  wizardGenerate = document.getElementById('wizard-generate');
+  wizardProgressFill = document.getElementById('wizard-progress-fill');
+  wizardCurrentStepText = document.getElementById('wizard-current-step');
   
   await loadPersonas();
   await loadJournalEntries();
@@ -115,6 +138,72 @@ function setupEventListeners() {
       adviceValue.textContent = e.target.value;
     });
   }
+  
+  // Bulk import modal handlers
+  if (bulkImportBtn) {
+    bulkImportBtn.addEventListener('click', openBulkImportModal);
+  }
+  if (closeBulkImport) {
+    closeBulkImport.addEventListener('click', closeBulkImportModal);
+  }
+  if (cancelBulkImport) {
+    cancelBulkImport.addEventListener('click', closeBulkImportModal);
+  }
+  if (bulkImportForm) {
+    bulkImportForm.addEventListener('submit', handleBulkImport);
+  }
+  
+  // Close modal on background click
+  if (bulkImportModal) {
+    bulkImportModal.addEventListener('click', (e) => {
+      if (e.target === bulkImportModal) {
+        closeBulkImportModal();
+      }
+    });
+  }
+  
+  // Wizard modal handlers
+  if (setupWizardBtn) {
+    setupWizardBtn.addEventListener('click', openWizardModal);
+  }
+  if (closeWizard) {
+    closeWizard.addEventListener('click', closeWizardModal);
+  }
+  if (wizardPrev) {
+    wizardPrev.addEventListener('click', wizardPreviousStep);
+  }
+  if (wizardNext) {
+    wizardNext.addEventListener('click', wizardNextStep);
+  }
+  if (wizardForm) {
+    wizardForm.addEventListener('submit', handleWizardSubmit);
+  }
+  if (wizardModal) {
+    wizardModal.addEventListener('click', (e) => {
+      if (e.target === wizardModal) {
+        closeWizardModal();
+      }
+    });
+  }
+  
+  // Wizard slider value updates
+  const wizardSliders = [
+    { slider: 'wizard-humor-level', value: 'wizard-humor-value' },
+    { slider: 'wizard-honesty-level', value: 'wizard-honesty-value' },
+    { slider: 'wizard-sentimentality-level', value: 'wizard-sentimentality-value' },
+    { slider: 'wizard-energy-level', value: 'wizard-energy-value' },
+    { slider: 'wizard-advice-level', value: 'wizard-advice-value' }
+  ];
+  
+  wizardSliders.forEach(({ slider, value }) => {
+    const sliderEl = document.getElementById(slider);
+    const valueEl = document.getElementById(value);
+    if (sliderEl && valueEl) {
+      sliderEl.addEventListener('input', (e) => {
+        valueEl.textContent = e.target.value;
+      });
+    }
+  });
 }
 
 // Enable strict mode
@@ -208,6 +297,11 @@ function populatePersonaDropdown() {
 async function handlePersonaChange(event) {
   const personaId = event.target.value;
   
+  // Close wizard modal if open (prevents confusion when switching personas)
+  if (wizardModal && wizardModal.style.display === 'flex') {
+    closeWizardModal();
+  }
+  
   if (!personaId) {
     selectedPersonaId = null;
     clearPersonaInfo();
@@ -259,6 +353,16 @@ async function loadPersonaDetails(personaId) {
     
     // Load settings
     await loadPersonaSettings(personaId);
+    
+    // Show bulk import button
+    if (bulkImportBtn) {
+      bulkImportBtn.style.display = 'inline-block';
+    }
+    
+    // Show wizard section
+    if (wizardSection) {
+      wizardSection.style.display = 'block';
+    }
   } catch (error) {
     console.error('Failed to load persona details:', error);
     showError('Failed to load persona details');
@@ -272,11 +376,22 @@ function displayPersonaInfo(persona) {
   document.getElementById('info-description').textContent = persona.description || '-';
 }
 
+// Hide persona-specific UI elements
+function hidePersonaControls() {
+  if (wizardSection) {
+    wizardSection.style.display = 'none';
+  }
+  if (bulkImportBtn) {
+    bulkImportBtn.style.display = 'none';
+  }
+}
+
 // Clear persona info
 function clearPersonaInfo() {
   document.getElementById('info-name').textContent = '-';
   document.getElementById('info-relationship').textContent = '-';
   document.getElementById('info-description').textContent = '-';
+  hidePersonaControls();
 }
 
 // Display memories
@@ -342,6 +457,7 @@ function displayMemories() {
 function clearMemories() {
   memories = [];
   memoriesList.innerHTML = '<p class="placeholder">Select a persona to view memories</p>';
+  hidePersonaControls();
 }
 
 // Handle create persona
@@ -476,6 +592,232 @@ async function deleteMemory(memoryId) {
   } catch (error) {
     console.error('Failed to delete memory:', error);
     showError('Failed to delete memory');
+  }
+}
+
+// Open bulk import modal
+function openBulkImportModal() {
+  if (!selectedPersonaId) {
+    showError('Please select a persona first');
+    return;
+  }
+  if (bulkImportModal) {
+    bulkImportModal.style.display = 'flex';
+  }
+}
+
+// Close bulk import modal
+function closeBulkImportModal() {
+  if (bulkImportModal) {
+    bulkImportModal.style.display = 'none';
+  }
+  if (bulkImportForm) {
+    bulkImportForm.reset();
+  }
+}
+
+// Handle bulk import
+async function handleBulkImport(event) {
+  event.preventDefault();
+  
+  if (!selectedPersonaId) {
+    showError('Please select a persona first');
+    return;
+  }
+  
+  const text = document.getElementById('bulk-text').value.trim();
+  const autoWeight = document.getElementById('auto-weight-checkbox').checked;
+  
+  if (!text) {
+    showError('Please enter some memories to import');
+    return;
+  }
+  
+  try {
+    showSuccess('Importing memories... This may take a moment.');
+    
+    const response = await fetch(`/api/personas/${selectedPersonaId}/memories/bulk-import`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text,
+        auto_weight: autoWeight
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Add imported memories to list
+      memories = [...memories, ...result.memories];
+      displayMemories();
+      
+      // Close modal
+      closeBulkImportModal();
+      
+      // Reload snapshots to show auto-created snapshot
+      try {
+        const snapshotsResponse = await fetch(`/api/personas/${selectedPersonaId}/snapshots`);
+        const snapshotsResult = await snapshotsResponse.json();
+        if (snapshotsResult.success) {
+          snapshots = snapshotsResult.data;
+          displaySnapshots();
+        }
+      } catch (err) {
+        console.error('Failed to reload snapshots:', err);
+      }
+      
+      showSuccess(`Successfully imported ${result.imported} memories!`);
+    } else {
+      showError(result.message || 'Failed to import memories');
+    }
+  } catch (error) {
+    console.error('Failed to import memories:', error);
+    showError('Failed to import memories');
+  }
+}
+
+// Open wizard modal
+function openWizardModal() {
+  if (!selectedPersonaId) {
+    showError('Please select a persona first');
+    return;
+  }
+  wizardCurrentStep = 1;
+  updateWizardUI();
+  if (wizardModal) {
+    wizardModal.style.display = 'flex';
+  }
+}
+
+// Close wizard modal
+function closeWizardModal() {
+  if (wizardModal) {
+    wizardModal.style.display = 'none';
+  }
+  if (wizardForm) {
+    wizardForm.reset();
+  }
+  wizardCurrentStep = 1;
+  updateWizardUI();
+}
+
+// Wizard next step
+function wizardNextStep() {
+  if (wizardCurrentStep < 6) {
+    wizardCurrentStep++;
+    updateWizardUI();
+  }
+}
+
+// Wizard previous step
+function wizardPreviousStep() {
+  if (wizardCurrentStep > 1) {
+    wizardCurrentStep--;
+    updateWizardUI();
+  }
+}
+
+// Update wizard UI
+function updateWizardUI() {
+  // Hide all steps
+  for (let i = 1; i <= 6; i++) {
+    const step = document.getElementById(`wizard-step-${i}`);
+    if (step) {
+      step.style.display = i === wizardCurrentStep ? 'block' : 'none';
+    }
+  }
+  
+  // Update progress
+  const progressPercent = (wizardCurrentStep / 6) * 100;
+  if (wizardProgressFill) {
+    wizardProgressFill.style.width = `${progressPercent}%`;
+  }
+  if (wizardCurrentStepText) {
+    wizardCurrentStepText.textContent = wizardCurrentStep;
+  }
+  
+  // Update navigation buttons
+  if (wizardPrev) {
+    wizardPrev.style.display = wizardCurrentStep > 1 ? 'inline-block' : 'none';
+  }
+  if (wizardNext) {
+    wizardNext.style.display = wizardCurrentStep < 6 ? 'inline-block' : 'none';
+  }
+  if (wizardGenerate) {
+    wizardGenerate.style.display = wizardCurrentStep === 6 ? 'inline-block' : 'none';
+  }
+}
+
+// Handle wizard form submission
+async function handleWizardSubmit(event) {
+  event.preventDefault();
+  
+  // Double-check persona is still selected (defensive)
+  if (!selectedPersonaId) {
+    showError('No persona selected. Please select a persona first.');
+    closeWizardModal();
+    return;
+  }
+  
+  // Show loading
+  const loadingEl = document.getElementById('wizard-loading');
+  if (loadingEl) {
+    loadingEl.style.display = 'block';
+  }
+  
+  // Collect wizard inputs
+  const wizardInputs = {
+    personality: document.getElementById('wizard-personality').value.trim(),
+    humor: document.getElementById('wizard-humor').value.trim(),
+    memories: document.getElementById('wizard-memories').value.trim(),
+    conversations: document.getElementById('wizard-conversations').value.trim(),
+    tone_preferences: {
+      humor_level: parseFloat(document.getElementById('wizard-humor-level').value),
+      honesty_level: parseFloat(document.getElementById('wizard-honesty-level').value),
+      sentimentality_level: parseFloat(document.getElementById('wizard-sentimentality-level').value),
+      energy_level: parseFloat(document.getElementById('wizard-energy-level').value),
+      advice_level: parseFloat(document.getElementById('wizard-advice-level').value)
+    }
+  };
+  
+  try {
+    const response = await fetch(`/api/personas/${selectedPersonaId}/wizard`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ wizard_inputs: wizardInputs })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Add created memories to list
+      memories = [...memories, ...result.memories];
+      displayMemories();
+      
+      // Reload persona details to refresh settings and snapshots
+      await loadPersonaDetails(selectedPersonaId);
+      
+      // Close modal
+      closeWizardModal();
+      
+      showSuccess(`Persona Ready! Created ${result.memories_created} memories.`);
+    } else {
+      if (loadingEl) {
+        loadingEl.style.display = 'none';
+      }
+      showError(result.message || 'Failed to complete wizard');
+    }
+  } catch (error) {
+    console.error('Failed to complete wizard:', error);
+    if (loadingEl) {
+      loadingEl.style.display = 'none';
+    }
+    showError('Failed to complete wizard');
   }
 }
 

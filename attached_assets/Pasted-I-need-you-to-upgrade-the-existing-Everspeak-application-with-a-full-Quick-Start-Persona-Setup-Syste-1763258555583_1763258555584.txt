@@ -1,0 +1,326 @@
+I need you to upgrade the existing Everspeak application with a full Quick-Start Persona Setup System.
+This system must include:
+
+🟦 1. Bulk Memory Import (Backend + Frontend)
+
+Create a new endpoint:
+
+POST /api/personas/:id/memories/bulk-import
+
+Body:
+
+{
+  "text": "raw text the user pastes",
+  "auto_weight": true
+}
+
+
+Backend requirements:
+
+Split pasted text into discrete memory entries
+
+Break on newlines, periods, semicolons
+
+Ignore empty lines
+
+For each memory:
+
+Auto-categorize into:
+humor, regrets, childhood, advice, personality, misc
+
+Use OpenAI GPT-4o-mini to classify each memory
+
+Auto-assign weights (0.5–5.0)
+
+sentimentality → higher
+
+trivial details → lower
+
+Save each memory into the persona’s memory array
+
+conform to existing structure
+
+generate UUIDs
+
+Return:
+
+{
+  "success": true,
+  "imported": 12,
+  "memories": [...]
+}
+
+
+Frontend requirements:
+
+Add a Bulk Import Panel button inside the Memory Panel
+
+Modal pops up with:
+
+large textarea
+
+“Auto-assign categories & weights” checkbox (default ON)
+
+“Import Memories” button
+
+On success:
+
+close modal
+
+refresh memory list
+
+display success message
+
+Add professional styling consistent with panel design
+
+🟦 2. Quick-Start Memory Wizard (Multi-Step UI)
+
+Add a NEW top-level UI panel:
+“Setup Wizard” — accessible via a button inside the Persona Panel.
+
+Wizard Steps (Frontend Only):
+
+Step 1 — Personality Snapshot
+
+Fields:
+
+“Describe their personality in one or two sentences.”
+
+“Were they humorous, serious, soft-spoken, energetic, etc.?”
+
+Step 2 — Their Humor
+
+“What always made them laugh?”
+
+“What jokes or playful things did they do?”
+
+Step 3 — Memories That Matter
+
+“Tell me a few moments you think of often.”
+
+“Big, small, recent, childhood — anything.”
+
+Step 4 — Unfinished Conversations
+
+“Were there things left unsaid?”
+
+“Regrets, apologies, clarifications?”
+
+Step 5 — Tone Preference
+
+Slider defaults for:
+Humor, Honesty, Sentimentality, Energy, Advice-giving
+
+Step 6 — Generate Memories
+
+When the user finishes steps:
+
+Package all inputs into a single block of text
+
+Send to new endpoint:
+
+POST /api/personas/:id/wizard
+
+Body:
+
+{
+  "wizard_inputs": { ... all UI fields ... }
+}
+
+
+Backend must:
+
+Use GPT-4o-mini to:
+
+extract memories
+
+categorize
+
+weight
+
+Add memories directly to persona
+
+Update persona settings using tone slider defaults
+
+Return array of created memories
+
+Frontend must:
+
+Show progress indicator
+
+Auto-refresh persona panel + memory panel
+
+Display “Persona Ready!” confirmation
+
+Clear wizard steps afterward
+
+Style wizard beautifully (mobile-responsive, soft modal)
+
+🟦 3. Voice-to-Text Memory Entry
+
+Add a microphone icon next to the existing “Add Memory” form.
+
+Frontend requirements:
+
+Use browser getUserMedia() for audio capture
+
+Send audio blob to new endpoint:
+
+POST /api/transcribe
+
+Use Whisper via OpenAI API
+
+Return text transcription
+
+Auto-fill the Memory Text field with transcription
+
+User can edit before submitting
+
+If transcription fails, show “Could not transcribe audio.”
+
+Backend requirements:
+
+Add /api/transcribe endpoint using OpenAI Whisper
+
+Return structure:
+
+{ "success": true, "text": "..." }
+
+🟦 4. Persona Booster (AI Audit of Persona Accuracy)
+
+Add a button: “Improve Persona Accuracy”
+Place it under the Persona Settings Panel.
+
+Clicking the button makes a request:
+
+POST /api/personas/:id/boost
+
+Backend must:
+
+Load persona
+
+Send all memories + settings + journal entries + chat logs (if available) to GPT-4o-mini
+
+Ask model to identify:
+
+missing memory categories
+
+missing traits
+
+potential quirks
+
+unclear personality boundaries
+
+calibration suggestions
+
+Return:
+
+{
+  "success": true,
+  "recommendations": {
+    "new_memories": [...],
+    "tone_suggestions": {...},
+    "boundary_flags": [...],
+    "missing_categories": [...]
+  }
+}
+
+
+Frontend must:
+
+Open a new modal
+
+Show recommendations in a clean, readable format
+
+Each recommended memory should have:
+
+“Add” button → auto-create memory
+
+“Dismiss” button
+
+Recommended tone settings should have a button:
+
+“Apply Recommendations”
+
+Modal stays consistent with existing UI visual language
+
+🟦 5. Snapshot Integration
+
+When a wizard completes, or a bulk import happens:
+
+Automatically create a new persona snapshot named:
+“Auto Snapshot – Setup Wizard (timestamp)”
+or
+“Auto Snapshot – Bulk Import (timestamp)”
+
+This uses the existing snapshot system without modifications.
+
+🟦 6. Documentation
+
+Update:
+
+README.md
+
+replit.md
+
+Swagger docs
+
+Include:
+
+Bulk Import endpoint
+
+Wizard endpoint
+
+Transcription endpoint
+
+Booster endpoint
+
+UI notes
+
+Use consistent formatting.
+
+🟦 7. Testing
+
+Add Playwright tests for:
+
+Bulk import
+
+Wizard flow
+
+Voice transcription (mocked)
+
+Booster endpoint
+
+Snapshot auto-creation
+
+Smooth persona switching after wizard
+
+Ensure 100% pass rate.
+
+🟦 Architecture Notes
+
+Match existing folder/project structure
+
+Use existing utils for IDs, loading/saving JSON
+
+Reuse OpenAI client
+
+Maintain grounding/ethical guidelines inside AI prompts
+
+Preserve safety rails (no supernatural assertions)
+
+Avoid blocking synchronous fs ops
+
+Use fs/promises everywhere
+
+🟦 Deliverables
+
+After running this prompt, you must deliver:
+
+✔ Full backend code additions
+✔ Full frontend UI + new modals + panels
+✔ Complete CSS additions
+✔ Updated docs
+✔ Passing Playwright test results
+✔ Architect review and confirmation
+✔ Cleaned and validated JSON data

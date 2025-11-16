@@ -1,3 +1,4 @@
+import OpenAI from 'openai';
 import { ValidationError, AppError } from '../utils/errorHandler.js';
 import {
   loadPersonas,
@@ -15,6 +16,10 @@ import {
   getDefaultSettings,
   validateSettings
 } from '../personas/utils.js';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 export const personaController = {
   // GET /api/personas - List all personas
@@ -557,6 +562,239 @@ export const personaController = {
         success: true,
         data: updatedSettings,
         message: 'Settings updated successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // POST /api/personas/:id/memories/bulk-import - Bulk import memories with AI categorization
+  async bulkImportMemories(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { text, auto_weight = true } = req.body;
+
+      if (!text || typeof text !== 'string' || text.trim().length === 0) {
+        throw new ValidationError('Validation failed', [{
+          field: 'text',
+          message: 'Text is required and must be a non-empty string'
+        }]);
+      }
+
+      const data = await loadPersonas();
+      const personaIndex = data.personas.findIndex(p => p.id === id);
+
+      if (personaIndex === -1) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      const persona = data.personas[personaIndex];
+
+      // Split text into discrete memories
+      const rawSegments = text
+        .split(/[\n;.]/)
+        .map(s => s.trim())
+        .filter(s => s.length > 0 && s.length >= 5); // Filter out very short or empty segments
+
+      if (rawSegments.length === 0) {
+        throw new ValidationError('Validation failed', [{
+          field: 'text',
+          message: 'No valid memory segments found in text'
+        }]);
+      }
+
+      const importedMemories = [];
+
+      // Process each segment with AI categorization and weighting
+      for (const segment of rawSegments) {
+        try {
+          let category = 'misc';
+          let weight = 1.0;
+
+          if (auto_weight) {
+            // Use AI to categorize and weight the memory
+            const prompt = `Analyze this memory snippet and provide:
+1. A category (must be one of: humor, regrets, childhood, advice, personality, misc)
+2. A weight/importance score from 0.5 to 5.0 where:
+   - 5.0 = deeply sentimental, defining trait, or major life event
+   - 3.0 = meaningful memory or notable characteristic
+   - 1.0 = typical everyday memory
+   - 0.5 = trivial detail
+
+Memory: "${segment}"
+
+Respond ONLY with JSON in this format: {"category": "...", "weight": ...}`;
+
+            const completion = await openai.chat.completions.create({
+              model: 'gpt-4o-mini',
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.3,
+              max_tokens: 100
+            });
+
+            const responseText = completion.choices[0].message.content.trim();
+            const parsed = JSON.parse(responseText);
+            
+            if (parsed.category && ['humor', 'regrets', 'childhood', 'advice', 'personality', 'misc'].includes(parsed.category)) {
+              category = parsed.category;
+            }
+            
+            if (parsed.weight && !isNaN(parseFloat(parsed.weight))) {
+              weight = Math.max(0.5, Math.min(5.0, parseFloat(parsed.weight)));
+            }
+          }
+
+          const memory = createMemory(category, segment, weight);
+          persona.memories.push(memory);
+          importedMemories.push(memory);
+        } catch (aiError) {
+          console.error('AI categorization failed for segment, using defaults:', aiError);
+          // Fall back to defaults if AI fails
+          const memory = createMemory('misc', segment, 1.0);
+          persona.memories.push(memory);
+          importedMemories.push(memory);
+        }
+      }
+
+      persona.updated_at = new Date().toISOString();
+      data.personas[personaIndex] = persona;
+      await savePersonas(data);
+
+      // Auto-create snapshot
+      const snapshot = createSnapshot(persona, `Auto Snapshot – Bulk Import (${new Date().toISOString()})`);
+      persona.snapshots.push(snapshot);
+      await savePersonas(data);
+
+      res.status(201).json({
+        success: true,
+        imported: importedMemories.length,
+        memories: importedMemories,
+        message: `Successfully imported ${importedMemories.length} memories`
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // POST /api/personas/:id/wizard - Process wizard inputs and generate memories
+  async processWizard(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { wizard_inputs } = req.body;
+
+      if (!wizard_inputs || typeof wizard_inputs !== 'object') {
+        throw new ValidationError('Validation failed', [{
+          field: 'wizard_inputs',
+          message: 'wizard_inputs is required and must be an object'
+        }]);
+      }
+
+      const data = await loadPersonas();
+      const personaIndex = data.personas.findIndex(p => p.id === id);
+
+      if (personaIndex === -1) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      const persona = data.personas[personaIndex];
+
+      // Combine all wizard inputs into text for processing
+      const wizardText = `
+Personality: ${wizard_inputs.personality || ''}
+Humor: ${wizard_inputs.humor || ''}
+Important Memories: ${wizard_inputs.memories || ''}
+Unfinished Conversations: ${wizard_inputs.conversations || ''}
+      `.trim();
+
+      // Use AI to extract and categorize memories from wizard inputs
+      const prompt = `You are helping set up a memorial persona based on user input. Extract discrete, meaningful memories from the following wizard responses.
+
+For each memory:
+1. Create a clear, specific memory statement
+2. Categorize it (humor, regrets, childhood, advice, personality, misc)
+3. Assign a weight from 0.5 to 5.0 based on emotional significance
+
+Wizard Responses:
+${wizardText}
+
+Return a JSON array of memories in this format:
+[
+  {"text": "memory statement", "category": "humor", "weight": 3.5},
+  {"text": "another memory", "category": "personality", "weight": 4.0}
+]
+
+Extract 5-15 memories. Focus on specific, concrete details rather than general descriptions.`;
+
+      let extractedMemories = [];
+
+      try {
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.5,
+          max_tokens: 1500
+        });
+
+        const responseText = completion.choices[0].message.content.trim();
+        // Extract JSON array from response (handle markdown code blocks)
+        const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          extractedMemories = JSON.parse(jsonMatch[0]);
+        }
+      } catch (aiError) {
+        console.error('AI memory extraction failed:', aiError);
+        // Fallback: create basic memories from wizard text
+        if (wizardText.length > 0) {
+          extractedMemories = [
+            { text: wizard_inputs.personality || 'Personality description', category: 'personality', weight: 3.0 },
+            { text: wizard_inputs.humor || 'Humor description', category: 'humor', weight: 2.5 },
+            { text: wizard_inputs.memories || 'Important memories', category: 'misc', weight: 3.5 }
+          ].filter(m => m.text && m.text.trim().length > 0);
+        }
+      }
+
+      // Create memories
+      const createdMemories = [];
+      for (const memData of extractedMemories) {
+        if (memData.text && memData.text.trim().length > 0) {
+          const memory = createMemory(
+            memData.category || 'misc',
+            memData.text.trim(),
+            memData.weight || 3.0
+          );
+          persona.memories.push(memory);
+          createdMemories.push(memory);
+        }
+      }
+
+      // Update persona settings from wizard tone preferences
+      if (!persona.settings) {
+        persona.settings = getDefaultSettings();
+      }
+
+      if (wizard_inputs.tone_preferences) {
+        const tp = wizard_inputs.tone_preferences;
+        if (tp.humor_level !== undefined) persona.settings.humor_level = parseFloat(tp.humor_level);
+        if (tp.honesty_level !== undefined) persona.settings.honesty_level = parseFloat(tp.honesty_level);
+        if (tp.sentimentality_level !== undefined) persona.settings.sentimentality_level = parseFloat(tp.sentimentality_level);
+        if (tp.energy_level !== undefined) persona.settings.energy_level = parseFloat(tp.energy_level);
+        if (tp.advice_level !== undefined) persona.settings.advice_level = parseFloat(tp.advice_level);
+      }
+
+      persona.updated_at = new Date().toISOString();
+      data.personas[personaIndex] = persona;
+      await savePersonas(data);
+
+      // Auto-create snapshot
+      const snapshot = createSnapshot(persona, `Auto Snapshot – Setup Wizard (${new Date().toISOString()})`);
+      persona.snapshots.push(snapshot);
+      await savePersonas(data);
+
+      res.status(201).json({
+        success: true,
+        memories_created: createdMemories.length,
+        memories: createdMemories,
+        message: `Wizard completed! Created ${createdMemories.length} memories.`
       });
     } catch (error) {
       next(error);

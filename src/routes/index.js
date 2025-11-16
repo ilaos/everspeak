@@ -466,6 +466,139 @@ router.post('/personas/:id/memories', personaController.createMemory);
 
 /**
  * @swagger
+ * /api/personas/{id}/memories/bulk-import:
+ *   post:
+ *     summary: Bulk import memories
+ *     description: Import multiple memories at once with automatic AI categorization and weighting
+ *     tags: [Memories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - text
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 description: Raw text to import (will be split into discrete memories)
+ *                 example: "He loved fishing at the lake. Always told dad jokes. Gave great advice about work."
+ *               auto_weight:
+ *                 type: boolean
+ *                 description: Whether to use AI for automatic categorization and weighting
+ *                 default: true
+ *                 example: true
+ *     responses:
+ *       201:
+ *         description: Memories imported successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 imported:
+ *                   type: number
+ *                 memories:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Persona not found
+ */
+router.post('/personas/:id/memories/bulk-import', personaController.bulkImportMemories);
+
+/**
+ * @swagger
+ * /api/personas/{id}/wizard:
+ *   post:
+ *     summary: Process wizard setup
+ *     description: Complete persona setup wizard with multi-step inputs to automatically generate memories
+ *     tags: [Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - wizard_inputs
+ *             properties:
+ *               wizard_inputs:
+ *                 type: object
+ *                 properties:
+ *                   personality:
+ *                     type: string
+ *                     description: Personality description
+ *                   humor:
+ *                     type: string
+ *                     description: Humor and playfulness details
+ *                   memories:
+ *                     type: string
+ *                     description: Important memories
+ *                   conversations:
+ *                     type: string
+ *                     description: Unfinished conversations or regrets
+ *                   tone_preferences:
+ *                     type: object
+ *                     properties:
+ *                       humor_level:
+ *                         type: number
+ *                       honesty_level:
+ *                         type: number
+ *                       sentimentality_level:
+ *                         type: number
+ *                       energy_level:
+ *                         type: number
+ *                       advice_level:
+ *                         type: number
+ *     responses:
+ *       201:
+ *         description: Wizard completed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 memories_created:
+ *                   type: number
+ *                 memories:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Persona not found
+ */
+router.post('/personas/:id/wizard', personaController.processWizard);
+
+/**
+ * @swagger
  * /api/personas/{id}/memories/{memoryId}:
  *   put:
  *     summary: Update a memory

@@ -658,7 +658,7 @@ router.get('/personas/:id/settings', personaController.getSettings);
  *             properties:
  *               default_tone_mode:
  *                 type: string
- *                 enum: [auto, gentle, casual, real_talk, playful]
+ *                 enum: [auto, comforting, honest, playful, balanced]
  *               humor_level:
  *                 type: number
  *                 minimum: 0

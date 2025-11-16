@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 const PERSONAS_FILE = path.join(__dirname, 'personas.json');
 
 const VALID_CATEGORIES = ['humor', 'regrets', 'childhood', 'advice', 'personality', 'misc'];
-const VALID_TONE_MODES = ['auto', 'gentle', 'casual', 'real_talk', 'playful'];
+const VALID_TONE_MODES = ['auto', 'comforting', 'honest', 'playful', 'balanced'];
 
 export async function loadPersonas() {
   try {

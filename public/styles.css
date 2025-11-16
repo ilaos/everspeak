@@ -1558,3 +1558,243 @@ button[type="submit"]:active {
   padding-top: 20px;
   border-top: 1px solid #e0e0e0;
 }
+
+/* ===================================
+   Step Zero Welcome Modal
+   =================================== */
+
+.step-zero-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.step-zero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.step-zero-content {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  max-width: 650px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: stepZeroFadeIn 0.4s ease-out;
+  padding: 50px 40px;
+}
+
+@keyframes stepZeroFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.step-zero-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.step-zero-title {
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 30px;
+  line-height: 1.3;
+}
+
+.step-zero-body {
+  color: #4a5568;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 40px;
+  max-width: 550px;
+}
+
+.step-zero-body p {
+  margin-bottom: 20px;
+}
+
+.step-zero-body p:last-child {
+  margin-bottom: 0;
+}
+
+.step-zero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.btn-step-zero-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-step-zero-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-step-zero-primary:active {
+  transform: translateY(0);
+}
+
+.btn-step-zero-secondary {
+  background: transparent;
+  color: #7f8c8d;
+  border: 1px solid #cbd5e0;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-step-zero-secondary:hover {
+  background: #f7fafc;
+  border-color: #a0aec0;
+  color: #4a5568;
+}
+
+.btn-step-zero-secondary:active {
+  background: #edf2f7;
+}
+
+/* "I Need More Time" Banner */
+.need-time-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+  border-top: 2px solid #cbd5e0;
+  padding: 20px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.need-time-banner p {
+  color: #4a5568;
+  font-size: 1rem;
+  margin: 0;
+  flex: 0 1 auto;
+}
+
+.btn-start-everspeak {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  white-space: nowrap;
+}
+
+.btn-start-everspeak:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-start-everspeak:active {
+  transform: translateY(0);
+}
+
+.btn-close-time-banner {
+  background: transparent;
+  border: none;
+  color: #a0aec0;
+  font-size: 1.8rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.btn-close-time-banner:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #4a5568;
+}
+
+/* Responsive adjustments for Step Zero */
+@media (max-width: 768px) {
+  .step-zero-content {
+    padding: 40px 30px;
+  }
+  
+  .step-zero-title {
+    font-size: 1.6rem;
+  }
+  
+  .step-zero-body {
+    font-size: 1rem;
+  }
+  
+  .need-time-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+    padding: 16px;
+  }
+  
+  .need-time-banner p {
+    font-size: 0.9rem;
+  }
+}

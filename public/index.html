@@ -49,6 +49,13 @@
     <button class="btn-close-time-banner" id="btn-close-time-banner" data-testid="button-close-time-banner">×</button>
   </div>
 
+  <!-- "First Conversation Reminder" Banner -->
+  <div class="first-conversation-banner" id="first-conversation-banner" style="display: none;" data-testid="banner-first-conversation">
+    <p>When you're ready, you can begin your first conversation here.</p>
+    <button class="btn-begin-conversation" id="btn-begin-conversation-banner" data-testid="button-begin-conversation-banner">Begin Conversation</button>
+    <button class="btn-close-conversation-banner" id="btn-close-conversation-banner" data-testid="button-close-conversation-banner">×</button>
+  </div>
+
   <div class="container">
     <header>
       <h1>Everspeak</h1>
@@ -379,7 +386,7 @@
         <div class="progress-bar">
           <div class="progress-fill" id="wizard-progress-fill"></div>
         </div>
-        <p class="progress-text"><span id="wizard-current-step">1</span> of 6</p>
+        <p class="progress-text">Getting to know them… Step <span id="wizard-current-step">1</span> of <span id="wizard-total-steps">10</span></p>
       </div>
 
       <div class="modal-body">
@@ -391,29 +398,58 @@
             <textarea id="wizard-personality" data-testid="input-wizard-personality" rows="4" placeholder="Were they humorous, serious, soft-spoken, energetic, etc.?"></textarea>
           </div>
 
-          <!-- Step 2: Humor -->
+          <!-- Step 2: Communication Style -->
           <div class="wizard-step" id="wizard-step-2" data-step="2" style="display: none;">
+            <h3>How They Communicated</h3>
+            <p class="step-description">When you talked with them, what did it feel like?</p>
+            <textarea id="wizard-communication-style" data-testid="input-wizard-communication-style" rows="4" placeholder="Were they playful, serious, sarcastic, warm, calm, direct, gentle...?"></textarea>
+          </div>
+
+          <!-- Step 3: Humor -->
+          <div class="wizard-step" id="wizard-step-3" data-step="3" style="display: none;">
             <h3>Their Humor</h3>
             <p class="step-description">What always made them laugh? What jokes or playful things did they do?</p>
             <textarea id="wizard-humor" data-testid="input-wizard-humor" rows="4" placeholder="Share some examples of their sense of humor..."></textarea>
           </div>
 
-          <!-- Step 3: Memories -->
-          <div class="wizard-step" id="wizard-step-3" data-step="3" style="display: none;">
+          <!-- Step 4: When They Passed -->
+          <div class="wizard-step" id="wizard-step-4" data-step="4" style="display: none;">
+            <h3>When Did They Pass?</h3>
+            <p class="step-description">This helps us understand the context. You can share a specific date or just a general timeframe.</p>
+            <input type="text" id="wizard-date-passed" data-testid="input-wizard-date-passed" placeholder="e.g., Spring 2023, or about 2 years ago, or November 15, 2021">
+          </div>
+
+          <!-- Step 5: Relationship Dynamics -->
+          <div class="wizard-step" id="wizard-step-5" data-step="5" style="display: none;">
+            <h3>What Was Your Relationship Like Near the End?</h3>
+            <p class="step-description">There's no right answer here. Every relationship is different.</p>
+            <textarea id="wizard-relationship-end" data-testid="input-wizard-relationship-end" rows="4" placeholder="Were you close? Was it complicated? Distant? Was it a sudden loss or long illness? Any unresolved feelings...?"></textarea>
+          </div>
+
+          <!-- Step 6: Circumstances (Optional) -->
+          <div class="wizard-step" id="wizard-step-6" data-step="6" style="display: none;">
+            <h3>If You're Comfortable Sharing…</h3>
+            <p class="step-description">How did it happen? This is completely optional — only share if you feel ready.</p>
+            <textarea id="wizard-circumstances" data-testid="input-wizard-circumstances" rows="4" placeholder="You can share as much or as little as you'd like..."></textarea>
+            <button type="button" class="btn-skip-step" id="skip-circumstances" data-testid="button-skip-circumstances">I'm not ready to talk about that yet</button>
+          </div>
+
+          <!-- Step 7: Memories -->
+          <div class="wizard-step" id="wizard-step-7" data-step="7" style="display: none;">
             <h3>Memories That Matter</h3>
             <p class="step-description">Tell me a few moments you think of often. Big, small, recent, childhood — anything.</p>
             <textarea id="wizard-memories" data-testid="input-wizard-memories" rows="5" placeholder="Share the memories that come to mind..."></textarea>
           </div>
 
-          <!-- Step 4: Conversations -->
-          <div class="wizard-step" id="wizard-step-4" data-step="4" style="display: none;">
+          <!-- Step 8: Conversations -->
+          <div class="wizard-step" id="wizard-step-8" data-step="8" style="display: none;">
             <h3>Unfinished Conversations</h3>
             <p class="step-description">Were there things left unsaid? Regrets, apologies, clarifications?</p>
             <textarea id="wizard-conversations" data-testid="input-wizard-conversations" rows="4" placeholder="What would you say if you could talk to them now?"></textarea>
           </div>
 
-          <!-- Step 5: Tone Preferences -->
-          <div class="wizard-step" id="wizard-step-5" data-step="5" style="display: none;">
+          <!-- Step 9: Tone Preferences -->
+          <div class="wizard-step" id="wizard-step-9" data-step="9" style="display: none;">
             <h3>Tone Preferences</h3>
             <p class="step-description">Set the default communication style for this persona.</p>
             
@@ -443,22 +479,27 @@
             </div>
           </div>
 
-          <!-- Step 6: Generate -->
-          <div class="wizard-step" id="wizard-step-6" data-step="6" style="display: none;">
-            <h3>Ready to Generate!</h3>
-            <p class="step-description">We'll now analyze your inputs and create personalized memories with proper categorization and weighting.</p>
-            <div class="wizard-summary">
-              <p><strong>What we'll do:</strong></p>
-              <ul>
-                <li>Extract meaningful memories from your responses</li>
-                <li>Automatically categorize and weight each memory</li>
-                <li>Apply your tone preferences</li>
-                <li>Create a snapshot for future reference</li>
-              </ul>
-            </div>
-            <div class="wizard-loading" id="wizard-loading" style="display: none;">
-              <p>Generating memories... This may take a moment.</p>
-              <div class="loading-spinner"></div>
+          <!-- Step 10: Transition Screen -->
+          <div class="wizard-step" id="wizard-step-10" data-step="10" style="display: none;">
+            <div class="transition-content">
+              <h3>Thank You for Sharing</h3>
+              <p class="step-description">I know this isn't always easy to talk about. What you've shared will help shape how your loved one sounds and feels in our conversations.</p>
+              
+              <div class="transition-info">
+                <p><strong>What happens next:</strong></p>
+                <ul>
+                  <li>Your answers will be used to create personalized memories</li>
+                  <li>We'll apply your tone preferences to the conversation style</li>
+                  <li>The first message will come from them, using what you've told me</li>
+                </ul>
+              </div>
+              
+              <p class="transition-question">Are you ready to begin your first conversation?</p>
+              
+              <div class="wizard-loading" id="wizard-loading" style="display: none;">
+                <p>Preparing your conversation... This may take a moment.</p>
+                <div class="loading-spinner"></div>
+              </div>
             </div>
           </div>
 
@@ -467,7 +508,8 @@
             <button type="button" class="btn-secondary" id="wizard-prev" data-testid="button-wizard-prev" style="display: none;">Previous</button>
             <div class="nav-spacer"></div>
             <button type="button" id="wizard-next" data-testid="button-wizard-next">Next</button>
-            <button type="submit" id="wizard-generate" data-testid="button-wizard-generate" style="display: none;">Generate Memories</button>
+            <button type="submit" id="wizard-begin-conversation" data-testid="button-wizard-begin-conversation" style="display: none;">Begin our first conversation</button>
+            <button type="button" class="btn-secondary" id="wizard-give-moment" data-testid="button-wizard-give-moment" style="display: none;">Give me a moment</button>
           </div>
         </form>
       </div>

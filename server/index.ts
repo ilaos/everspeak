@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
+import rateLimit from 'express-rate-limit';
 import { router } from '../src/routes/index.js';
 import { errorHandler } from '../src/utils/errorHandler.js';
 
@@ -38,8 +39,46 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
+const allowedOrigins = [
+  'http://localhost:5000',
+  'http://localhost:3000',
+  /\.replit\.dev$/,
+  /\.replit\.app$/,
+];
+
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') {
+        return origin === allowed;
+      }
+      return allowed.test(origin);
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use(morgan('dev'));
-app.use(cors());
+app.use(cors(corsOptions));
+app.use(limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

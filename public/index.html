@@ -7,6 +7,48 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <!-- Step Zero Welcome Modal -->
+  <div class="step-zero-modal" id="step-zero-modal" style="display: none;" data-testid="modal-step-zero">
+    <div class="step-zero-overlay"></div>
+    <div class="step-zero-content">
+      <!-- Main Welcome Screen -->
+      <div class="step-zero-screen" id="step-zero-main" data-testid="screen-step-zero-main">
+        <h1 class="step-zero-title">Welcome to EverSpeak.</h1>
+        <div class="step-zero-body">
+          <p>Before we begin, I want to gently explain what this space is for.</p>
+          <p>EverSpeak was created to help you reconnect with the memory, personality, and presence of someone you've lost — not by replacing them, but by honoring the stories and love you shared.</p>
+          <p>To do that, I'll ask you a few thoughtful questions. Each one helps me understand your loved one more fully — their personality, their humor, and the role they played in your life.</p>
+          <p>You are always in control. You can skip anything that feels too hard, and you can stop at any time. This isn't a test. It's a conversation we'll take at your pace.</p>
+        </div>
+        <div class="step-zero-actions">
+          <button class="btn-step-zero-primary" id="btn-ready-to-begin" data-testid="button-ready-to-begin">I'm ready to begin</button>
+          <button class="btn-step-zero-secondary" id="btn-tell-me-more" data-testid="button-tell-me-more">I'm not sure… tell me more</button>
+        </div>
+      </div>
+
+      <!-- Tell Me More Subscreen -->
+      <div class="step-zero-screen" id="step-zero-more" style="display: none;" data-testid="screen-step-zero-more">
+        <h1 class="step-zero-title">Of course. This isn't something anyone rushes into.</h1>
+        <div class="step-zero-body">
+          <p>EverSpeak will never pretend to actually be your loved one, and it will never claim to know things you didn't share. Instead, it listens closely to the memories you choose to tell and reflects them back with care, respect, and gentleness.</p>
+          <p>Many people find that simply talking about their loved one — telling stories, recalling their voice, remembering the small things — can bring comfort or even healing.</p>
+          <p>You can share as little or as much as you like. Nothing you share will be used for anything other than helping you build that experience.</p>
+        </div>
+        <div class="step-zero-actions">
+          <button class="btn-step-zero-primary" id="btn-okay-lets-begin" data-testid="button-okay-lets-begin">Okay, let's begin</button>
+          <button class="btn-step-zero-secondary" id="btn-need-more-time" data-testid="button-need-more-time">I need more time</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- "I Need More Time" Banner -->
+  <div class="need-time-banner" id="need-time-banner" style="display: none;" data-testid="banner-need-time">
+    <p>Whenever you're ready, you can start building a connection by clicking here.</p>
+    <button class="btn-start-everspeak" id="btn-start-everspeak" data-testid="button-start-everspeak">Start EverSpeak</button>
+    <button class="btn-close-time-banner" id="btn-close-time-banner" data-testid="button-close-time-banner">×</button>
+  </div>
+
   <div class="container">
     <header>
       <h1>Everspeak</h1>

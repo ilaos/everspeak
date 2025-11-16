@@ -2,6 +2,7 @@
 let personas = [];
 let selectedPersonaId = null;
 let memories = [];
+let snapshots = [];
 let bannerDismissed = false;
 let userMessageCount = 0;
 let healthyUseNudgeShown = false;
@@ -13,6 +14,7 @@ let editingMemoryId = null;
 let personaDropdown, personaForm, memoryForm, chatForm, memoriesList, chatMessages;
 let groundingBanner, bannerDismissBtn, healthyUseNudge;
 let strictModeIndicator, strictModeTurnOff;
+let snapshotsSection, createSnapshotBtn, snapshotsList;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -28,6 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   healthyUseNudge = document.getElementById('healthy-use-nudge');
   strictModeIndicator = document.getElementById('strict-mode-indicator');
   strictModeTurnOff = document.getElementById('strict-mode-turn-off');
+  snapshotsSection = document.getElementById('snapshots-section');
+  createSnapshotBtn = document.getElementById('create-snapshot-btn');
+  snapshotsList = document.getElementById('snapshots-list');
   
   await loadPersonas();
   setupEventListeners();
@@ -43,6 +48,10 @@ function setupEventListeners() {
   
   if (strictModeTurnOff) {
     strictModeTurnOff.addEventListener('click', handleStrictModeTurnOff);
+  }
+  
+  if (createSnapshotBtn) {
+    createSnapshotBtn.addEventListener('click', handleCreateSnapshot);
   }
 }
 
@@ -138,6 +147,7 @@ async function handlePersonaChange(event) {
     selectedPersonaId = null;
     clearPersonaInfo();
     clearMemories();
+    clearSnapshots();
     clearChat();
     return;
   }
@@ -167,6 +177,18 @@ async function loadPersonaDetails(personaId) {
     if (memoriesResult.success) {
       memories = memoriesResult.data;
       displayMemories();
+    }
+    
+    // Load snapshots
+    const snapshotsResponse = await fetch(`/api/personas/${personaId}/snapshots`);
+    const snapshotsResult = await snapshotsResponse.json();
+    
+    if (snapshotsResult.success) {
+      snapshots = snapshotsResult.data;
+      displaySnapshots();
+      if (snapshotsSection) {
+        snapshotsSection.style.display = 'block';
+      }
     }
   } catch (error) {
     console.error('Failed to load persona details:', error);
@@ -460,6 +482,110 @@ async function saveMemoryEdit(memoryId) {
     console.error('Failed to update memory:', error);
     errorDiv.textContent = 'Failed to update memory';
     errorDiv.style.display = 'block';
+  }
+}
+
+// Display snapshots
+function displaySnapshots() {
+  if (!snapshotsList) return;
+  
+  if (snapshots.length === 0) {
+    snapshotsList.innerHTML = '<p class="placeholder">No snapshots yet</p>';
+    return;
+  }
+  
+  snapshotsList.innerHTML = snapshots.map(snapshot => {
+    const date = new Date(snapshot.created_at);
+    const formattedDate = date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    return `
+      <div class="snapshot-item" data-testid="snapshot-item-${snapshot.id}">
+        <div class="snapshot-info">
+          <div class="snapshot-name" data-testid="text-snapshot-name-${snapshot.id}">${escapeHtml(snapshot.name)}</div>
+          <div class="snapshot-date">${formattedDate}</div>
+        </div>
+        <button class="btn-restore-snapshot" data-testid="button-restore-snapshot-${snapshot.id}" onclick="restoreSnapshot('${snapshot.id}')">Restore</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// Clear snapshots
+function clearSnapshots() {
+  snapshots = [];
+  if (snapshotsList) {
+    snapshotsList.innerHTML = '<p class="placeholder">No snapshots yet</p>';
+  }
+  if (snapshotsSection) {
+    snapshotsSection.style.display = 'none';
+  }
+}
+
+// Handle create snapshot
+async function handleCreateSnapshot() {
+  if (!selectedPersonaId) return;
+  
+  const name = prompt('Name this snapshot (optional):');
+  
+  // User clicked cancel
+  if (name === null) {
+    return;
+  }
+  
+  try {
+    const body = name && name.trim() ? { name: name.trim() } : {};
+    const response = await fetch(`/api/personas/${selectedPersonaId}/snapshots`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      snapshots.push(result.data);
+      displaySnapshots();
+      showSuccess('Snapshot created successfully!');
+    } else {
+      showError(result.message || 'Failed to create snapshot');
+    }
+  } catch (error) {
+    console.error('Failed to create snapshot:', error);
+    showError('Failed to create snapshot');
+  }
+}
+
+// Restore snapshot
+async function restoreSnapshot(snapshotId) {
+  if (!selectedPersonaId) return;
+  
+  if (!confirm('Restore this version? Current memories and settings for this persona will be replaced.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/personas/${selectedPersonaId}/snapshots/${snapshotId}/restore`, {
+      method: 'POST'
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Refresh persona details, memories, and chat
+      await loadPersonaDetails(selectedPersonaId);
+      showSuccess('Persona restored successfully!');
+    } else {
+      showError(result.message || 'Failed to restore snapshot');
+    }
+  } catch (error) {
+    console.error('Failed to restore snapshot:', error);
+    showError('Failed to restore snapshot');
   }
 }
 

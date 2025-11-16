@@ -531,4 +531,86 @@ router.put('/personas/:id/memories/:memoryId', personaController.updateMemory);
  */
 router.delete('/personas/:id/memories/:memoryId', personaController.deleteMemory);
 
+/**
+ * @swagger
+ * /api/personas/{id}/snapshots:
+ *   get:
+ *     summary: Get all snapshots for a persona
+ *     description: Retrieve all saved snapshots (versions) for a persona
+ *     tags: [Snapshots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     responses:
+ *       200:
+ *         description: Snapshots retrieved successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:id/snapshots', personaController.getSnapshots);
+
+/**
+ * @swagger
+ * /api/personas/{id}/snapshots:
+ *   post:
+ *     summary: Create a new snapshot
+ *     description: Save a snapshot of the current persona state
+ *     tags: [Snapshots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Optional name for the snapshot
+ *                 example: "Before memory edit"
+ *     responses:
+ *       201:
+ *         description: Snapshot created successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.post('/personas/:id/snapshots', personaController.createSnapshot);
+
+/**
+ * @swagger
+ * /api/personas/{id}/snapshots/{snapshotId}/restore:
+ *   post:
+ *     summary: Restore a persona from a snapshot
+ *     description: Restore persona state from a saved snapshot
+ *     tags: [Snapshots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *       - in: path
+ *         name: snapshotId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The snapshot ID
+ *     responses:
+ *       200:
+ *         description: Persona restored successfully
+ *       404:
+ *         description: Persona or snapshot not found
+ */
+router.post('/personas/:id/snapshots/:snapshotId/restore', personaController.restoreSnapshot);
+
 export { router };

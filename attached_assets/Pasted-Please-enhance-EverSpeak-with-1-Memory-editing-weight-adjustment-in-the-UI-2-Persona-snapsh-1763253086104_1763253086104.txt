@@ -1,0 +1,162 @@
+Please enhance EverSpeak with:
+
+1) Memory editing + weight adjustment in the UI
+2) Persona snapshots (versioning) with save + restore
+
+Do NOT break any existing endpoints or flows. Extend what’s there.
+
+A. Memory Editing in UI (public/app.js, public/index.html, public/styles.css)
+
+Current state:
+- The Memory Panel shows a list of memories per persona.
+- You can add and delete memories via existing endpoints.
+
+New behavior required:
+1. For each memory listed in the Memory Panel:
+   - Add a small "Edit" button next to the "Delete" button.
+
+2. When "Edit" is clicked:
+   - Turn that memory row into an inline edit form with:
+     - Category (dropdown: humor, regrets, childhood, advice, personality, misc)
+     - Text (textarea or input)
+     - Weight (number, 0.1–5.0)
+   - Show "Save" and "Cancel" buttons for that row.
+   - While editing, hide the original static display for that memory.
+
+3. On "Save":
+   - Call the existing endpoint:
+     - PUT /api/personas/:id/memories/:memoryId
+   - Send the updated fields (category, text, weight).
+   - On success:
+     - Re-render that memory row in view mode with the new values.
+   - On validation error (e.g., invalid weight), show a small error message near that memory row, not an alert popup.
+
+4. On "Cancel":
+   - Revert that row back to its original display without changes.
+
+5. Make sure:
+   - Only one memory row per persona is in edit mode at a time.
+   - Editing doesn’t interfere with adding or deleting other memories.
+   - Styling is consistent with existing UI (use simple CSS extensions in styles.css).
+
+B. Persona Snapshots (versioning) in Backend + UI
+
+Goal:
+Allow the user to save and restore “versions” of a persona (including its memories), so they can go back if the persona drifts too far.
+
+Backend changes (personas JSON & routes):
+
+1. Extend the persona model in src/personas/personas.json so each persona can have an optional `snapshots` array, e.g.:
+
+   {
+     "id": "uuid",
+     "name": "Jimmy",
+     "relationship": "Brother",
+     "description": "Short summary",
+     "memories": [ ... ],
+     "snapshots": [
+       {
+         "id": "uuid",
+         "name": "Before strict mode tuning",
+         "created_at": "ISO timestamp",
+         "persona_state": {
+           "name": "Jimmy",
+           "relationship": "Brother",
+           "description": "Short summary",
+           "memories": [ ... ]
+         }
+       }
+     ],
+     "created_at": "...",
+     "updated_at": "..."
+   }
+
+2. Add new endpoints under /api/personas (keep consistent response pattern with the rest of the API):
+
+   - GET /api/personas/:id/snapshots
+     - Returns all snapshots for that persona (id, name, created_at).
+
+   - POST /api/personas/:id/snapshots
+     - Creates a new snapshot for that persona.
+     - Request body fields:
+       - optional `name` string (e.g., "First draft", "Post-memory-edit")
+     - If `name` is not provided, auto-generate something like:
+       - "Snapshot - <ISO date>"
+     - The snapshot’s `persona_state` should capture:
+       - current persona name
+       - relationship
+       - description
+       - full memories array
+     - Respond with the created snapshot.
+
+   - POST /api/personas/:id/snapshots/:snapshotId/restore
+     - Restores that persona’s state from the given snapshot.
+     - This should:
+       - Overwrite the persona’s `name`, `relationship`, `description`, and `memories` with the data from `persona_state`.
+       - Leave snapshots themselves intact (so we keep history).
+       - Update `updated_at`.
+     - Respond with the updated persona.
+
+3. Implement any needed helpers in src/personas/utils.js:
+   - To safely handle snapshots array
+   - To avoid corrupting the JSON file
+   - To generate snapshot IDs
+
+4. Validation:
+   - Return 404 if persona or snapshot not found.
+   - Return 400 if invalid data is sent.
+   - Keep error handling consistent with existing patterns.
+
+Frontend changes for snapshots (public/app.js, public/index.html, public/styles.css):
+
+1. In the Persona Panel:
+   - Add a simple “Snapshots” section for the selected persona, containing:
+     - A "Create Snapshot" button.
+     - A list (or small table) of existing snapshots for that persona:
+       - Snapshot name
+       - Created date (friendly format like "2025-11-15 14:32")
+       - A "Restore" button on each row.
+
+2. Behavior:
+   - When "Create Snapshot" is clicked:
+     - Optionally show a small prompt (e.g., `prompt("Name this snapshot (optional):")`)
+     - Call POST /api/personas/:id/snapshots with the given name or with no body if user cancels or leaves blank.
+     - On success:
+       - Refresh the snapshot list for that persona.
+
+   - When "Restore" is clicked:
+     - Confirm with the user using window.confirm (e.g., "Restore this version? Current memories and settings for this persona will be replaced.")
+     - On confirm:
+       - Call POST /api/personas/:id/snapshots/:snapshotId/restore
+       - On success:
+         - Refresh persona details (name, relationship, description)
+         - Refresh memories list (since they changed)
+         - Clear the chat for that persona (like a fresh start with the restored version)
+         - Reset strict mode and session counters for that persona.
+
+3. UI/UX details:
+   - Keep snapshots list visually simple and small. This is a power feature, not the main focus.
+   - On mobile, ensure snapshots section stacks nicely in the Persona Panel.
+   - Show a tiny success toast or message after restore (e.g., text near the top of the persona section that auto-fades) if that fits easily within current code structure; otherwise at least console.log for now.
+
+C. Consistency and Testing
+
+- Do NOT remove or rename any existing routes.
+- Make sure:
+  - persona CRUD still works
+  - memory CRUD still works
+  - chat works for all personas
+  - strict mode, grounding banner, grounding line, and healthy-use nudge are unchanged
+- Ensure that:
+  - Saving a snapshot does not break anything if there are no memories yet.
+  - Restoring works even if the current persona has different memories than in the snapshot.
+  - JSON structure remains valid and readable.
+
+After changes:
+- Confirm:
+  - You can create a persona.
+  - Add some memories.
+  - Create a snapshot.
+  - Edit a memory (including weight).
+  - Create another snapshot.
+  - Restore a previous snapshot and see memories + persona info revert.

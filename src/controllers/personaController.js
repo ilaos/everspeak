@@ -8,7 +8,10 @@ import {
   findPersonaById,
   findMemoryById,
   isValidCategory,
-  isValidWeight
+  isValidWeight,
+  createSnapshot,
+  findSnapshotById,
+  restoreFromSnapshot
 } from '../personas/utils.js';
 
 export const personaController = {
@@ -362,6 +365,108 @@ export const personaController = {
         success: true,
         data: deletedMemory,
         message: 'Memory deleted successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET /api/personas/:id/snapshots - Get all snapshots for a persona
+  async getSnapshots(req, res, next) {
+    try {
+      const { id } = req.params;
+      const data = await loadPersonas();
+      const persona = findPersonaById(data.personas, id);
+
+      if (!persona) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      const snapshots = persona.snapshots || [];
+
+      res.status(200).json({
+        success: true,
+        data: snapshots,
+        count: snapshots.length,
+        message: 'Snapshots retrieved successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // POST /api/personas/:id/snapshots - Create a new snapshot
+  async createSnapshot(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { name } = req.body;
+
+      const data = await loadPersonas();
+      const persona = findPersonaById(data.personas, id);
+
+      if (!persona) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      // Validate name if provided
+      const errors = [];
+      if (name !== undefined && typeof name !== 'string') {
+        errors.push({
+          field: 'name',
+          message: 'Name must be a string'
+        });
+      }
+
+      if (errors.length > 0) {
+        throw new ValidationError('Validation failed', errors);
+      }
+
+      // Initialize snapshots array if it doesn't exist
+      if (!persona.snapshots) {
+        persona.snapshots = [];
+      }
+
+      const snapshot = createSnapshot(persona, name);
+      persona.snapshots.push(snapshot);
+      await savePersonas(data);
+
+      res.status(201).json({
+        success: true,
+        data: snapshot,
+        message: 'Snapshot created successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // POST /api/personas/:id/snapshots/:snapshotId/restore - Restore from snapshot
+  async restoreSnapshot(req, res, next) {
+    try {
+      const { id, snapshotId } = req.params;
+
+      const data = await loadPersonas();
+      const personaIndex = data.personas.findIndex(p => p.id === id);
+
+      if (personaIndex === -1) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      const persona = data.personas[personaIndex];
+      const snapshot = findSnapshotById(persona, snapshotId);
+
+      if (!snapshot) {
+        throw new AppError('Snapshot not found', 404);
+      }
+
+      // Restore persona from snapshot
+      data.personas[personaIndex] = restoreFromSnapshot(persona, snapshot);
+      await savePersonas(data);
+
+      res.status(200).json({
+        success: true,
+        data: data.personas[personaIndex],
+        message: 'Persona restored from snapshot successfully'
       });
     } catch (error) {
       next(error);

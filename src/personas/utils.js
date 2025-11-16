@@ -53,6 +53,7 @@ export function createPersona(name, relationship, description) {
     relationship,
     description,
     memories: [],
+    snapshots: [],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
@@ -73,7 +74,44 @@ export function updatePersona(persona, updates) {
     ...updates,
     id: persona.id,
     memories: persona.memories,
+    snapshots: persona.snapshots,
     created_at: persona.created_at,
+    updated_at: new Date().toISOString()
+  };
+}
+
+export function createSnapshot(persona, name) {
+  const snapshotName = name && name.trim() 
+    ? name.trim() 
+    : `Snapshot - ${new Date().toISOString()}`;
+  
+  return {
+    id: generateUUID(),
+    name: snapshotName,
+    created_at: new Date().toISOString(),
+    persona_state: {
+      name: persona.name,
+      relationship: persona.relationship,
+      description: persona.description,
+      memories: JSON.parse(JSON.stringify(persona.memories))
+    }
+  };
+}
+
+export function findSnapshotById(persona, snapshotId) {
+  if (!persona.snapshots) {
+    return null;
+  }
+  return persona.snapshots.find(s => s.id === snapshotId);
+}
+
+export function restoreFromSnapshot(persona, snapshot) {
+  return {
+    ...persona,
+    name: snapshot.persona_state.name,
+    relationship: snapshot.persona_state.relationship,
+    description: snapshot.persona_state.description,
+    memories: JSON.parse(JSON.stringify(snapshot.persona_state.memories)),
     updated_at: new Date().toISOString()
   };
 }

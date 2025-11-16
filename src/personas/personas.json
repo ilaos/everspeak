@@ -28,26 +28,6 @@
       "snapshots": [],
       "created_at": "2025-11-15T22:58:00.603Z",
       "updated_at": "2025-11-15T23:35:39.260Z"
-    },
-    {
-      "id": "54508638-730e-4cbb-97c8-66855def227a",
-      "name": "TestGroundingquB0oy",
-      "relationship": "Friend",
-      "description": "Test persona for grounding features",
-      "memories": [],
-      "snapshots": [],
-      "created_at": "2025-11-15T23:35:53.098Z",
-      "updated_at": "2025-11-15T23:35:53.098Z"
-    },
-    {
-      "id": "ddc7527c-b6ef-40b7-8d45-ecc3347a443f",
-      "name": "TestNoticeKRiete",
-      "relationship": "",
-      "description": "",
-      "memories": [],
-      "snapshots": [],
-      "created_at": "2025-11-16T00:01:36.632Z",
-      "updated_at": "2025-11-16T00:01:36.632Z"
     }
   ]
 }

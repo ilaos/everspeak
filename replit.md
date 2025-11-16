@@ -16,7 +16,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ Created /api/test endpoint and full CRUD examples
 - ✅ Implemented robust error handling with custom error classes
 - ✅ Added input validation middleware with type checking and partial update support
-- ✅ Set up Swagger/OpenAPI documentation at /api-docs for all 13 endpoints
+- ✅ Set up Swagger/OpenAPI documentation at /api-docs for all 19 endpoints
 - ✅ Integrated OpenAI GPT-4o-mini for AI-powered message responses
 - ✅ Installed openai npm package and configured API authentication
 - ✅ **Implemented complete Loved Ones Persona System**:
@@ -58,6 +58,25 @@ Preferred communication style: Simple, everyday language.
   - All session state resets when switching personas
   - Fixed critical bugs: DOM element timing, chat clearing sequence
   - Comprehensive Playwright testing: 100% pass rate
+- ✅ **Implemented Memory Editing and Persona Snapshots (November 16, 2025)**:
+  - **Memory Editing**: Inline edit mode for memories with full field modification
+    - Edit button on each memory item alongside Delete button
+    - Inline edit form with category dropdown, text textarea, weight input (0.1-5.0)
+    - Save and Cancel buttons with proper state management
+    - Only one memory editable at a time (editingMemoryId state variable)
+    - Validation errors displayed below edit form
+    - Smooth UI transitions between view and edit modes
+  - **Persona Snapshots**: Version control for persona configurations
+    - Extended persona model with snapshots array in personas.json
+    - Snapshot helper functions: createSnapshot, findSnapshotById, etc.
+    - Three new API endpoints: GET snapshots, POST create, POST restore
+    - UI in Persona Panel: "Create Snapshot" button, snapshots list with Restore buttons
+    - Snapshots capture complete persona state (name, relationship, description, all memories)
+    - Restore operation reverts persona to snapshot state and clears chat
+    - Optional snapshot naming with auto-generated names if not provided
+    - Full Swagger documentation for all snapshot endpoints
+  - CSS styling for memory editing and snapshots with consistent design
+  - All features tested end-to-end with Playwright (100% pass rate)
 - ✅ Architect-approved and production-ready
 - ✅ All endpoints and UI tested and verified working
 
@@ -118,7 +137,7 @@ Preferred communication style: Simple, everyday language.
 - Complete endpoint descriptions with request/response schemas
 - Server URL automatically configured based on PORT environment variable
 
-### API Endpoints (13 Total)
+### API Endpoints (19 Total)
 
 **Test Endpoint**
 - `GET /api/test` - Returns `{ok: true}` to verify API is operational
@@ -148,6 +167,15 @@ Preferred communication style: Simple, everyday language.
   - Optional: `weight` (number 0.1-5.0, default 1.0) - importance/significance
 - `PUT /api/personas/:id/memories/:memoryId` - Update memory (partial updates)
 - `DELETE /api/personas/:id/memories/:memoryId` - Delete specific memory
+
+**Snapshots Sub-Resource (3 endpoints)**
+- `GET /api/personas/:id/snapshots` - Get all snapshots for a persona
+- `POST /api/personas/:id/snapshots` - Create snapshot of current persona state
+  - Optional: `name` (string) - custom snapshot name (auto-generated if not provided)
+  - Captures: persona name, relationship, description, and all memories
+- `POST /api/personas/:id/snapshots/:snapshotId/restore` - Restore persona to snapshot state
+  - Replaces current persona data with snapshot data
+  - Returns updated persona with all fields
 
 **Examples Resource (CRUD - 3 endpoints)**
 - `GET /api/examples` - List all examples with count

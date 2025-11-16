@@ -8,7 +8,7 @@ Everspeak Backend is a professional Node.js + Express REST API with organized fo
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (November 15, 2025)
+## Recent Changes (November 16, 2025)
 
 - ✅ Restructured from fullstack template to backend-only API
 - ✅ Implemented organized folder structure (/src/routes, /src/controllers, /src/personas, /src/utils)
@@ -48,6 +48,16 @@ Preferred communication style: Simple, everyday language.
   - Nudge encourages taking breaks and processing emotions
   - Message counter and nudge reset when switching personas
   - All features tested with Playwright (100% pass rate)
+- ✅ **Implemented Strict Mode Feature (November 16, 2025)**:
+  - Session-based toggle to keep AI responses closer to stored memories
+  - "Doesn't sound like them?" link appears under each AI reply
+  - Strict mode indicator badge with turn-off functionality
+  - One-time dismissible notice per persona session explaining the feature
+  - Backend accepts optional strict_persona parameter
+  - Enhanced AI prompt when strict mode enabled: "CRITICAL: Stay extremely close to the provided memories"
+  - All session state resets when switching personas
+  - Fixed critical bugs: DOM element timing, chat clearing sequence
+  - Comprehensive Playwright testing: 100% pass rate
 - ✅ Architect-approved and production-ready
 - ✅ All endpoints and UI tested and verified working
 
@@ -116,12 +126,13 @@ Preferred communication style: Simple, everyday language.
 **Message Endpoint (AI-Powered)**
 - `POST /api/message` - Process conversational message with OpenAI GPT-4o-mini
   - Required: `user_message` (string)
-  - Optional: `persona_id` (UUID - auto-loads persona memories), `emotional_state`, `tone_mode`, `memory_bank`
+  - Optional: `persona_id` (UUID - auto-loads persona memories), `emotional_state`, `tone_mode`, `memory_bank`, `strict_persona` (boolean)
   - Uses OpenAI API to generate emotionally intelligent, context-aware responses
   - When persona_id provided: Automatically loads all persona memories and includes in AI prompt
+  - When strict_persona is true: Adds extra instruction to AI prompt to stay extremely close to stored memories
   - Simulates personality based on persona name, relationship, and stored memories
   - Falls back to stub response if OpenAI API fails
-  - Returns metadata with persona info and memories used
+  - Returns metadata with persona info, memories used, and strict_persona status
 
 **Personas Resource (CRUD - 5 endpoints)**
 - `GET /api/personas` - List all personas with their memories

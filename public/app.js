@@ -11,6 +11,7 @@ let strictMode = false;
 let strictModeNoticeShown = false;
 let editingMemoryId = null;
 let wizardCurrentStep = 1;
+let stepZeroCompleted = false;
 
 // DOM Elements
 let personaDropdown, personaForm, memoryForm, chatForm, memoriesList, chatMessages;
@@ -31,6 +32,8 @@ let isRecording = false;
 let boostPersonaBtn, boostModal, closeBoost, refreshBoostBtn, applyToneBtn;
 let boostLoading, boostResults;
 let currentBoostRecommendations = null;
+let stepZeroModal, stepZeroMain, stepZeroMore, btnReadyToBegin, btnTellMeMore, btnOkayLetsBegin, btnNeedMoreTime;
+let needTimeBanner, btnStartEverspeak, btnCloseTimeBanner;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -108,9 +111,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   boostLoading = document.getElementById('boost-loading');
   boostResults = document.getElementById('boost-results');
   
+  // Step Zero elements
+  stepZeroModal = document.getElementById('step-zero-modal');
+  stepZeroMain = document.getElementById('step-zero-main');
+  stepZeroMore = document.getElementById('step-zero-more');
+  btnReadyToBegin = document.getElementById('btn-ready-to-begin');
+  btnTellMeMore = document.getElementById('btn-tell-me-more');
+  btnOkayLetsBegin = document.getElementById('btn-okay-lets-begin');
+  btnNeedMoreTime = document.getElementById('btn-need-more-time');
+  needTimeBanner = document.getElementById('need-time-banner');
+  btnStartEverspeak = document.getElementById('btn-start-everspeak');
+  btnCloseTimeBanner = document.getElementById('btn-close-time-banner');
+  
   await loadPersonas();
   await loadJournalEntries();
   setupEventListeners();
+  
+  // Check if we should show Step Zero on initial load
+  checkAndShowStepZero();
 });
 
 // Setup event listeners
@@ -256,6 +274,26 @@ function setupEventListeners() {
         closeBoostModal();
       }
     });
+  }
+  
+  // Step Zero modal handlers
+  if (btnReadyToBegin) {
+    btnReadyToBegin.addEventListener('click', handleReadyToBegin);
+  }
+  if (btnTellMeMore) {
+    btnTellMeMore.addEventListener('click', showStepZeroMore);
+  }
+  if (btnOkayLetsBegin) {
+    btnOkayLetsBegin.addEventListener('click', handleReadyToBegin);
+  }
+  if (btnNeedMoreTime) {
+    btnNeedMoreTime.addEventListener('click', handleNeedMoreTime);
+  }
+  if (btnStartEverspeak) {
+    btnStartEverspeak.addEventListener('click', handleStartEverspeak);
+  }
+  if (btnCloseTimeBanner) {
+    btnCloseTimeBanner.addEventListener('click', closeNeedTimeBanner);
   }
 }
 
@@ -1934,4 +1972,95 @@ function updateJournalPersonaDropdown() {
 // Initialize journal event listeners
 if (journalForm) {
   journalForm.addEventListener('submit', handleJournalSubmit);
+}
+
+// ===================================
+// Step Zero Welcome Flow Functions
+// ===================================
+
+// Check if we should show Step Zero on initial load
+function checkAndShowStepZero() {
+  // Check localStorage to see if Step Zero was already completed
+  const stepZeroCompleted = localStorage.getItem('stepZeroCompleted');
+  
+  // Only show Step Zero if:
+  // 1. No personas exist yet
+  // 2. Step Zero hasn't been completed before
+  if (personas.length === 0 && !stepZeroCompleted) {
+    showStepZeroModal();
+  }
+}
+
+// Show Step Zero modal with main screen
+function showStepZeroModal() {
+  if (stepZeroModal) {
+    // Reset to main screen
+    stepZeroMain.style.display = 'flex';
+    stepZeroMore.style.display = 'none';
+    stepZeroModal.style.display = 'flex';
+  }
+}
+
+// Show "Tell me more" subscreen
+function showStepZeroMore() {
+  if (stepZeroMain && stepZeroMore) {
+    stepZeroMain.style.display = 'none';
+    stepZeroMore.style.display = 'flex';
+  }
+}
+
+// Handle "I'm ready to begin" or "Okay, let's begin"
+function handleReadyToBegin() {
+  // Mark Step Zero as completed in localStorage
+  localStorage.setItem('stepZeroCompleted', 'true');
+  stepZeroCompleted = true;
+  
+  // Close Step Zero modal
+  closeStepZero();
+  
+  // Open the onboarding wizard immediately
+  openWizardModal();
+}
+
+// Handle "I need more time"
+function handleNeedMoreTime() {
+  // Mark Step Zero as completed so it doesn't show again automatically
+  localStorage.setItem('stepZeroCompleted', 'true');
+  stepZeroCompleted = true;
+  
+  // Close Step Zero modal
+  closeStepZero();
+  
+  // Show the "need more time" banner
+  showNeedTimeBanner();
+}
+
+// Handle "Start EverSpeak" button from banner
+function handleStartEverspeak() {
+  // Hide the banner
+  closeNeedTimeBanner();
+  
+  // Open the onboarding wizard directly (skip Step Zero since they've already seen it)
+  openWizardModal();
+}
+
+// Close Step Zero modal
+function closeStepZero() {
+  if (stepZeroModal) {
+    stepZeroModal.style.display = 'none';
+  }
+}
+
+// Show "I need more time" banner
+function showNeedTimeBanner() {
+  if (needTimeBanner) {
+    needTimeBanner.style.display = 'flex';
+  }
+}
+
+// Close "I need more time" banner
+function closeNeedTimeBanner() {
+  if (needTimeBanner) {
+    needTimeBanner.style.display = 'none';
+  }
 }

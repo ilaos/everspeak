@@ -1,0 +1,111 @@
+I want to deploy my Everspeak application using Replit Deployments. 
+Please perform the following steps carefully and in this order:
+
+-------------------------
+A. PREPARE FOR DEPLOYMENT
+-------------------------
+
+1. Verify that my application already runs locally when I press “Run.”
+   - It should start the Express server on port 5000.
+   - It should serve the frontend from public/.
+   - If needed, ensure that Express uses:
+       app.use(express.static('public'));
+       app.listen(process.env.PORT || 5000);
+   - Confirm nothing in the code uses a hardcoded localhost:5000 URL; use relative URLs ("/api/...") instead.
+
+2. Create a new file in the root directory:
+   replit.nix
+   If one exists, review it but do NOT remove required dependencies.
+
+   Ensure the Nix environment includes:
+   - nodejs
+   - npm
+   - any other required packages your system already uses
+
+3. Ensure no hardcoded ports besides process.env.PORT || 5000.
+
+-------------------------
+B. CREATE A DEPLOYMENT TARGET
+-------------------------
+
+1. Use Replit Deployments (the “Deploy” tab).
+2. Create a new Deployment with the following settings:
+
+   TYPE: Web Server
+   ENTRY POINT: server/index.ts OR server/index.js (whichever my project uses)
+   INSTALL COMMAND: npm install
+   BUILD COMMAND: (leave blank unless required)
+   RUN COMMAND: npm start  (or: node server/index.js — whichever matches my existing setup)
+
+3. IMPORTANT:
+   Configure the Deployment Environment Variables:
+   - OPENAI_API_KEY = <value already stored in Replit Secrets>
+   - Any other secrets already used in this project
+
+4. Set the Deployment Auto-Restart to ON.
+5. Set Deployment Visibility to PUBLIC.
+6. Enable HTTPS (Replit does this by default).
+
+-------------------------
+C. CORS & SECURITY HARDENING
+-------------------------
+
+Before deploying, update CORS settings in the Express server:
+
+- Allow only the deployed Replit URL AND localhost for development.
+- Example:
+    const allowed = [
+      "http://localhost:5000",
+      "https://<YOUR-REPLIT-DEPLOYMENT-URL>"
+    ];
+
+    const corsOptions = {
+      origin: function(origin, callback) {
+        if (!origin || allowed.includes(origin)) callback(null, true);
+        else callback(new Error("CORS blocked"));
+      }
+    };
+
+    app.use(cors(corsOptions));
+
+Add basic rate limiting:
+   const rateLimit = require("express-rate-limit");
+   const limiter = rateLimit({
+     windowMs: 60 * 1000,
+     max: 30,
+   });
+   app.use(limiter);
+
+-------------------------
+D. DEPLOY IT
+-------------------------
+
+Once the above is ready:
+
+1. Press "Deploy".
+2. Wait for the build and startup logs.
+3. When it finishes successfully:
+   - Provide me the LIVE PUBLIC URL.
+
+-------------------------
+E. FINAL CHECK
+-------------------------
+
+After deployment:
+
+1. Open the public URL in your browser.
+2. Then open it on your mobile phone.
+3. Verify:
+   - Persona dropdown loads
+   - Memories load
+   - Chat works with AI
+   - Wizard works
+   - Journaling works
+   - Voice transcription works (mobile mic support)
+   - Booster modal works
+
+If anything fails, tell me the error logs, and I will fix it.
+
+-------------------------
+
+Please proceed with the deployment now.

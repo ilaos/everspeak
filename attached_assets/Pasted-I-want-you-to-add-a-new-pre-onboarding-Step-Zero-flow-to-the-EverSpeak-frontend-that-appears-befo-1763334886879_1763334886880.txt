@@ -1,0 +1,141 @@
+I want you to add a new pre-onboarding “Step Zero” flow to the EverSpeak frontend, that appears before the current onboarding wizard (the one that asks for name, relationship, memories, etc.).
+
+This is not visual polish. This is a new UX layer that:
+
+Explains what EverSpeak is for
+
+Sets expectations gently
+
+Gives the user emotional safety and control
+
+Then, only if they agree, starts the onboarding wizard
+
+1. Create a New “Welcome / Step Zero” Modal
+
+Add a new full-screen modal component that appears as soon as the app loads, before any other onboarding questions, if no personas exist yet.
+
+Requirements:
+
+Full-screen overlay
+
+Centered content card
+
+Soft, warm styling (can reuse existing modal styles)
+
+Must block access to the rest of the UI until dismissed via “Let’s begin” or “I need more time”
+
+Step Zero – Main Screen Content
+
+Use text along these lines (you can keep it as-is or lightly adjust wording, but keep the tone and meaning):
+
+Headline:
+
+“Welcome to EverSpeak.”
+
+Body copy (paragraphs):
+
+“Before we begin, I want to gently explain what this space is for.”
+
+“EverSpeak was created to help you reconnect with the memory, personality, and presence of someone you’ve lost — not by replacing them, but by honoring the stories and love you shared.”
+
+“To do that, I’ll ask you a few thoughtful questions. Each one helps me understand your loved one more fully — their personality, their humor, and the role they played in your life.”
+
+“You are always in control. You can skip anything that feels too hard, and you can stop at any time. This isn’t a test. It’s a conversation we’ll take at your pace.”
+
+Buttons:
+
+Primary button: “I’m ready to begin”
+
+Secondary text button: “I’m not sure… tell me more”
+
+2. “Tell Me More” Subscreen
+
+When the user clicks “I’m not sure… tell me more”, the same modal should switch to a “More Info” view (you can reuse the same component with internal state).
+
+Content example:
+
+“Of course. This isn’t something anyone rushes into.”
+
+“EverSpeak will never pretend to actually be your loved one, and it will never claim to know things you didn’t share. Instead, it listens closely to the memories you choose to tell and reflects them back with care, respect, and gentleness.”
+
+“Many people find that simply talking about their loved one — telling stories, recalling their voice, remembering the small things — can bring comfort or even healing.”
+
+“You can share as little or as much as you like. Nothing you share will be used for anything other than helping you build that experience.”
+
+Buttons on this screen:
+
+Primary: “Okay, let’s begin”
+
+Secondary: “I need more time”
+
+Button behavior:
+
+“Okay, let’s begin” → behaves exactly like “I’m ready to begin”: closes Step Zero modal and launches the onboarding wizard.
+
+“I need more time” → closes Step Zero modal and shows a gentle, non-blocking banner somewhere on the main UI (top or bottom) saying something like:
+
+“Whenever you’re ready, you can start building a connection by clicking here.”
+This banner should include a button: “Start EverSpeak” which re-opens Step Zero later.
+
+3. Integration with Existing Onboarding Wizard
+
+Assume the onboarding wizard (asking for name, relationship, when they passed, how they passed, what you loved, first memory, etc.) is or will be implemented separately.
+
+Wire Step Zero into that flow:
+
+On initial app load:
+
+If no personas exist → show Step Zero modal.
+
+If personas exist → skip Step Zero and onboarding and go straight to the normal UI.
+
+When user clicks:
+
+“I’m ready to begin” OR “Okay, let’s begin”
+→ close Step Zero modal
+→ immediately open the existing onboarding wizard modal (Step 1: condolences + “Whose memory would you like to reconnect with?”)
+
+Implementation detail:
+
+You can manage this with React-style state (e.g. showWelcomeModal, showOnboardingWizard) or whatever pattern the app already uses.
+
+Make sure that when onboarding completes successfully and a persona is created, Step Zero never reappears for that persona set.
+
+Store a simple flag in frontend state (and optionally localStorage, e.g. onboardingCompleted = true) so that returning visits skip Step Zero unless the user explicitly chooses to “Create a new connection”.
+
+4. Logic for Future Visits / Multiple Personas
+
+Adjust initial load logic:
+
+If personas.length === 0
+→ show Step Zero modal by default.
+
+If personas.length > 0
+→ do NOT show Step Zero or onboarding.
+→ Instead, provide a small button in the UI:
+
+Label: “Create a new connection”
+
+When clicked, it should directly launch the onboarding wizard (not Step Zero; Step Zero is mostly for first-time context).
+
+5. No Backend Changes Required
+
+Step Zero is frontend-only:
+
+It does not need a new API endpoint.
+
+It only controls when the existing onboarding wizard appears.
+
+All persona creation and memory saving still go through the existing onboarding and persona endpoints.
+
+6. Confirmation
+
+When you’re done, please ensure:
+
+On first load with zero personas, Step Zero modal appears and blocks the rest of the app.
+
+“I’m ready to begin” and “Okay, let’s begin” both open the onboarding wizard.
+
+“I need more time” closes Step Zero and shows a persistent gentle banner with a button to start onboarding later.
+
+When onboarding completes and a persona exists, Step Zero no longer appears automatically.

@@ -1,0 +1,182 @@
+Please add a focused "Bulk Memory Import" feature to EverSpeak, wired into the existing persona & memory system.
+
+Do NOT remove or break anything that’s already working (wizard, journaling, calibration, strict mode, etc.). Only extend.
+
+-------------------------
+A. BACKEND: BULK IMPORT ENDPOINT
+-------------------------
+
+1) Create a new endpoint:
+
+   POST /api/personas/:id/memories/bulk-import
+
+   Request body:
+   {
+     "text": "raw multi-line text from user",
+     "auto_weight": true
+   }
+
+2) Behavior:
+
+   - Validate:
+     - persona id exists
+     - text is a non-empty string
+   - Split text into candidate memory lines:
+     - Split on newlines first
+     - Trim whitespace
+     - Ignore empty lines
+   - For each non-empty line, treat it as a "memory candidate".
+
+3) Auto-categorization and optional weighting:
+
+   - Use OpenAI GPT-4o-mini to categorize each memory candidate into:
+     ["humor", "regrets", "childhood", "advice", "personality", "misc"].
+   - If auto_weight === true:
+     - Ask the model to output a weight between 0.5 and 5.0, where:
+       - higher weight = more emotionally or personally significant
+       - lower weight = trivial / low-impact detail
+   - To minimize token usage, you can batch multiple candidate lines in a single API call and have the model return a JSON array describing:
+     - category
+     - weight (if auto_weight is true)
+   - If auto_weight is false or not provided, default weight to 1.0.
+
+   IMPORTANT:
+   - If the model returns an invalid category, fall back to "misc".
+   - If it returns an invalid weight, fall back to 1.0.
+
+4) Create memory records:
+
+   - For each candidate line:
+     - Generate a UUID (consistent with existing pattern).
+     - Construct memory objects compatible with the current persona memory schema:
+       {
+         "id": "uuid",
+         "category": "humor" | "regrets" | "childhood" | "advice" | "personality" | "misc",
+         "text": "the trimmed line",
+         "weight": number
+       }
+   - Append them to the persona’s memories array.
+   - Save personas.json via the existing async utility (no sync fs).
+
+5) Response shape:
+
+   Return:
+   {
+     "success": true,
+     "persona_id": "<id>",
+     "imported_count": <number>,
+     "memories": [
+       {
+         "id": "...",
+         "category": "...",
+         "text": "...",
+         "weight": ...
+       },
+       ...
+     ]
+   }
+
+   On validation error:
+   - 400 with consistent error format.
+   On persona not found:
+   - 404.
+
+6) Snapshot integration:
+
+   - After a successful bulk import, automatically create a persona snapshot using the existing snapshot system.
+   - Name it:
+     "Auto Snapshot – Bulk Import (YYYY-MM-DD HH:mm)"
+
+-------------------------
+B. FRONTEND: BULK IMPORT UI
+-------------------------
+
+Files to update: public/index.html, public/styles.css, public/app.js.
+
+1) Add a "Bulk Import" button to the Memory Panel for the selected persona.
+
+   - Place it near the existing "Add Memory" controls.
+   - Only show it when a persona is selected.
+   - Hide/disable when no persona is selected.
+
+2) Bulk Import Modal:
+
+   - Create a modal (or panel overlay) with:
+     - Title: "Bulk Import Memories"
+     - A large textarea for the user to paste raw text.
+     - A checkbox:
+       - Label: "Automatically categorize and weight memories"
+       - Default: checked
+     - Buttons:
+       - "Import Memories" (primary)
+       - "Cancel" (secondary)
+
+3) Behavior in app.js:
+
+   - When "Bulk Import" button is clicked:
+     - If no persona selected, show a small non-blocking warning (not an alert popup) and do nothing.
+     - Otherwise, open the modal.
+
+   - On "Import Memories":
+     - Read textarea content.
+     - If empty, show inline validation message.
+     - Read checkbox value -> auto_weight boolean.
+     - Send POST to:
+       /api/personas/:id/memories/bulk-import
+       with body:
+       {
+         text: "<textarea value>",
+         auto_weight: <true/false>
+       }
+
+   - On success:
+     - Close modal.
+     - Clear textarea.
+     - Refresh the memory list for this persona (reusing existing memory-fetch logic).
+     - Show a small success message near the top of the Memory Panel, e.g.:
+       "Imported X memories."
+
+   - On error:
+     - Show a small inline error message in the modal (e.g. "Something went wrong while importing. Please try again.").
+
+4) UI/UX & Styling:
+
+   - Modal should match the style of your existing wizard and panels:
+     - Soft overlay background
+     - Centered card with padding and rounded corners
+     - Use simple responsive layout so it works on mobile.
+   - Textarea should be tall enough for multi-paragraph paste.
+   - Use calm colors, consistent with existing design.
+
+-------------------------
+C. DOCS & TESTS
+-------------------------
+
+1) Swagger / OpenAPI:
+
+   - Add documentation for:
+     POST /api/personas/:id/memories/bulk-import
+   - Include:
+     - Request body schema
+     - Sample request
+     - Sample response.
+
+2) README.md / replit.md:
+
+   - Add a short section "Bulk Memory Import":
+     - Explain the feature.
+     - Show example input text and sample API call/output.
+
+3) Tests:
+
+   - Add or extend existing tests to verify:
+     - Bulk import with multiple lines creates the right number of memories.
+     - Empty/whitespace-only lines are ignored.
+     - Invalid category/weight from AI is safely handled.
+     - Snapshot is auto-created after bulk import.
+     - Frontend flow:
+       - Modal opens/closes as expected.
+       - Success message displays.
+       - Memory list refreshes.
+
+Please follow the existing coding style, async patterns, error handling, and UI conventions already present in the project.

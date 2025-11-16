@@ -83,7 +83,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from public folder
-app.use(express.static(path.join(__dirname, '..', 'public')));
+// In dev: server/index.ts -> ../public
+// In prod: dist/index.js -> ./public
+const publicPath = process.env.NODE_ENV === 'production' 
+  ? path.join(__dirname, 'public')
+  : path.join(__dirname, '..', 'public');
+app.use(express.static(publicPath));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 

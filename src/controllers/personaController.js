@@ -11,7 +11,9 @@ import {
   isValidWeight,
   createSnapshot,
   findSnapshotById,
-  restoreFromSnapshot
+  restoreFromSnapshot,
+  getDefaultSettings,
+  validateSettings
 } from '../personas/utils.js';
 
 export const personaController = {
@@ -467,6 +469,94 @@ export const personaController = {
         success: true,
         data: data.personas[personaIndex],
         message: 'Persona restored from snapshot successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET /api/personas/:id/settings - Get persona settings
+  async getSettings(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const data = await loadPersonas();
+      const persona = findPersonaById(data.personas, id);
+
+      if (!persona) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      // Return existing settings or default settings
+      const settings = persona.settings || getDefaultSettings();
+
+      res.status(200).json({
+        success: true,
+        data: settings,
+        message: 'Settings retrieved successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // PUT /api/personas/:id/settings - Update persona settings
+  async updateSettings(req, res, next) {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      const data = await loadPersonas();
+      const personaIndex = data.personas.findIndex(p => p.id === id);
+
+      if (personaIndex === -1) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      const persona = data.personas[personaIndex];
+
+      // Validate settings
+      const validationErrors = validateSettings(updates);
+      if (validationErrors.length > 0) {
+        throw new ValidationError('Invalid settings', validationErrors.map(msg => ({ message: msg })));
+      }
+
+      // Get current settings or defaults
+      const currentSettings = persona.settings || getDefaultSettings();
+
+      // Merge updates into current settings (partial updates)
+      const updatedSettings = {
+        ...currentSettings,
+        ...updates
+      };
+
+      // Handle boundaries separately to allow partial updates
+      if (updates.boundaries) {
+        updatedSettings.boundaries = {
+          ...currentSettings.boundaries,
+          ...updates.boundaries
+        };
+      }
+
+      // Convert level fields to numbers
+      const levelFields = ['humor_level', 'honesty_level', 'sentimentality_level', 'energy_level', 'advice_level'];
+      for (const field of levelFields) {
+        if (updatedSettings[field] !== undefined) {
+          updatedSettings[field] = Number(updatedSettings[field]);
+        }
+      }
+
+      // Update persona with new settings
+      persona.settings = updatedSettings;
+      persona.updated_at = new Date().toISOString();
+      data.personas[personaIndex] = persona;
+
+      await savePersonas(data);
+
+      res.status(200).json({
+        success: true,
+        data: updatedSettings,
+        message: 'Settings updated successfully'
       });
     } catch (error) {
       next(error);

@@ -613,4 +613,91 @@ router.post('/personas/:id/snapshots', personaController.createSnapshot);
  */
 router.post('/personas/:id/snapshots/:snapshotId/restore', personaController.restoreSnapshot);
 
+/**
+ * @swagger
+ * /api/personas/{id}/settings:
+ *   get:
+ *     summary: Get persona settings
+ *     description: Get the emotional calibration settings for a persona
+ *     tags: [Settings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     responses:
+ *       200:
+ *         description: Settings retrieved successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:id/settings', personaController.getSettings);
+
+/**
+ * @swagger
+ * /api/personas/{id}/settings:
+ *   put:
+ *     summary: Update persona settings
+ *     description: Update the emotional calibration settings for a persona
+ *     tags: [Settings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               default_tone_mode:
+ *                 type: string
+ *                 enum: [auto, gentle, casual, real_talk, playful]
+ *               humor_level:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 5
+ *               honesty_level:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 5
+ *               sentimentality_level:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 5
+ *               energy_level:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 5
+ *               advice_level:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 5
+ *               boundaries:
+ *                 type: object
+ *                 properties:
+ *                   avoid_regret_spirals:
+ *                     type: boolean
+ *                   no_paranormal_language:
+ *                     type: boolean
+ *                   soften_sensitive_topics:
+ *                     type: boolean
+ *                   prefer_reassurance:
+ *                     type: boolean
+ *     responses:
+ *       200:
+ *         description: Settings updated successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Persona not found
+ */
+router.put('/personas/:id/settings', personaController.updateSettings);
+
 export { router };

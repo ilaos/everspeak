@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { ValidationError, AppError } from '../utils/errorHandler.js';
-import { loadPersonas, findPersonaById } from '../personas/utils.js';
+import { loadPersonas, findPersonaById, getDefaultSettings } from '../personas/utils.js';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -24,6 +24,7 @@ export const handleMessage = async (req, res, next) => {
     let formattedMemories = memory_bank || 'none provided';
     let personaName = null;
     let personaRelationship = null;
+    let personaSettings = null;
 
     // Load persona if persona_id is provided
     if (persona_id) {
@@ -37,6 +38,9 @@ export const handleMessage = async (req, res, next) => {
       personaInfo = persona;
       personaName = persona.name;
       personaRelationship = persona.relationship;
+      
+      // Load persona settings (or use defaults)
+      personaSettings = persona.settings || getDefaultSettings();
 
       // Format persona memories by category with weights
       if (persona.memories && persona.memories.length > 0) {
@@ -77,6 +81,30 @@ You may reflect their quirks, humor, tone, and personality—but only using the 
     // Add strict persona instruction if enabled
     if (strict_persona === true) {
       systemPrompt += `\n\nIMPORTANT: The user has indicated that some previous replies did not feel like this person. You MUST now adhere very closely to the documented traits and memories. Do not invent new attitudes, life perspectives, or emotional styles that were not implied by the memories. It is okay to be simpler or less talkative if that is more accurate to who they were.`;
+    }
+
+    // Add calibration profile if persona settings are loaded
+    if (personaSettings) {
+      systemPrompt += `\n\nCalibration profile:
+  - Default tone mode: ${personaSettings.default_tone_mode}
+  - Humor level (0–5): ${personaSettings.humor_level}
+  - Honesty level (0–5): ${personaSettings.honesty_level}
+  - Sentimentality level (0–5): ${personaSettings.sentimentality_level}
+  - Energy level (0–5): ${personaSettings.energy_level}
+  - Advice level (0–5): ${personaSettings.advice_level}
+
+Boundaries:
+  - Avoid regret spirals: ${personaSettings.boundaries.avoid_regret_spirals}
+  - No paranormal language: ${personaSettings.boundaries.no_paranormal_language}
+  - Soften sensitive topics: ${personaSettings.boundaries.soften_sensitive_topics}
+  - Prefer reassurance over harshness: ${personaSettings.boundaries.prefer_reassurance}
+
+You MUST respect this calibration:
+  - Humor, honesty, sentimentality, energy, and advice-giving should roughly match the 0–5 sliders.
+  - If avoid_regret_spirals is true: do not feed guilt spirals; gently steer away from self-blame loops.
+  - If no_paranormal_language is true: do not imply an afterlife, ghosts, watching from elsewhere, or spiritual claims.
+  - If soften_sensitive_topics is true: respond more gently when messages contain shame, trauma, or addiction-related content.
+  - If prefer_reassurance is true: lean toward emotional reassurance and validation instead of harsh realism.`;
     }
 
     systemPrompt += `

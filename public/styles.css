@@ -817,6 +817,143 @@ button[type="submit"]:active {
   font-style: italic;
 }
 
+/* ===================== */
+/* JOURNAL PANEL */
+/* ===================== */
+
+.journal-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+#journal-entries-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  max-height: 400px;
+}
+
+.journal-entry {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: all 0.2s ease;
+}
+
+.journal-entry:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-color: #3498db;
+}
+
+.journal-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.journal-entry-date {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.journal-mood-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.journal-entry-text {
+  color: #2c3e50;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.journal-entry-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.journal-tag-badge {
+  display: inline-block;
+  background: #f1f3f5;
+  color: #495057;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.journal-reflection {
+  background: #fff3cd;
+  border-left: 3px solid #ffc107;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #856404;
+  line-height: 1.5;
+}
+
+.journal-reflection em {
+  font-weight: 600;
+  font-style: normal;
+  margin-right: 5px;
+}
+
+.journal-entry-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-delete-journal {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-delete-journal:hover {
+  background: #c82333;
+}
+
+.add-journal-form {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.add-journal-form h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.add-journal-form .checkbox-item {
+  margin: 15px 0;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .panels {

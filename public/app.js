@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   preferReassurance = document.getElementById('prefer-reassurance');
   
   await loadPersonas();
+  await loadJournalEntries();
   setupEventListeners();
 });
 
@@ -198,6 +199,9 @@ function populatePersonaDropdown() {
     option.textContent = persona.name;
     personaDropdown.appendChild(option);
   });
+  
+  // Also update journal persona dropdown
+  updateJournalPersonaDropdown();
 }
 
 // Handle persona selection change
@@ -960,4 +964,181 @@ function showError(message) {
 function showSuccess(message) {
   // Simple success indication - could be improved with a toast notification
   console.log('Success:', message);
+}
+
+// =====================
+// JOURNAL SYSTEM
+// =====================
+
+const journalEntriesList = document.getElementById('journal-entries-list');
+const journalForm = document.getElementById('journal-form');
+const journalTextInput = document.getElementById('journal-text');
+const journalMoodInput = document.getElementById('journal-mood');
+const journalPersonaSelect = document.getElementById('journal-persona');
+const journalTagsInput = document.getElementById('journal-tags');
+const generateReflectionCheckbox = document.getElementById('generate-reflection');
+
+let journalEntries = [];
+let editingJournalId = null;
+
+// Load all journal entries
+async function loadJournalEntries() {
+  try {
+    const response = await fetch('/api/journal');
+    const result = await response.json();
+    
+    if (result.success) {
+      journalEntries = result.data;
+      displayJournalEntries();
+    }
+  } catch (error) {
+    console.error('Failed to load journal entries:', error);
+  }
+}
+
+// Display journal entries
+function displayJournalEntries() {
+  if (!journalEntries || journalEntries.length === 0) {
+    journalEntriesList.innerHTML = '<p class="placeholder">No journal entries yet</p>';
+    return;
+  }
+
+  journalEntriesList.innerHTML = '';
+  
+  journalEntries.forEach(entry => {
+    const entryDiv = document.createElement('div');
+    entryDiv.className = 'journal-entry';
+    entryDiv.dataset.testid = `journal-entry-${entry.id}`;
+    
+    const dateStr = new Date(entry.created_at).toLocaleString();
+    const moodBadge = entry.mood ? `<span class="journal-mood-badge">${escapeHtml(entry.mood)}</span>` : '';
+    const tagsBadges = entry.tags && entry.tags.length > 0 
+      ? entry.tags.map(tag => `<span class="journal-tag-badge">${escapeHtml(tag)}</span>`).join(' ')
+      : '';
+    
+    entryDiv.innerHTML = `
+      <div class="journal-entry-header">
+        <span class="journal-entry-date">${dateStr}</span>
+        ${moodBadge}
+      </div>
+      <div class="journal-entry-text">${escapeHtml(entry.text)}</div>
+      ${tagsBadges ? `<div class="journal-entry-tags">${tagsBadges}</div>` : ''}
+      ${entry.ai_reflection ? `<div class="journal-reflection">
+        <em>Reflection:</em> ${escapeHtml(entry.ai_reflection)}
+      </div>` : ''}
+      <div class="journal-entry-actions">
+        <button class="btn-delete-journal" data-id="${entry.id}" data-testid="button-delete-journal-${entry.id}">Delete</button>
+      </div>
+    `;
+    
+    journalEntriesList.appendChild(entryDiv);
+  });
+  
+  // Attach delete listeners
+  document.querySelectorAll('.btn-delete-journal').forEach(btn => {
+    btn.addEventListener('click', handleDeleteJournal);
+  });
+}
+
+// Handle journal form submission
+async function handleJournalSubmit(e) {
+  e.preventDefault();
+  
+  const text = journalTextInput.value.trim();
+  if (!text) {
+    showError('Journal text is required');
+    return;
+  }
+  
+  const mood = journalMoodInput.value || null;
+  const personaId = journalPersonaSelect.value || null;
+  const tagsStr = journalTagsInput.value.trim();
+  const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t) : null;
+  const generateReflection = generateReflectionCheckbox.checked;
+  
+  try {
+    const response = await fetch('/api/journal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        mood,
+        persona_id: personaId,
+        tags,
+        generate_reflection: generateReflection
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Clear form
+      journalForm.reset();
+      
+      // Reload entries
+      await loadJournalEntries();
+      
+      showSuccess('Journal entry saved');
+    } else {
+      showError(result.message || 'Failed to save journal entry');
+    }
+  } catch (error) {
+    console.error('Error saving journal entry:', error);
+    showError('Failed to save journal entry');
+  }
+}
+
+// Handle delete journal entry
+async function handleDeleteJournal(e) {
+  const entryId = e.target.dataset.id;
+  
+  if (!confirm('Delete this journal entry?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/journal/${entryId}`, {
+      method: 'DELETE'
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      await loadJournalEntries();
+      showSuccess('Journal entry deleted');
+    } else {
+      showError(result.message || 'Failed to delete journal entry');
+    }
+  } catch (error) {
+    console.error('Error deleting journal entry:', error);
+    showError('Failed to delete journal entry');
+  }
+}
+
+// Update journal persona dropdown when personas change
+function updateJournalPersonaDropdown() {
+  if (!journalPersonaSelect) return;
+  
+  // Save current selection
+  const currentSelection = journalPersonaSelect.value;
+  
+  // Clear and rebuild
+  journalPersonaSelect.innerHTML = '<option value="">-- None --</option>';
+  
+  personas.forEach(persona => {
+    const option = document.createElement('option');
+    option.value = persona.id;
+    option.textContent = persona.name;
+    journalPersonaSelect.appendChild(option);
+  });
+  
+  // Restore selection if still valid
+  if (currentSelection && personas.find(p => p.id === currentSelection)) {
+    journalPersonaSelect.value = currentSelection;
+  }
+}
+
+// Initialize journal event listeners
+if (journalForm) {
+  journalForm.addEventListener('submit', handleJournalSubmit);
 }

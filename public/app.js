@@ -7,6 +7,7 @@ let userMessageCount = 0;
 let healthyUseNudgeShown = false;
 let strictMode = false;
 let strictModeNoticeShown = false;
+let editingMemoryId = null;
 
 // DOM Elements
 let personaDropdown, personaForm, memoryForm, chatForm, memoriesList, chatMessages;
@@ -194,16 +195,56 @@ function displayMemories() {
     return;
   }
   
-  memoriesList.innerHTML = memories.map(memory => `
-    <div class="memory-item" data-testid="memory-item-${memory.id}">
-      <div class="memory-header">
-        <span class="memory-category">${memory.category}</span>
-        <span class="memory-weight">Weight: ${memory.weight}</span>
-      </div>
-      <p class="memory-text">${escapeHtml(memory.text)}</p>
-      <button class="memory-delete" data-testid="button-delete-memory-${memory.id}" onclick="deleteMemory('${memory.id}')">Delete</button>
-    </div>
-  `).join('');
+  memoriesList.innerHTML = memories.map(memory => {
+    if (editingMemoryId === memory.id) {
+      // Show edit form for this memory
+      return `
+        <div class="memory-item memory-editing" data-testid="memory-item-${memory.id}">
+          <div class="memory-edit-form">
+            <div class="form-group">
+              <label>Category</label>
+              <select id="edit-category-${memory.id}" class="edit-category" data-testid="select-edit-category-${memory.id}">
+                <option value="humor" ${memory.category === 'humor' ? 'selected' : ''}>Humor</option>
+                <option value="regrets" ${memory.category === 'regrets' ? 'selected' : ''}>Regrets</option>
+                <option value="childhood" ${memory.category === 'childhood' ? 'selected' : ''}>Childhood</option>
+                <option value="advice" ${memory.category === 'advice' ? 'selected' : ''}>Advice</option>
+                <option value="personality" ${memory.category === 'personality' ? 'selected' : ''}>Personality</option>
+                <option value="misc" ${memory.category === 'misc' ? 'selected' : ''}>Misc</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Memory Text</label>
+              <textarea id="edit-text-${memory.id}" class="edit-text" rows="3" data-testid="input-edit-text-${memory.id}">${escapeHtml(memory.text)}</textarea>
+            </div>
+            <div class="form-group">
+              <label>Weight (0.1 - 5.0)</label>
+              <input type="number" id="edit-weight-${memory.id}" class="edit-weight" min="0.1" max="5.0" step="0.1" value="${memory.weight}" data-testid="input-edit-weight-${memory.id}">
+            </div>
+            <div class="memory-edit-error" id="edit-error-${memory.id}" style="display: none;"></div>
+            <div class="memory-edit-actions">
+              <button class="btn-save" data-testid="button-save-memory-${memory.id}" onclick="saveMemoryEdit('${memory.id}')">Save</button>
+              <button class="btn-cancel" data-testid="button-cancel-edit-${memory.id}" onclick="cancelMemoryEdit()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      // Show normal display
+      return `
+        <div class="memory-item" data-testid="memory-item-${memory.id}">
+          <div class="memory-header">
+            <span class="memory-category">${memory.category}</span>
+            <span class="memory-weight">Weight: ${memory.weight}</span>
+          </div>
+          <p class="memory-text">${escapeHtml(memory.text)}</p>
+          <div class="memory-actions">
+            <button class="memory-edit" data-testid="button-edit-memory-${memory.id}" onclick="enterMemoryEditMode('${memory.id}')">Edit</button>
+            <button class="memory-delete" data-testid="button-delete-memory-${memory.id}" onclick="deleteMemory('${memory.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
 }
 
 // Clear memories
@@ -344,6 +385,81 @@ async function deleteMemory(memoryId) {
   } catch (error) {
     console.error('Failed to delete memory:', error);
     showError('Failed to delete memory');
+  }
+}
+
+// Enter memory edit mode
+function enterMemoryEditMode(memoryId) {
+  editingMemoryId = memoryId;
+  displayMemories();
+}
+
+// Cancel memory edit
+function cancelMemoryEdit() {
+  editingMemoryId = null;
+  displayMemories();
+}
+
+// Save memory edit
+async function saveMemoryEdit(memoryId) {
+  if (!selectedPersonaId) return;
+  
+  const category = document.getElementById(`edit-category-${memoryId}`).value;
+  const text = document.getElementById(`edit-text-${memoryId}`).value.trim();
+  const weight = parseFloat(document.getElementById(`edit-weight-${memoryId}`).value);
+  const errorDiv = document.getElementById(`edit-error-${memoryId}`);
+  
+  // Clear previous errors
+  errorDiv.style.display = 'none';
+  errorDiv.textContent = '';
+  
+  // Validate
+  if (!text) {
+    errorDiv.textContent = 'Memory text is required';
+    errorDiv.style.display = 'block';
+    return;
+  }
+  
+  if (isNaN(weight) || weight < 0.1 || weight > 5.0) {
+    errorDiv.textContent = 'Weight must be between 0.1 and 5.0';
+    errorDiv.style.display = 'block';
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/personas/${selectedPersonaId}/memories/${memoryId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, text, weight })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Update memory in list
+      const memory = memories.find(m => m.id === memoryId);
+      if (memory) {
+        memory.category = result.data.category;
+        memory.text = result.data.text;
+        memory.weight = result.data.weight;
+      }
+      
+      editingMemoryId = null;
+      displayMemories();
+      showSuccess('Memory updated successfully!');
+    } else {
+      // Show validation errors inline
+      if (result.details && result.details.length > 0) {
+        errorDiv.textContent = result.details.map(d => d.message).join(', ');
+      } else {
+        errorDiv.textContent = result.message || 'Failed to update memory';
+      }
+      errorDiv.style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Failed to update memory:', error);
+    errorDiv.textContent = 'Failed to update memory';
+    errorDiv.style.display = 'block';
   }
 }
 

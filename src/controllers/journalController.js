@@ -58,7 +58,7 @@ Simply reflect back a gentle, grounding observation.`;
 
 export const listJournalEntries = async (req, res, next) => {
   try {
-    const entries = getAllEntries();
+    const entries = await getAllEntries();
     res.json({
       success: true,
       data: entries,
@@ -72,7 +72,7 @@ export const listJournalEntries = async (req, res, next) => {
 export const getJournalEntry = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const entry = getEntryById(id);
+    const entry = await getEntryById(id);
 
     if (!entry) {
       throw new AppError('Journal entry not found', 404);
@@ -118,7 +118,7 @@ export const createJournalEntry = async (req, res, next) => {
       aiReflection = await generateReflection(text, mood, personaMemories);
     }
 
-    const newEntry = createEntry({
+    const newEntry = await createEntry({
       text,
       persona_id: persona_id || null,
       mood: mood || null,
@@ -140,7 +140,7 @@ export const updateJournalEntry = async (req, res, next) => {
     const { id } = req.params;
     const { text, persona_id, mood, tags } = req.body;
 
-    const existingEntry = getEntryById(id);
+    const existingEntry = await getEntryById(id);
     if (!existingEntry) {
       throw new AppError('Journal entry not found', 404);
     }
@@ -162,7 +162,7 @@ export const updateJournalEntry = async (req, res, next) => {
     if (mood !== undefined) updates.mood = mood;
     if (tags !== undefined) updates.tags = tags;
 
-    const updatedEntry = updateEntry(id, updates);
+    const updatedEntry = await updateEntry(id, updates);
 
     res.json({
       success: true,
@@ -177,7 +177,7 @@ export const deleteJournalEntry = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const deleted = deleteEntry(id);
+    const deleted = await deleteEntry(id);
     if (!deleted) {
       throw new AppError('Journal entry not found', 404);
     }

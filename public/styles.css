@@ -273,9 +273,188 @@ button[type="submit"]:active {
   background: #c0392b;
 }
 
+.memory-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.memory-edit {
+  padding: 4px 12px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.memory-edit:hover {
+  background: #2980b9;
+}
+
+/* Memory Editing */
+.memory-editing {
+  background: #fff;
+  border-left: 3px solid #f39c12;
+}
+
+.memory-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.memory-edit-form .form-group {
+  margin-bottom: 0;
+}
+
+.memory-edit-form label {
+  font-size: 0.85rem;
+  color: #34495e;
+  margin-bottom: 4px;
+}
+
+.memory-edit-form .edit-category,
+.memory-edit-form .edit-text,
+.memory-edit-form .edit-weight {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d8e0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.memory-edit-form .edit-text {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.memory-edit-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  padding: 6px;
+  background: #fadbd8;
+  border-radius: 4px;
+}
+
+.memory-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-save {
+  padding: 6px 16px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background: #229954;
+}
+
+.btn-cancel {
+  padding: 6px 16px;
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #7f8c8d;
+}
+
 .add-memory-form {
   border-top: 1px solid #e8eef5;
   padding-top: 16px;
+}
+
+/* Snapshots Section */
+.snapshots-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e8eef5;
+}
+
+.snapshots-description {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.btn-create-snapshot {
+  padding: 8px 16px;
+  background: #9b59b6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 16px;
+}
+
+.btn-create-snapshot:hover {
+  background: #8e44ad;
+}
+
+#snapshots-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.snapshot-item {
+  background: #f8f9fb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 3px solid #9b59b6;
+}
+
+.snapshot-info {
+  flex: 1;
+}
+
+.snapshot-name {
+  color: #2c3e50;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.snapshot-date {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+}
+
+.btn-restore-snapshot {
+  padding: 6px 14px;
+  background: #16a085;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.btn-restore-snapshot:hover {
+  background: #138d75;
 }
 
 /* Chat Panel */

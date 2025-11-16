@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +28,7 @@ export function saveJournal(journal) {
 }
 
 export function generateUUID() {
-  return uuidv4();
+  return randomUUID();
 }
 
 export function validateJournalEntry(entry, isUpdate = false) {

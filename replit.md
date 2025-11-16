@@ -2,7 +2,7 @@
 
 ## Overview
 
-Everspeak Backend is a professional Node.js + Express REST API designed for building scalable backend applications. It features an organized folder structure, comprehensive error handling, input validation, request logging, and interactive Swagger/OpenAPI documentation. The project's core purpose is to power an AI-driven conversational companion system, allowing users to create and interact with "personas" based on stored memories. Key capabilities include full CRUD operations for personas and their memories, AI-powered message processing using OpenAI GPT-4o-mini, a robust grounding system to manage user expectations, and advanced features like memory editing, persona snapshots, and emotional calibration for AI responses. The overarching vision is to provide a customizable and emotionally intelligent conversational experience, enabling deeper and more personalized interactions with AI companions based on curated memories.
+Everspeak Backend is a professional Node.js + Express REST API designed for building scalable backend applications. It features an organized folder structure, comprehensive error handling, input validation, request logging, and interactive Swagger/OpenAPI documentation. The project's core purpose is to power an AI-driven conversational companion system, allowing users to create and interact with "personas" based on stored memories. Key capabilities include full CRUD operations for personas and their memories, AI-powered message processing using OpenAI GPT-4o-mini, a robust grounding system to manage user expectations, and advanced features like memory editing, persona snapshots, emotional calibration for AI responses, and a comprehensive journaling system with AI-powered reflections. The overarching vision is to provide a customizable and emotionally intelligent conversational experience, enabling deeper and more personalized interactions with AI companions based on curated memories, while also supporting emotional processing through guided journaling.
 
 ## User Preferences
 
@@ -27,10 +27,11 @@ Preferred communication style: Simple, everyday language.
 **Project Structure**
 - `/server/index.ts`: Main server entry point.
 - `/src/routes/`: API route definitions.
-- `/src/controllers/`: Business logic and request handlers for test, message, persona, and example operations.
+- `/src/controllers/`: Business logic and request handlers for test, message, persona, journal, and example operations.
 - `/src/personas/`: Persona storage and utility functions.
+- `/src/journal/`: Journal storage and utility functions.
 - `/src/utils/`: Utility functions and middleware, including error handling and input validation.
-- `/public/`: Frontend web UI assets (HTML, CSS, JS) for a three-panel responsive layout (Persona, Memories, Chat).
+- `/public/`: Frontend web UI assets (HTML, CSS, JS) for a four-panel responsive layout (Persona, Memories, Journal, Chat).
 
 **Error Handling**
 - Centralized middleware with custom error classes (`AppError`, `ValidationError`).
@@ -68,13 +69,22 @@ Preferred communication style: Simple, everyday language.
 - **Emotional Calibration**:
   - `GET /api/personas/:id/settings`
   - `PUT /api/personas/:id/settings` (customizable AI communication style via tone modes, sliders for humor, honesty, sentimentality, energy, advice-giving, and boundary checkboxes).
+- **Journal Resource (CRUD)**:
+  - `GET /api/journal` (list all journal entries, sorted newest → oldest)
+  - `GET /api/journal/:id` (get single journal entry)
+  - `POST /api/journal` (create journal entry with optional persona linking, mood, tags, and AI reflection generation)
+  - `PUT /api/journal/:id` (update journal entry)
+  - `DELETE /api/journal/:id` (delete journal entry)
+  - AI Reflection Engine: Optional AI-generated insights using OpenAI GPT-4o-mini with gentle, grounding, non-prescriptive tone
+  - Reflection uses persona memories as context when persona_id is linked
 - **Examples Resource (CRUD)**: `GET`, `GET/:id`, `POST`, `PUT/:id`, `DELETE/:id` (in-memory only).
 
 ### Data Storage
 
 - **Personas and Memories**: Stored in a JSON file (`src/personas/personas.json`) for persistence across sessions.
+- **Journal Entries**: Stored in a JSON file (`src/journal/journal.json`) for persistence across sessions.
 - **Examples**: Stored in an in-memory JavaScript Map, resetting on server restart.
-- UUID generation for unique identifiers.
+- UUID generation for unique identifiers using Node.js crypto.randomUUID().
 - Timestamps (`created_at`, `updated_at`) automatically managed.
 
 ### Logging & Monitoring

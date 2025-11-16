@@ -76,6 +76,9 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Trust proxy for Replit deployment (enables correct IP tracking for rate limiting)
+app.set('trust proxy', true);
+
 app.use(morgan('dev'));
 app.use(cors(corsOptions));
 app.use(limiter);

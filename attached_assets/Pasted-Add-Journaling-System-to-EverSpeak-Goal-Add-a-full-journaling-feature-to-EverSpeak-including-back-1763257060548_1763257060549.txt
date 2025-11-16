@@ -1,0 +1,169 @@
+Add Journaling System to EverSpeak
+
+Goal: Add a full journaling feature to EverSpeak, including backend CRUD, optional persona linking, AI reflection prompts, and full frontend UI panel integration. Follow the existing project architecture, coding style, validation patterns, and UI/UX conventions already established.
+
+✅ 1. BACKEND — Create Journaling System
+Create new file:
+
+src/controllers/journalController.js
+
+Create endpoints:
+
+GET /api/journal — list all journal entries (sorted newest → oldest)
+
+GET /api/journal/:id — get single entry
+
+POST /api/journal — create entry
+
+PUT /api/journal/:id — update entry
+
+DELETE /api/journal/:id — delete entry
+
+Journal entry fields:
+{
+  id: string (uuid),
+  created_at: ISO timestamp,
+  updated_at: ISO timestamp,
+  text: string (required),
+  persona_id: string | null (optional link to persona),
+  mood: string | null (optional: calm, sad, reflective, angry, hopeful, etc),
+  tags: string[] | null (optional),
+  ai_reflection: string | null (AI-generated optional insight)
+}
+
+Rules:
+
+Validate required text field
+
+Persona linking is optional
+
+Auto-generate timestamps
+
+Support optional AI reflection generation via existing OpenAI integration
+
+If request includes generate_reflection: true, create a reflection using persona context if persona_id is provided
+
+Reflection prompt should follow this schema:
+
+“You are EverSpeak’s reflection system. Create a gentle, non-clinical emotional insight about the following journal entry. NEVER provide therapy, diagnosis, or directives. The tone must be grounding, reflective, and supportive, not prescriptive.”
+
+Add data storage:
+
+Create: src/journal/journal.json
+
+Implement file load/save helpers (mirroring personas system)
+
+✅ 2. FRONTEND — Add Journaling Panel
+Add new panel to UI
+
+Place it between Persona Panel and Chat Panel (or as a toggle tab within the middle column if cleaner).
+
+UI Features:
+
+List of journal entries (scrollable)
+
+Click entry to expand/view full content
+
+Create new journal entry form:
+
+textarea (required)
+
+mood selector (optional)
+
+persona association dropdown (optional)
+
+tags input (optional)
+
+checkbox: “Generate reflection?” (optional)
+
+Edit & delete buttons
+
+Display AI reflection (if present) under entry
+
+Styled lightly, italic, subtle
+
+Additional UX Requirements:
+
+On persona switch:
+
+Do NOT clear journal panel
+
+Do refresh persona dropdown inside journal form
+
+Journals persist independently of persona
+
+Reflection is displayed only when present
+
+Clean error and success states
+
+Smooth fade-in for new entries
+
+Sort newest → oldest
+
+✅ 3. AI INTEGRATION — Journal Reflection Engine
+
+Use existing OpenAI client.
+
+If generate_reflection === true, call AI with:
+
+Prompt Template:
+
+You are EverSpeak’s Reflection Layer.
+Your role is to offer gentle, grounding emotional insights based solely on:  
+- the journal entry text  
+- optional mood  
+- optional linked persona memories (if persona_id provided)
+
+Rules:
+- Never imply the deceased is aware or communicating
+- Never reference the journal writer directly (avoid “you should”)
+- Keep reflections short (2–4 sentences)
+- No therapy, no advice, no diagnosis
+- Tone: reflective, warm, grounding
+- If persona memories are provided, reference them *as memories* only
+
+
+Return reflection into ai_reflection field.
+
+✅ 4. Update Swagger Documentation
+
+Add full schema & examples for all 5 journal endpoints.
+Group them under "Journal" tag.
+
+✅ 5. Update README.md & replit.md
+
+Add a new section:
+
+Journaling System
+
+Purpose
+
+Endpoints
+
+Example requests/responses
+
+Notes on AI reflection usage
+
+How persona linking works
+
+Privacy considerations
+
+✅ 6. Testing Requirements
+
+Run Playwright tests or manual tests to confirm:
+
+All CRUD operations work
+
+Optional fields validate correctly
+
+Reflections generate as expected
+
+Persona linking works
+
+Journal panel UI updates automatically
+
+No breakage to persona/memory/chat system
+
+Strict mode unaffected
+
+This completes the journaling system — one of the most psychologically important features in EverSpeak.

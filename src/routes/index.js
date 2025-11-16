@@ -4,6 +4,13 @@ import { exampleController } from '../controllers/exampleController.js';
 import { handleMessage } from '../controllers/messageController.js';
 import { personaController } from '../controllers/personaController.js';
 import { validateExample } from '../utils/validation.js';
+import {
+  listJournalEntries,
+  getJournalEntry,
+  createJournalEntry,
+  updateJournalEntry,
+  deleteJournalEntry
+} from '../controllers/journalController.js';
 
 const router = express.Router();
 
@@ -699,5 +706,269 @@ router.get('/personas/:id/settings', personaController.getSettings);
  *         description: Persona not found
  */
 router.put('/personas/:id/settings', personaController.updateSettings);
+
+/**
+ * @swagger
+ * /api/journal:
+ *   get:
+ *     summary: List all journal entries
+ *     description: Retrieve all journal entries sorted by newest first
+ *     tags: [Journal]
+ *     responses:
+ *       200:
+ *         description: List of journal entries
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *                       updated_at:
+ *                         type: string
+ *                         format: date-time
+ *                       text:
+ *                         type: string
+ *                       persona_id:
+ *                         type: string
+ *                         nullable: true
+ *                       mood:
+ *                         type: string
+ *                         nullable: true
+ *                       tags:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         nullable: true
+ *                       ai_reflection:
+ *                         type: string
+ *                         nullable: true
+ *                 count:
+ *                   type: number
+ */
+router.get('/journal', listJournalEntries);
+
+/**
+ * @swagger
+ * /api/journal/{id}:
+ *   get:
+ *     summary: Get a single journal entry
+ *     description: Retrieve a specific journal entry by ID
+ *     tags: [Journal]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Journal entry ID
+ *     responses:
+ *       200:
+ *         description: Journal entry retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                     updated_at:
+ *                       type: string
+ *                       format: date-time
+ *                     text:
+ *                       type: string
+ *                     persona_id:
+ *                       type: string
+ *                       nullable: true
+ *                     mood:
+ *                       type: string
+ *                       nullable: true
+ *                     tags:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       nullable: true
+ *                     ai_reflection:
+ *                       type: string
+ *                       nullable: true
+ *       404:
+ *         description: Journal entry not found
+ */
+router.get('/journal/:id', getJournalEntry);
+
+/**
+ * @swagger
+ * /api/journal:
+ *   post:
+ *     summary: Create a new journal entry
+ *     description: Create a journal entry with optional persona linking and AI reflection
+ *     tags: [Journal]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - text
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 description: The journal entry text
+ *                 example: "Today I was thinking about our conversations..."
+ *               persona_id:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Optional persona ID to link this entry to
+ *                 example: "uuid-of-persona"
+ *               mood:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Optional mood descriptor
+ *                 example: "reflective"
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 nullable: true
+ *                 description: Optional tags for categorization
+ *                 example: ["grief", "memory"]
+ *               generate_reflection:
+ *                 type: boolean
+ *                 description: Whether to generate an AI reflection
+ *                 example: true
+ *     responses:
+ *       201:
+ *         description: Journal entry created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     created_at:
+ *                       type: string
+ *                     updated_at:
+ *                       type: string
+ *                     text:
+ *                       type: string
+ *                     persona_id:
+ *                       type: string
+ *                     mood:
+ *                       type: string
+ *                     tags:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     ai_reflection:
+ *                       type: string
+ *       400:
+ *         description: Validation error
+ */
+router.post('/journal', createJournalEntry);
+
+/**
+ * @swagger
+ * /api/journal/{id}:
+ *   put:
+ *     summary: Update a journal entry
+ *     description: Update an existing journal entry
+ *     tags: [Journal]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Journal entry ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 description: Updated journal entry text
+ *               persona_id:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Updated persona ID
+ *               mood:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Updated mood
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 nullable: true
+ *                 description: Updated tags
+ *     responses:
+ *       200:
+ *         description: Journal entry updated successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Journal entry not found
+ */
+router.put('/journal/:id', updateJournalEntry);
+
+/**
+ * @swagger
+ * /api/journal/{id}:
+ *   delete:
+ *     summary: Delete a journal entry
+ *     description: Delete a specific journal entry
+ *     tags: [Journal]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Journal entry ID
+ *     responses:
+ *       200:
+ *         description: Journal entry deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Journal entry not found
+ */
+router.delete('/journal/:id', deleteJournalEntry);
 
 export { router };

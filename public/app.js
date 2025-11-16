@@ -2010,7 +2010,7 @@ function showStepZeroMore() {
 }
 
 // Handle "I'm ready to begin" or "Okay, let's begin"
-function handleReadyToBegin() {
+async function handleReadyToBegin() {
   // Mark Step Zero as completed in localStorage
   localStorage.setItem('stepZeroCompleted', 'true');
   stepZeroCompleted = true;
@@ -2018,8 +2018,8 @@ function handleReadyToBegin() {
   // Close Step Zero modal
   closeStepZero();
   
-  // Open the onboarding wizard immediately
-  openWizardModal();
+  // Create a placeholder persona and then open wizard
+  await createPlaceholderPersonaAndOpenWizard();
 }
 
 // Handle "I need more time"
@@ -2036,12 +2036,12 @@ function handleNeedMoreTime() {
 }
 
 // Handle "Start EverSpeak" button from banner
-function handleStartEverspeak() {
+async function handleStartEverspeak() {
   // Hide the banner
   closeNeedTimeBanner();
   
-  // Open the onboarding wizard directly (skip Step Zero since they've already seen it)
-  openWizardModal();
+  // Create a placeholder persona and then open wizard
+  await createPlaceholderPersonaAndOpenWizard();
 }
 
 // Close Step Zero modal
@@ -2062,5 +2062,43 @@ function showNeedTimeBanner() {
 function closeNeedTimeBanner() {
   if (needTimeBanner) {
     needTimeBanner.style.display = 'none';
+  }
+}
+
+// Create a placeholder persona and open wizard
+async function createPlaceholderPersonaAndOpenWizard() {
+  try {
+    // Create a minimal placeholder persona
+    const response = await fetch('/api/personas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: 'New Connection',
+        relationship: '',
+        description: ''
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Reload personas from API to get the new one
+      await loadPersonas();
+      
+      // The new persona should now be selected (loadPersonas auto-selects first one)
+      // Open the wizard to complete the setup
+      if (selectedPersonaId) {
+        openWizardModal();
+      } else {
+        showError('Failed to initialize persona setup');
+      }
+    } else {
+      showError(result.message || 'Failed to create persona');
+    }
+  } catch (error) {
+    console.error('Failed to create placeholder persona:', error);
+    showError('Failed to start setup');
   }
 }

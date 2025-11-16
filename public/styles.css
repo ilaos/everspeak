@@ -1278,3 +1278,63 @@ button[type="submit"]:active {
 #wizard-generate:hover {
   background: #218838;
 }
+
+/* Voice Recording */
+.memory-text-wrapper {
+  position: relative;
+}
+
+.voice-btn {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #667eea;
+}
+
+.voice-btn:hover {
+  background: #f8f9fa;
+  border-color: #667eea;
+  transform: scale(1.05);
+}
+
+.voice-btn.recording {
+  background: #e74c3c;
+  border-color: #e74c3c;
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.voice-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.voice-status {
+  font-size: 0.85rem;
+  color: #667eea;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.voice-status.error {
+  color: #e74c3c;
+}
+
+.voice-status.success {
+  color: #28a745;
+}

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Everspeak Backend is a professional Node.js + Express REST API designed for building scalable backend applications. It features an organized folder structure, comprehensive error handling, input validation, request logging, and interactive Swagger/OpenAPI documentation. The project's core purpose is to power an AI-driven conversational companion system, allowing users to create and interact with "personas" based on stored memories. Key capabilities include full CRUD operations for personas and their memories, AI-powered message processing using OpenAI GPT-4o-mini, a robust grounding system to manage user expectations, and advanced features like memory editing, persona snapshots, emotional calibration for AI responses, and a comprehensive journaling system with AI-powered reflections. The overarching vision is to provide a customizable and emotionally intelligent conversational experience, enabling deeper and more personalized interactions with AI companions based on curated memories, while also supporting emotional processing through guided journaling.
+Everspeak Backend is a professional Node.js + Express REST API designed for building scalable backend applications. It features an organized folder structure, comprehensive error handling, input validation, request logging, and interactive Swagger/OpenAPI documentation. The project's core purpose is to power an AI-driven conversational companion system, allowing users to create and interact with "personas" based on stored memories. Key capabilities include full CRUD operations for personas and their memories, AI-powered message processing using OpenAI GPT-4o-mini, a robust grounding system to manage user expectations, and advanced features like memory editing, persona snapshots, emotional calibration for AI responses, voice-to-text memory entry using OpenAI Whisper, bulk memory import, 6-step persona setup wizard, and a comprehensive journaling system with AI-powered reflections. The overarching vision is to provide a customizable and emotionally intelligent conversational experience, enabling deeper and more personalized interactions with AI companions based on curated memories, while also supporting emotional processing through guided journaling.
 
 ## User Preferences
 
@@ -66,6 +66,10 @@ Preferred communication style: Simple, everyday language.
 - **Setup Wizard**:
   - `POST /api/personas/:id/wizard` (6-step guided persona setup with AI memory extraction)
   - Creates snapshot, extracts memories from wizard inputs, applies tone preferences
+- **Voice-to-Text Transcription**:
+  - `POST /api/transcribe` (transcribe audio to text using OpenAI Whisper)
+  - Accepts audio file uploads (webm, wav, mp3, m4a)
+  - Returns transcribed text for memory entry
 - **Snapshots Sub-Resource**:
   - `GET /api/personas/:id/snapshots`
   - `POST /api/personas/:id/snapshots` (creates versioned persona states)

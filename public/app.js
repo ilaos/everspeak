@@ -24,6 +24,10 @@ let avoidRegretSpirals, noParanormalLanguage, softenSensitiveTopics, preferReass
 let bulkImportBtn, bulkImportModal, bulkImportForm, closeBulkImport, cancelBulkImport;
 let wizardSection, setupWizardBtn, wizardModal, wizardForm, closeWizard, wizardPrev, wizardNext, wizardGenerate;
 let wizardProgressFill, wizardCurrentStepText;
+let voiceRecordBtn, voiceStatus, memoryTextInput;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -86,6 +90,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   wizardGenerate = document.getElementById('wizard-generate');
   wizardProgressFill = document.getElementById('wizard-progress-fill');
   wizardCurrentStepText = document.getElementById('wizard-current-step');
+  
+  // Voice recording elements
+  voiceRecordBtn = document.getElementById('voice-record-btn');
+  voiceStatus = document.getElementById('voice-status');
+  memoryTextInput = document.getElementById('memory-text');
   
   await loadPersonas();
   await loadJournalEntries();
@@ -204,6 +213,17 @@ function setupEventListeners() {
       });
     }
   });
+  
+  // Voice recording button
+  if (voiceRecordBtn) {
+    // Check if browser supports voice recording
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      voiceRecordBtn.disabled = true;
+      voiceRecordBtn.title = 'Voice recording not supported in this browser';
+    } else {
+      voiceRecordBtn.addEventListener('click', handleVoiceRecording);
+    }
+  }
 }
 
 // Enable strict mode
@@ -818,6 +838,116 @@ async function handleWizardSubmit(event) {
       loadingEl.style.display = 'none';
     }
     showError('Failed to complete wizard');
+  }
+}
+
+// Handle voice recording
+async function handleVoiceRecording() {
+  if (!isRecording) {
+    // Start recording
+    await startVoiceRecording();
+  } else {
+    // Stop recording
+    await stopVoiceRecording();
+  }
+}
+
+// Start voice recording
+async function startVoiceRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    
+    mediaRecorder.addEventListener('dataavailable', (event) => {
+      audioChunks.push(event.data);
+    });
+    
+    mediaRecorder.addEventListener('stop', async () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      await transcribeAudio(audioBlob);
+      
+      // Stop all tracks
+      stream.getTracks().forEach(track => track.stop());
+    });
+    
+    mediaRecorder.start();
+    isRecording = true;
+    
+    // Update UI
+    voiceRecordBtn.classList.add('recording');
+    showVoiceStatus('Recording... Click again to stop', 'info');
+  } catch (error) {
+    console.error('Failed to start recording:', error);
+    showVoiceStatus('Could not access microphone. Please check permissions.', 'error');
+  }
+}
+
+// Stop voice recording
+async function stopVoiceRecording() {
+  if (mediaRecorder && isRecording) {
+    mediaRecorder.stop();
+    isRecording = false;
+    
+    // Update UI
+    voiceRecordBtn.classList.remove('recording');
+    showVoiceStatus('Processing...', 'info');
+  }
+}
+
+// Transcribe audio
+async function transcribeAudio(audioBlob) {
+  try {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.webm');
+    
+    const response = await fetch('/api/transcribe', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.text) {
+      // Insert transcribed text into memory field
+      const currentText = memoryTextInput.value.trim();
+      if (currentText) {
+        // Append to existing text
+        memoryTextInput.value = currentText + ' ' + result.text;
+      } else {
+        // Replace empty field
+        memoryTextInput.value = result.text;
+      }
+      
+      showVoiceStatus('Transcription added. You can edit it before saving.', 'success');
+      
+      // Hide status after 3 seconds
+      setTimeout(() => {
+        if (voiceStatus) {
+          voiceStatus.style.display = 'none';
+        }
+      }, 3000);
+    } else {
+      showVoiceStatus(result.error || 'Could not transcribe audio. Please try again.', 'error');
+    }
+  } catch (error) {
+    console.error('Transcription error:', error);
+    showVoiceStatus('Could not transcribe audio. Please try again.', 'error');
+  }
+}
+
+// Show voice status message
+function showVoiceStatus(message, type) {
+  if (voiceStatus) {
+    voiceStatus.textContent = message;
+    voiceStatus.className = 'voice-status';
+    if (type === 'error') {
+      voiceStatus.classList.add('error');
+    } else if (type === 'success') {
+      voiceStatus.classList.add('success');
+    }
+    voiceStatus.style.display = 'block';
   }
 }
 

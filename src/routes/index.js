@@ -1,8 +1,10 @@
 import express from 'express';
+import multer from 'multer';
 import { testController } from '../controllers/testController.js';
 import { exampleController } from '../controllers/exampleController.js';
 import { handleMessage } from '../controllers/messageController.js';
 import { personaController } from '../controllers/personaController.js';
+import { transcriptionController } from '../controllers/transcriptionController.js';
 import { validateExample } from '../utils/validation.js';
 import {
   listJournalEntries,
@@ -13,6 +15,38 @@ import {
 } from '../controllers/journalController.js';
 
 const router = express.Router();
+
+// Configure multer for audio file uploads
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 25 * 1024 * 1024 // 25MB limit (OpenAI Whisper max)
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = ['audio/webm', 'audio/wav', 'audio/mpeg', 'audio/mp4', 'audio/m4a'];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid audio format. Supported: webm, wav, mp3, m4a'));
+    }
+  }
+});
+
+// Multer error handler middleware
+function handleMulterError(err, req, res, next) {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  } else if (err) {
+    return res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+  next();
+}
 
 /**
  * @swagger
@@ -110,6 +144,47 @@ router.get('/test', testController.getTest);
  *         description: Persona not found (if persona_id provided)
  */
 router.post('/message', handleMessage);
+
+/**
+ * @swagger
+ * /api/transcribe:
+ *   post:
+ *     summary: Transcribe audio to text
+ *     description: Upload an audio file and receive a text transcription using OpenAI Whisper
+ *     tags: [Transcription]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - audio
+ *             properties:
+ *               audio:
+ *                 type: string
+ *                 format: binary
+ *                 description: Audio file to transcribe (webm, wav, mp3, m4a)
+ *     responses:
+ *       200:
+ *         description: Transcription successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 text:
+ *                   type: string
+ *                   example: "This is the transcribed text from the audio file."
+ *       400:
+ *         description: Bad request (no file or invalid format)
+ *       500:
+ *         description: Transcription failed
+ */
+router.post('/transcribe', upload.single('audio'), handleMulterError, transcriptionController.transcribe);
 
 /**
  * @swagger

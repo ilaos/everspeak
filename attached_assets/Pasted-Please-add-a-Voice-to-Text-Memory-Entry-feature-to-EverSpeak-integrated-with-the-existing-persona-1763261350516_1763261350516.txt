@@ -1,0 +1,151 @@
+Please add a “Voice-to-Text Memory Entry” feature to EverSpeak, integrated with the existing persona + memory system.
+
+Do NOT remove or break any existing features (wizard, bulk import, journaling, calibration, strict mode, etc.). Only extend.
+
+-------------------------
+A. BACKEND: /api/transcribe ENDPOINT
+-------------------------
+
+1) Create a new controller file if needed (e.g. src/controllers/transcriptionController.js) or add to an existing misc controller, following current patterns.
+
+2) Add a new endpoint:
+
+   POST /api/transcribe
+
+   Requirements:
+   - Accepts audio uploaded from the frontend via multipart/form-data.
+   - Field name for the file should be: "audio".
+   - Supported content-types: audio/webm, audio/wav, audio/mpeg (mp3) if easy.
+
+3) Implementation details:
+
+   - Use the existing OpenAI client (imported from where you already configured it for /api/message and journaling).
+   - Use OpenAI’s audio transcription with model "whisper-1".
+   - Steps:
+     - Validate that a file exists in the request.
+     - Pass the file to the OpenAI audio transcription endpoint.
+     - On success, return JSON:
+
+       {
+         "success": true,
+         "text": "<transcribed text>"
+       }
+
+     - On error (e.g., no file, unsupported type, OpenAI failure), return:
+
+       {
+         "success": false,
+         "error": "Human-readable explanation"
+       }
+
+       with an appropriate HTTP status code (400 for validation, 500 for OpenAI failures).
+
+   - Use async/await, fs/promises, and the same error-handling middleware patterns used for other controllers.
+
+4) Wire the endpoint into the router in src/routes/index.js with a clear path:
+
+   router.post('/api/transcribe', ...)
+
+-------------------------
+B. FRONTEND: MICROPHONE + TRANSCRIBE -> MEMORY FORM
+-------------------------
+
+Files: public/index.html, public/styles.css, public/app.js
+
+1) In the Memory Panel where the “Add Memory” form exists:
+
+   - Add a small microphone icon/button next to the Memory Text field.
+   - This button should:
+     - Toggle a “recording” state when pressed.
+     - Have clear visual states:
+       - Idle: regular icon
+       - Recording: highlighted / pulsing / red dot, etc.
+
+2) Recording behavior (in app.js):
+
+   - Use the browser’s MediaRecorder + getUserMedia to capture audio from the user’s microphone.
+   - Requirements:
+     - On first click:
+       - Request microphone permission.
+       - Start recording.
+       - Update UI to show “Recording…” state.
+     - On second click (or when user stops):
+       - Stop recording.
+       - Collect the resulting audio blob.
+       - Send the blob via fetch to POST /api/transcribe as multipart/form-data with field "audio".
+
+   - Use a simple, robust approach:
+     - MIME type: "audio/webm" is fine (Chrome default).
+     - Build a FormData object:
+       - formData.append("audio", blob, "recording.webm")
+
+3) Handling transcription response:
+
+   - On success (`success: true` and `text` returned):
+     - Insert the transcribed text into the existing Memory Text input/textarea.
+     - Preserve any existing text if present by appending, or if simpler, just replace it (you can choose the cleaner UX).
+     - Show a small inline message in the Memory Panel:
+       - e.g., "Transcription added. You can edit it before saving."
+
+   - On error:
+     - Show a small inline error near the microphone button:
+       - e.g., "Could not transcribe audio. Please try again."
+     - Do NOT crash the app.
+
+4) Recording UX constraints:
+
+   - If no persona is selected:
+     - Allow recording and transcription anyway (since memory text is not persona-specific yet).
+     - But when user tries to save the memory, continue using the existing “no persona selected” checks.
+   - If the browser does not support getUserMedia or MediaRecorder:
+     - Hide the microphone button gracefully OR
+     - Disable with tooltip: "Voice capture not supported in this browser."
+
+5) Styles (styles.css):
+
+   - Add styles for:
+     - microphone button (normal + recording states)
+     - small status text (e.g., “Recording…”, “Transcribing…”)
+   - Keep consistent with current EverSpeak theme:
+     - Subtle, clean, not flashy.
+
+-------------------------
+C. OPTIONAL NICE TOUCHES
+-------------------------
+
+If it fits cleanly with your current structure (not required, but nice):
+
+- Show a tiny "Recording..." status line under the memory form while recording.
+- Show "Transcribing..." while waiting for the backend.
+- Disable the Add Memory button while transcription is in progress to avoid confusion.
+
+-------------------------
+D. DOCS & TESTS
+-------------------------
+
+1) Update Swagger / OpenAPI:
+
+   - Document POST /api/transcribe:
+     - Summary: "Transcribe audio to text for memory entry."
+     - Request: multipart/form-data with "audio" file.
+     - Response: { success, text }.
+
+2) Update README.md / replit.md:
+
+   - Add a "Voice-to-Text" subsection under the Memory features:
+     - Brief explanation of how to use the mic button.
+     - Mention that this uses OpenAI Whisper for transcription.
+
+3) Tests:
+
+   - Add or adapt tests to:
+     - Ensure /api/transcribe returns proper error when no file sent.
+     - Ensure success path works with a mocked audio file (you can mock the OpenAI client call).
+     - Optional: simple UI test for the mic button toggling state (if compatible with your current Playwright setup).
+
+Please follow the existing coding style, async patterns, error handling, and UI conventions already in the project.
+Once Replit finishes that and reports success, just tell me something like:
+
+“Voice feature done.”
+
+And I’ll immediately move us to the Persona Booster / “Improve Persona Accuracy” system next, still without asking you to stop and test anything unless you explicitly want to.

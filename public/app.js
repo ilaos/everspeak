@@ -28,6 +28,9 @@ let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
+let boostPersonaBtn, boostModal, closeBoost, refreshBoostBtn, applyToneBtn;
+let boostLoading, boostResults;
+let currentBoostRecommendations = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -95,6 +98,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   voiceRecordBtn = document.getElementById('voice-record-btn');
   voiceStatus = document.getElementById('voice-status');
   memoryTextInput = document.getElementById('memory-text');
+  
+  // Boost elements
+  boostPersonaBtn = document.getElementById('boost-persona-btn');
+  boostModal = document.getElementById('boost-modal');
+  closeBoost = document.getElementById('close-boost');
+  refreshBoostBtn = document.getElementById('refresh-boost-btn');
+  applyToneBtn = document.getElementById('apply-tone-btn');
+  boostLoading = document.getElementById('boost-loading');
+  boostResults = document.getElementById('boost-results');
   
   await loadPersonas();
   await loadJournalEntries();
@@ -223,6 +235,27 @@ function setupEventListeners() {
     } else {
       voiceRecordBtn.addEventListener('click', handleVoiceRecording);
     }
+  }
+  
+  // Boost persona button
+  if (boostPersonaBtn) {
+    boostPersonaBtn.addEventListener('click', openBoostModal);
+  }
+  if (closeBoost) {
+    closeBoost.addEventListener('click', closeBoostModal);
+  }
+  if (refreshBoostBtn) {
+    refreshBoostBtn.addEventListener('click', fetchBoostRecommendations);
+  }
+  if (applyToneBtn) {
+    applyToneBtn.addEventListener('click', applyToneSuggestions);
+  }
+  if (boostModal) {
+    boostModal.addEventListener('click', (e) => {
+      if (e.target === boostModal) {
+        closeBoostModal();
+      }
+    });
   }
 }
 
@@ -948,6 +981,294 @@ function showVoiceStatus(message, type) {
       voiceStatus.classList.add('success');
     }
     voiceStatus.style.display = 'block';
+  }
+}
+
+// Open boost modal
+async function openBoostModal() {
+  if (!selectedPersonaId) {
+    showError('Please select a persona first');
+    return;
+  }
+  
+  if (boostModal) {
+    boostModal.style.display = 'flex';
+  }
+  
+  // Reset UI and state
+  if (boostLoading) boostLoading.style.display = 'block';
+  if (boostResults) boostResults.style.display = 'none';
+  boostSnapshotCreated = false; // Reset snapshot flag for new boost session
+  
+  // Fetch recommendations
+  await fetchBoostRecommendations();
+}
+
+// Close boost modal
+function closeBoostModal() {
+  if (boostModal) {
+    boostModal.style.display = 'none';
+  }
+  currentBoostRecommendations = null;
+}
+
+// Fetch boost recommendations
+async function fetchBoostRecommendations() {
+  if (!selectedPersonaId) {
+    showError('No persona selected');
+    closeBoostModal();
+    return;
+  }
+  
+  try {
+    // Show loading
+    if (boostLoading) boostLoading.style.display = 'block';
+    if (boostResults) boostResults.style.display = 'none';
+    
+    const response = await fetch(`/api/personas/${selectedPersonaId}/boost`, {
+      method: 'POST'
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      currentBoostRecommendations = result.recommendations;
+      displayBoostRecommendations(result.recommendations);
+    } else {
+      showError(result.message || 'Failed to fetch recommendations');
+      closeBoostModal();
+    }
+  } catch (error) {
+    console.error('Failed to fetch boost recommendations:', error);
+    showError('Failed to fetch recommendations');
+    closeBoostModal();
+  }
+}
+
+// Display boost recommendations
+function displayBoostRecommendations(recommendations) {
+  // Hide loading, show results
+  if (boostLoading) boostLoading.style.display = 'none';
+  if (boostResults) boostResults.style.display = 'block';
+  
+  // Display missing categories
+  const missingCategoriesList = document.getElementById('missing-categories-list');
+  if (missingCategoriesList) {
+    if (recommendations.missing_categories && recommendations.missing_categories.length > 0) {
+      missingCategoriesList.innerHTML = recommendations.missing_categories.map(cat => 
+        `<span class="category-tag">${cat}</span>`
+      ).join('');
+    } else {
+      missingCategoriesList.innerHTML = '<span class="category-tag empty">All categories covered</span>';
+    }
+  }
+  
+  // Display suggested memories
+  const suggestedMemoriesList = document.getElementById('suggested-memories-list');
+  if (suggestedMemoriesList) {
+    if (recommendations.new_memories && recommendations.new_memories.length > 0) {
+      suggestedMemoriesList.innerHTML = recommendations.new_memories.map((mem, index) => `
+        <div class="suggested-memory-card" data-memory-index="${index}">
+          <div class="memory-card-header">
+            <span class="memory-card-category">${mem.category}</span>
+            <span class="memory-card-weight">Weight: ${mem.weight}</span>
+          </div>
+          <p class="memory-card-text">${escapeHtml(mem.text)}</p>
+          <button class="btn-add-suggested" data-testid="button-add-suggested-${index}" onclick="addSuggestedMemory(${index})">Add Memory</button>
+        </div>
+      `).join('');
+    } else {
+      suggestedMemoriesList.innerHTML = '<p class="placeholder">No new memories suggested</p>';
+    }
+  }
+  
+  // Display tone suggestions
+  const toneSuggestionsContainer = document.getElementById('tone-suggestions-container');
+  if (toneSuggestionsContainer && recommendations.tone_suggestions) {
+    const toneFields = [
+      { key: 'humor', label: 'Humor' },
+      { key: 'honesty', label: 'Honesty' },
+      { key: 'sentimentality', label: 'Sentimentality' },
+      { key: 'energy', label: 'Energy' },
+      { key: 'advice_giving', label: 'Advice-giving' }
+    ];
+    
+    const currentSettings = settings || {};
+    let hasSuggestions = false;
+    
+    const html = toneFields.map(field => {
+      const current = currentSettings[`${field.key}_level`] || 3;
+      const suggested = recommendations.tone_suggestions[field.key];
+      
+      if (suggested !== undefined && suggested !== null) {
+        hasSuggestions = true;
+        return `
+          <div class="tone-comparison">
+            <span class="tone-comparison-label">${field.label}</span>
+            <div class="tone-comparison-values">
+              <span class="tone-value current">Current: ${current}</span>
+              <span class="tone-value suggested">→ ${suggested}</span>
+            </div>
+          </div>
+        `;
+      }
+      return '';
+    }).filter(h => h).join('');
+    
+    toneSuggestionsContainer.innerHTML = html || '<p class="placeholder">No tone adjustments suggested</p>';
+    
+    // Reset and show/hide apply tone button
+    if (applyToneBtn) {
+      applyToneBtn.style.display = hasSuggestions ? 'block' : 'none';
+      applyToneBtn.disabled = false;
+      applyToneBtn.textContent = 'Apply Tone Suggestions';
+    }
+  }
+  
+  // Display boundary flags
+  const boundaryFlagsList = document.getElementById('boundary-flags-list');
+  if (boundaryFlagsList) {
+    if (recommendations.boundary_flags && recommendations.boundary_flags.length > 0) {
+      boundaryFlagsList.innerHTML = recommendations.boundary_flags.map(flag => 
+        `<div class="boundary-flag">${escapeHtml(flag)}</div>`
+      ).join('');
+    } else {
+      boundaryFlagsList.innerHTML = '<p class="placeholder">No boundary issues detected</p>';
+    }
+  }
+}
+
+// Add suggested memory
+async function addSuggestedMemory(index) {
+  if (!selectedPersonaId || !currentBoostRecommendations) return;
+  
+  const memory = currentBoostRecommendations.new_memories[index];
+  if (!memory) return;
+  
+  try {
+    const response = await fetch(`/api/personas/${selectedPersonaId}/memories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        category: memory.category,
+        text: memory.text,
+        weight: memory.weight
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Add to memories list
+      memories.push(result.data);
+      displayMemories();
+      
+      // Update button to show added state
+      const btn = document.querySelector(`[data-testid="button-add-suggested-${index}"]`);
+      if (btn) {
+        btn.textContent = 'Added ✓';
+        btn.classList.add('added');
+        btn.disabled = true;
+      }
+      
+      showSuccess('Memory added successfully!');
+      
+      // Auto-create snapshot after first memory added
+      await createBoostSnapshot();
+    } else {
+      showError(result.message || 'Failed to add memory');
+    }
+  } catch (error) {
+    console.error('Failed to add suggested memory:', error);
+    showError('Failed to add memory');
+  }
+}
+
+// Apply tone suggestions
+async function applyToneSuggestions() {
+  if (!selectedPersonaId || !currentBoostRecommendations) return;
+  
+  try {
+    const toneSuggestions = currentBoostRecommendations.tone_suggestions;
+    
+    const updatedSettings = {
+      ...settings,
+      humor_level: toneSuggestions.humor !== undefined ? parseFloat(toneSuggestions.humor) : settings.humor_level,
+      honesty_level: toneSuggestions.honesty !== undefined ? parseFloat(toneSuggestions.honesty) : settings.honesty_level,
+      sentimentality_level: toneSuggestions.sentimentality !== undefined ? parseFloat(toneSuggestions.sentimentality) : settings.sentimentality_level,
+      energy_level: toneSuggestions.energy !== undefined ? parseFloat(toneSuggestions.energy) : settings.energy_level,
+      advice_level: toneSuggestions.advice_giving !== undefined ? parseFloat(toneSuggestions.advice_giving) : settings.advice_level
+    };
+    
+    const response = await fetch(`/api/personas/${selectedPersonaId}/settings`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedSettings)
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Update local settings
+      settings = updatedSettings;
+      
+      // Update UI sliders
+      if (humorSlider) humorSlider.value = updatedSettings.humor_level;
+      if (humorValue) humorValue.textContent = updatedSettings.humor_level;
+      if (honestySlider) honestySlider.value = updatedSettings.honesty_level;
+      if (honestyValue) honestyValue.textContent = updatedSettings.honesty_level;
+      if (sentimentalitySlider) sentimentalitySlider.value = updatedSettings.sentimentality_level;
+      if (sentimentalityValue) sentimentalityValue.textContent = updatedSettings.sentimentality_level;
+      if (energySlider) energySlider.value = updatedSettings.energy_level;
+      if (energyValue) energyValue.textContent = updatedSettings.energy_level;
+      if (adviceSlider) adviceSlider.value = updatedSettings.advice_level;
+      if (adviceValue) adviceValue.textContent = updatedSettings.advice_level;
+      
+      showSuccess('Tone settings applied successfully!');
+      
+      // Auto-create snapshot
+      await createBoostSnapshot();
+      
+      // Disable apply button
+      if (applyToneBtn) {
+        applyToneBtn.textContent = 'Applied ✓';
+        applyToneBtn.disabled = true;
+      }
+    } else {
+      showError(result.message || 'Failed to apply tone suggestions');
+    }
+  } catch (error) {
+    console.error('Failed to apply tone suggestions:', error);
+    showError('Failed to apply tone suggestions');
+  }
+}
+
+// Create boost snapshot
+let boostSnapshotCreated = false;
+async function createBoostSnapshot() {
+  if (boostSnapshotCreated || !selectedPersonaId) return;
+  
+  try {
+    const name = `Auto Snapshot – Persona Booster (${new Date().toLocaleString()})`;
+    const response = await fetch(`/api/personas/${selectedPersonaId}/snapshots`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      snapshots.push(result.data);
+      displaySnapshots();
+      boostSnapshotCreated = true;
+    }
+  } catch (error) {
+    console.error('Failed to create boost snapshot:', error);
   }
 }
 

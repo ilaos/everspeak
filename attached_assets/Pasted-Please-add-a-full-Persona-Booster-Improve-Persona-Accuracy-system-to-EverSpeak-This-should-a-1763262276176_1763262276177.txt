@@ -1,0 +1,169 @@
+Please add a full Persona Booster (“Improve Persona Accuracy”) system to EverSpeak.  
+This should audit the selected persona using AI and generate structured improvement recommendations.
+
+Do NOT modify or break any existing features (wizard, journaling, calibration, strict mode, bulk import, voice-to-text, etc.). Only extend.
+
+------------------------------------
+A. BACKEND: BOOST ENDPOINT
+------------------------------------
+
+Add new endpoint:
+
+POST /api/personas/:id/boost
+
+Behavior:
+
+1) Validate persona exists.
+2) Load persona:
+   - name
+   - relationship
+   - description
+   - memories[]
+   - settings (tone defaults, sliders, boundaries)
+3) Load journals where "persona_id" matches requested id.
+4) Load chat logs if they exist:
+   - If you have a lightweight chat log storage, use it.
+   - If not, skip this step and include an empty array.
+
+5) Package all persona data into a single analysis object:
+
+{
+  "persona": { ...full persona... },
+  "memories": [...],
+  "journals": [...],
+  "settings": { ... },
+  "calibration": { ... },
+  "strict_mode": boolean or null,
+  "chat_logs": [...]
+}
+
+6) Send this object to OpenAI GPT-4o-mini with a carefully constructed prompt:
+
+Prompt must ask the model to analyze the persona and return ONLY JSON with:
+
+{
+  "missing_categories": [ "childhood", "humor", ... ],
+  "new_memories": [
+    {
+      "category": "...",
+      "text": "...",
+      "weight": number
+    }
+  ],
+  "tone_suggestions": {
+    "humor": 0-5,
+    "honesty": 0-5,
+    "sentimentality": 0-5,
+    "energy": 0-5,
+    "advice_giving": 0-5
+  },
+  "boundary_flags": [
+    "risk of regret spirals",
+    "tone too sentimental",
+    ...
+  ]
+}
+
+Rules:
+- The model must never claim supernatural info.
+- It must only infer based on provided persona data.
+- Use firm instruction: “CRITICAL: Do not invent unknown biographical facts. Suggest only memories or traits that could plausibly emerge from patterns in the supplied data.”
+
+7) After receiving the JSON:
+   - Validate it (ensure arrays and numbers are present).
+   - DO NOT automatically modify the persona.
+   - Return:
+
+{
+  "success": true,
+  "recommendations": { ...parsed model output... }
+}
+
+------------------------------------
+B. FRONTEND: BOOST UI / MODAL
+------------------------------------
+
+Files: public/index.html, public/app.js, public/styles.css
+
+1) Add a new button under Persona Settings panel:
+   Label: “Improve Persona Accuracy”
+   Style: small premium-looking button consistent with current UI.
+
+2) Button behavior:
+   - Only visible when a persona is selected.
+   - If clicked with no persona selected, show non-blocking message and do nothing.
+
+3) Booster Modal:
+   - Create a new modal overlay containing:
+     - Title: “Persona Accuracy Recommendations”
+     - Section 1: Missing Categories (list them)
+     - Section 2: Suggested Memories
+         For each suggested memory:
+           - Show category, text, weight
+           - Add “Add Memory” button
+     - Section 3: Tone Calibration Suggestions
+         - Show slider comparisons (current vs recommended)
+         - Button: “Apply Tone Suggestions”
+     - Section 4: Boundary Flags
+         - List warnings about potential inconsistencies or tone issues
+   - Buttons:
+     - Close (top-right X)
+     - Optional: “Refresh Recommendations” (rerun boost)
+
+4) Behavior on “Add Memory”:
+   - POST to /api/personas/:id/memories
+     (Use existing single-memory create endpoint)
+   - On success:
+     - Refresh memory list
+     - Replace the “Add” button with “Added ✓”
+
+5) Behavior on “Apply Tone Suggestions”:
+   - Send PUT to /api/personas/:id/settings
+   - Update slider UI values locally
+   - Show success message
+
+6) Styling:
+   - Modal should match wizard aesthetic.
+   - Clean, modern card layout.
+   - Recommended memories should be grouped in cards.
+   - Boundary flags should appear as small yellow warning tags.
+
+------------------------------------
+C. SNAPSHOT INTEGRATION
+------------------------------------
+
+After user:
+- Adds at least one recommended memory OR
+- Applies tone suggestions
+
+Automatically create:
+“Auto Snapshot – Persona Booster (timestamp)”
+
+Use existing snapshot system.
+
+------------------------------------
+D. DOCUMENTATION & TESTS
+------------------------------------
+
+1) Swagger:
+   - Add documentation for POST /api/personas/:id/boost
+   - Include:
+     - request body (none)
+     - full response example
+
+2) README.md / replit.md:
+   - Add new “Persona Booster / Accuracy Improvement” section.
+
+3) Playwright tests:
+   - Test the booster endpoint (mock OpenAI in tests):
+     - Returns structured JSON
+   - Test UI:
+     - Opening modal
+     - Adding suggested memory
+     - Applying tone suggestions
+     - Snapshot triggered
+     - Proper hiding when persona deselected
+
+------------------------------------
+
+Please maintain existing architecture, async fs operations, OpenAI client pattern, validation helpers, and UI conventions already present in the project.

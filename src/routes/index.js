@@ -674,6 +674,74 @@ router.post('/personas/:id/wizard', personaController.processWizard);
 
 /**
  * @swagger
+ * /api/personas/{id}/boost:
+ *   post:
+ *     summary: Analyze persona and get improvement recommendations
+ *     description: Uses AI to analyze the persona and provide structured recommendations for missing categories, new memories, tone adjustments, and boundary warnings
+ *     tags: [Personas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Persona ID
+ *     responses:
+ *       200:
+ *         description: Analysis complete with recommendations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 recommendations:
+ *                   type: object
+ *                   properties:
+ *                     missing_categories:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       example: ["childhood", "humor"]
+ *                     new_memories:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           category:
+ *                             type: string
+ *                           text:
+ *                             type: string
+ *                           weight:
+ *                             type: number
+ *                     tone_suggestions:
+ *                       type: object
+ *                       properties:
+ *                         humor:
+ *                           type: number
+ *                         honesty:
+ *                           type: number
+ *                         sentimentality:
+ *                           type: number
+ *                         energy:
+ *                           type: number
+ *                         advice_giving:
+ *                           type: number
+ *                     boundary_flags:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *       404:
+ *         description: Persona not found
+ *       500:
+ *         description: Analysis failed
+ */
+router.post('/personas/:id/boost', personaController.boostPersona);
+
+/**
+ * @swagger
  * /api/personas/{id}/memories/{memoryId}:
  *   put:
  *     summary: Update a memory

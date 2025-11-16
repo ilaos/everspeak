@@ -107,6 +107,11 @@
 
           <button class="btn-save-settings" id="save-settings-btn" data-testid="button-save-settings">Save Settings</button>
           <div class="settings-feedback" id="settings-feedback" style="display: none;"></div>
+          
+          <div class="boost-section">
+            <button class="btn-boost-persona" id="boost-persona-btn" data-testid="button-boost-persona">✨ Improve Persona Accuracy</button>
+            <p class="boost-hint">Get AI-powered recommendations to enhance this persona</p>
+          </div>
         </div>
 
         <div class="snapshots-section" id="snapshots-section" style="display: none;">
@@ -423,6 +428,54 @@
             <button type="submit" id="wizard-generate" data-testid="button-wizard-generate" style="display: none;">Generate Memories</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boost Modal -->
+  <div id="boost-modal" class="modal boost-modal" style="display: none;" data-testid="modal-boost">
+    <div class="modal-content boost-content">
+      <div class="modal-header">
+        <h2>Persona Accuracy Recommendations</h2>
+        <button class="modal-close" id="close-boost" data-testid="button-close-boost">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div id="boost-loading" class="boost-loading">
+          <p>Analyzing persona... This may take a moment.</p>
+          <div class="loading-spinner"></div>
+        </div>
+        
+        <div id="boost-results" style="display: none;">
+          <!-- Missing Categories -->
+          <div class="boost-section">
+            <h3>Missing Categories</h3>
+            <div id="missing-categories-list"></div>
+          </div>
+
+          <!-- Suggested Memories -->
+          <div class="boost-section">
+            <h3>Suggested Memories</h3>
+            <div id="suggested-memories-list"></div>
+          </div>
+
+          <!-- Tone Suggestions -->
+          <div class="boost-section">
+            <h3>Tone Calibration Suggestions</h3>
+            <div id="tone-suggestions-container"></div>
+            <button class="btn-apply-tone" id="apply-tone-btn" data-testid="button-apply-tone" style="display: none;">Apply Tone Suggestions</button>
+          </div>
+
+          <!-- Boundary Flags -->
+          <div class="boost-section">
+            <h3>Boundary Flags</h3>
+            <div id="boundary-flags-list"></div>
+          </div>
+
+          <div class="boost-actions">
+            <button class="btn-secondary" id="refresh-boost-btn" data-testid="button-refresh-boost">Refresh Recommendations</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

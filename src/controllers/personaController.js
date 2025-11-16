@@ -799,5 +799,128 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
     } catch (error) {
       next(error);
     }
+  },
+
+  // POST /api/personas/:id/boost - Analyze persona and get improvement recommendations
+  async boostPersona(req, res, next) {
+    try {
+      const { id } = req.params;
+      const data = await loadPersonas();
+      const persona = findPersonaById(data.personas, id);
+
+      if (!persona) {
+        throw new AppError('Persona not found', 404);
+      }
+
+      // Load journal entries for this persona
+      const { loadJournal } = await import('../journal/utils.js');
+      const allJournals = await loadJournal();
+      const personaJournals = allJournals.filter(j => j.persona_id === id);
+
+      // Package persona data for analysis
+      const analysisData = {
+        persona: {
+          name: persona.name,
+          relationship: persona.relationship,
+          description: persona.description
+        },
+        memories: persona.memories || [],
+        journals: personaJournals.map(j => ({
+          text: j.text,
+          mood: j.mood,
+          created_at: j.created_at
+        })),
+        settings: persona.settings || getDefaultSettings(),
+        chat_logs: [] // Not implemented yet - placeholder for future
+      };
+
+      // Construct AI prompt for persona analysis
+      const prompt = `You are analyzing a conversational AI persona to provide improvement recommendations.
+
+PERSONA DATA:
+${JSON.stringify(analysisData, null, 2)}
+
+CRITICAL INSTRUCTIONS:
+1. Do NOT invent unknown biographical facts.
+2. Only suggest memories or traits that could plausibly emerge from patterns in the supplied data.
+3. Never claim supernatural information.
+4. Base all recommendations strictly on the provided persona data.
+
+TASK: Analyze this persona and return ONLY valid JSON (no markdown, no explanations) with the following structure:
+
+{
+  "missing_categories": ["category1", "category2"],
+  "new_memories": [
+    {
+      "category": "humor|regrets|childhood|advice|personality|misc",
+      "text": "specific memory suggestion based on existing data patterns",
+      "weight": 1.0-5.0
+    }
+  ],
+  "tone_suggestions": {
+    "humor": 0-5,
+    "honesty": 0-5,
+    "sentimentality": 0-5,
+    "energy": 0-5,
+    "advice_giving": 0-5
+  },
+  "boundary_flags": [
+    "descriptive flag about potential issues"
+  ]
+}
+
+CATEGORY ANALYSIS:
+- Valid categories: humor, regrets, childhood, advice, personality, misc
+- Identify which categories have few or no memories
+- Suggest 3-5 new memories that would fill gaps
+
+TONE ANALYSIS:
+- Current settings: ${JSON.stringify(analysisData.settings)}
+- Suggest adjustments based on persona description and existing memories
+
+BOUNDARY FLAGS:
+- Identify potential issues like: tone inconsistencies, risk of regret spirals, overly sentimental, etc.
+
+Return ONLY the JSON object, nothing else.`;
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a persona analysis expert. You provide structured recommendations in JSON format only.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        response_format: { type: 'json_object' }
+      });
+
+      const responseText = completion.choices[0].message.content;
+      let recommendations;
+
+      try {
+        recommendations = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', responseText);
+        throw new AppError('Failed to generate recommendations. Please try again.', 500);
+      }
+
+      // Validate recommendations structure
+      if (!recommendations.missing_categories) recommendations.missing_categories = [];
+      if (!recommendations.new_memories) recommendations.new_memories = [];
+      if (!recommendations.tone_suggestions) recommendations.tone_suggestions = {};
+      if (!recommendations.boundary_flags) recommendations.boundary_flags = [];
+
+      res.status(200).json({
+        success: true,
+        recommendations
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 };

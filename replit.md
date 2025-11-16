@@ -70,6 +70,12 @@ Preferred communication style: Simple, everyday language.
   - `POST /api/transcribe` (transcribe audio to text using OpenAI Whisper)
   - Accepts audio file uploads (webm, wav, mp3, m4a)
   - Returns transcribed text for memory entry
+- **Persona Booster / Accuracy Improvement**:
+  - `POST /api/personas/:id/boost` (AI-powered persona analysis and recommendations)
+  - Analyzes persona data, memories, journals, and settings
+  - Returns structured recommendations: missing categories, suggested memories, tone adjustments, boundary flags
+  - Frontend modal with interactive UI to apply suggestions
+  - Auto-snapshot creation after applying recommendations
 - **Snapshots Sub-Resource**:
   - `GET /api/personas/:id/snapshots`
   - `POST /api/personas/:id/snapshots` (creates versioned persona states)

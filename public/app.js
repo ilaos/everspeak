@@ -9,20 +9,25 @@ let strictMode = false;
 let strictModeNoticeShown = false;
 
 // DOM Elements
-const personaDropdown = document.getElementById('persona-dropdown');
-const personaForm = document.getElementById('persona-form');
-const memoryForm = document.getElementById('memory-form');
-const chatForm = document.getElementById('chat-form');
-const memoriesList = document.getElementById('memories-list');
-const chatMessages = document.getElementById('chat-messages');
-const groundingBanner = document.getElementById('grounding-banner');
-const bannerDismissBtn = document.getElementById('banner-dismiss');
-const healthyUseNudge = document.getElementById('healthy-use-nudge');
-const strictModeIndicator = document.getElementById('strict-mode-indicator');
-const strictModeTurnOff = document.getElementById('strict-mode-turn-off');
+let personaDropdown, personaForm, memoryForm, chatForm, memoriesList, chatMessages;
+let groundingBanner, bannerDismissBtn, healthyUseNudge;
+let strictModeIndicator, strictModeTurnOff;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+  // Get DOM element references
+  personaDropdown = document.getElementById('persona-dropdown');
+  personaForm = document.getElementById('persona-form');
+  memoryForm = document.getElementById('memory-form');
+  chatForm = document.getElementById('chat-form');
+  memoriesList = document.getElementById('memories-list');
+  chatMessages = document.getElementById('chat-messages');
+  groundingBanner = document.getElementById('grounding-banner');
+  bannerDismissBtn = document.getElementById('banner-dismiss');
+  healthyUseNudge = document.getElementById('healthy-use-nudge');
+  strictModeIndicator = document.getElementById('strict-mode-indicator');
+  strictModeTurnOff = document.getElementById('strict-mode-turn-off');
+  
   await loadPersonas();
   setupEventListeners();
 });
@@ -34,13 +39,19 @@ function setupEventListeners() {
   memoryForm.addEventListener('submit', handleAddMemory);
   chatForm.addEventListener('submit', handleSendMessage);
   bannerDismissBtn.addEventListener('click', handleBannerDismiss);
-  strictModeTurnOff.addEventListener('click', handleStrictModeTurnOff);
+  
+  if (strictModeTurnOff) {
+    strictModeTurnOff.addEventListener('click', handleStrictModeTurnOff);
+  }
 }
 
 // Enable strict mode
 function enableStrictMode() {
   strictMode = true;
-  strictModeIndicator.style.display = 'block';
+  
+  if (strictModeIndicator) {
+    strictModeIndicator.style.display = 'block';
+  }
   
   // Show one-time notice
   if (!strictModeNoticeShown) {
@@ -51,12 +62,14 @@ function enableStrictMode() {
     
     // Insert before chat controls
     const chatControls = document.querySelector('.chat-controls');
-    chatControls.parentNode.insertBefore(noticeDiv, chatControls);
-    
-    // Auto-hide after 4 seconds
-    setTimeout(() => {
-      noticeDiv.remove();
-    }, 4000);
+    if (chatControls && chatControls.parentNode) {
+      chatControls.parentNode.insertBefore(noticeDiv, chatControls);
+      
+      // Auto-hide after 4 seconds
+      setTimeout(() => {
+        noticeDiv.remove();
+      }, 4000);
+    }
     
     strictModeNoticeShown = true;
   }
@@ -66,7 +79,10 @@ function enableStrictMode() {
 function handleStrictModeTurnOff(event) {
   event.preventDefault();
   strictMode = false;
-  strictModeIndicator.style.display = 'none';
+  
+  if (strictModeIndicator) {
+    strictModeIndicator.style.display = 'none';
+  }
 }
 
 // Handle banner dismiss
@@ -132,6 +148,9 @@ async function handlePersonaChange(event) {
 // Load persona details and memories
 async function loadPersonaDetails(personaId) {
   try {
+    // Clear chat immediately when switching personas
+    clearChat();
+    
     // Load persona info
     const personaResponse = await fetch(`/api/personas/${personaId}`);
     const personaResult = await personaResponse.json();
@@ -148,9 +167,6 @@ async function loadPersonaDetails(personaId) {
       memories = memoriesResult.data;
       displayMemories();
     }
-    
-    // Clear chat when switching personas
-    clearChat();
   } catch (error) {
     console.error('Failed to load persona details:', error);
     showError('Failed to load persona details');
@@ -356,7 +372,7 @@ async function handleSendMessage(event) {
   userMessageCount++;
   
   // Show healthy-use nudge after 12 messages (once per session)
-  if (userMessageCount >= 12 && !healthyUseNudgeShown) {
+  if (userMessageCount >= 12 && !healthyUseNudgeShown && healthyUseNudge) {
     healthyUseNudge.style.display = 'block';
     healthyUseNudgeShown = true;
   }
@@ -481,12 +497,16 @@ function clearChat() {
   // Reset message counter and healthy-use nudge when switching personas
   userMessageCount = 0;
   healthyUseNudgeShown = false;
-  healthyUseNudge.style.display = 'none';
+  if (healthyUseNudge) {
+    healthyUseNudge.style.display = 'none';
+  }
   
   // Reset strict mode when switching personas
   strictMode = false;
   strictModeNoticeShown = false;
-  strictModeIndicator.style.display = 'none';
+  if (strictModeIndicator) {
+    strictModeIndicator.style.display = 'none';
+  }
 }
 
 // Utility: Escape HTML

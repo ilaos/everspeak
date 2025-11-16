@@ -36,6 +36,15 @@
       "memories": [],
       "created_at": "2025-11-15T23:35:53.098Z",
       "updated_at": "2025-11-15T23:35:53.098Z"
+    },
+    {
+      "id": "ddc7527c-b6ef-40b7-8d45-ecc3347a443f",
+      "name": "TestNoticeKRiete",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "created_at": "2025-11-16T00:01:36.632Z",
+      "updated_at": "2025-11-16T00:01:36.632Z"
     }
   ]
 }

@@ -40,6 +40,70 @@
           <p class="info-item"><strong>Description:</strong> <span id="info-description" data-testid="text-persona-description">-</span></p>
         </div>
 
+        <div class="settings-section" id="settings-section" style="display: none;">
+          <h3>Persona Settings</h3>
+          <p class="settings-description">Calibrate communication style and boundaries</p>
+          
+          <div class="form-group">
+            <label for="tone-mode-select">Default Tone Mode</label>
+            <select id="tone-mode-select" class="tone-mode-select" data-testid="select-tone-mode">
+              <option value="auto">Auto</option>
+              <option value="gentle">Gentle</option>
+              <option value="casual">Casual</option>
+              <option value="real_talk">Real talk</option>
+              <option value="playful">Playful</option>
+            </select>
+          </div>
+
+          <div class="slider-group">
+            <label for="humor-slider">Humor <span id="humor-value" class="slider-value">3</span></label>
+            <input type="range" id="humor-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-humor">
+          </div>
+
+          <div class="slider-group">
+            <label for="honesty-slider">Honesty <span id="honesty-value" class="slider-value">3</span></label>
+            <input type="range" id="honesty-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-honesty">
+          </div>
+
+          <div class="slider-group">
+            <label for="sentimentality-slider">Sentimentality <span id="sentimentality-value" class="slider-value">3</span></label>
+            <input type="range" id="sentimentality-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-sentimentality">
+          </div>
+
+          <div class="slider-group">
+            <label for="energy-slider">Energy <span id="energy-value" class="slider-value">3</span></label>
+            <input type="range" id="energy-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-energy">
+          </div>
+
+          <div class="slider-group">
+            <label for="advice-slider">Advice-giving <span id="advice-value" class="slider-value">2</span></label>
+            <input type="range" id="advice-slider" min="0" max="5" step="0.5" value="2" class="calibration-slider" data-testid="slider-advice">
+          </div>
+
+          <div class="boundaries-group">
+            <label class="boundary-label">Boundaries</label>
+            <div class="checkbox-item">
+              <input type="checkbox" id="avoid-regret-spirals" checked data-testid="checkbox-avoid-regret">
+              <label for="avoid-regret-spirals">Avoid regret spirals</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="no-paranormal-language" checked data-testid="checkbox-no-paranormal">
+              <label for="no-paranormal-language">No paranormal language</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="soften-sensitive-topics" checked data-testid="checkbox-soften-sensitive">
+              <label for="soften-sensitive-topics">Soften sensitive topics</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="prefer-reassurance" checked data-testid="checkbox-prefer-reassurance">
+              <label for="prefer-reassurance">Prefer reassurance</label>
+            </div>
+          </div>
+
+          <button class="btn-save-settings" id="save-settings-btn" data-testid="button-save-settings">Save Settings</button>
+          <div class="settings-feedback" id="settings-feedback" style="display: none;"></div>
+        </div>
+
         <div class="snapshots-section" id="snapshots-section" style="display: none;">
           <h3>Snapshots</h3>
           <p class="snapshots-description">Save versions of this persona to restore later</p>

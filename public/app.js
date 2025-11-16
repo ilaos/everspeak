@@ -3,6 +3,7 @@ let personas = [];
 let selectedPersonaId = null;
 let memories = [];
 let snapshots = [];
+let settings = null;
 let bannerDismissed = false;
 let userMessageCount = 0;
 let healthyUseNudgeShown = false;
@@ -15,6 +16,10 @@ let personaDropdown, personaForm, memoryForm, chatForm, memoriesList, chatMessag
 let groundingBanner, bannerDismissBtn, healthyUseNudge;
 let strictModeIndicator, strictModeTurnOff;
 let snapshotsSection, createSnapshotBtn, snapshotsList;
+let settingsSection, toneModeSelect, saveSettingsBtn, settingsFeedback;
+let humorSlider, honestySlider, sentimentalitySlider, energySlider, adviceSlider;
+let humorValue, honestyValue, sentimentalityValue, energyValue, adviceValue;
+let avoidRegretSpirals, noParanormalLanguage, softenSensitiveTopics, preferReassurance;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -34,6 +39,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   createSnapshotBtn = document.getElementById('create-snapshot-btn');
   snapshotsList = document.getElementById('snapshots-list');
   
+  // Settings elements
+  settingsSection = document.getElementById('settings-section');
+  toneModeSelect = document.getElementById('tone-mode-select');
+  saveSettingsBtn = document.getElementById('save-settings-btn');
+  settingsFeedback = document.getElementById('settings-feedback');
+  
+  // Sliders and their value displays
+  humorSlider = document.getElementById('humor-slider');
+  honestySlider = document.getElementById('honesty-slider');
+  sentimentalitySlider = document.getElementById('sentimentality-slider');
+  energySlider = document.getElementById('energy-slider');
+  adviceSlider = document.getElementById('advice-slider');
+  
+  humorValue = document.getElementById('humor-value');
+  honestyValue = document.getElementById('honesty-value');
+  sentimentalityValue = document.getElementById('sentimentality-value');
+  energyValue = document.getElementById('energy-value');
+  adviceValue = document.getElementById('advice-value');
+  
+  // Boundary checkboxes
+  avoidRegretSpirals = document.getElementById('avoid-regret-spirals');
+  noParanormalLanguage = document.getElementById('no-paranormal-language');
+  softenSensitiveTopics = document.getElementById('soften-sensitive-topics');
+  preferReassurance = document.getElementById('prefer-reassurance');
+  
   await loadPersonas();
   setupEventListeners();
 });
@@ -52,6 +82,37 @@ function setupEventListeners() {
   
   if (createSnapshotBtn) {
     createSnapshotBtn.addEventListener('click', handleCreateSnapshot);
+  }
+  
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener('click', handleSaveSettings);
+  }
+  
+  // Slider value updates
+  if (humorSlider) {
+    humorSlider.addEventListener('input', (e) => {
+      humorValue.textContent = e.target.value;
+    });
+  }
+  if (honestySlider) {
+    honestySlider.addEventListener('input', (e) => {
+      honestyValue.textContent = e.target.value;
+    });
+  }
+  if (sentimentalitySlider) {
+    sentimentalitySlider.addEventListener('input', (e) => {
+      sentimentalityValue.textContent = e.target.value;
+    });
+  }
+  if (energySlider) {
+    energySlider.addEventListener('input', (e) => {
+      energyValue.textContent = e.target.value;
+    });
+  }
+  if (adviceSlider) {
+    adviceSlider.addEventListener('input', (e) => {
+      adviceValue.textContent = e.target.value;
+    });
   }
 }
 
@@ -148,6 +209,7 @@ async function handlePersonaChange(event) {
     clearPersonaInfo();
     clearMemories();
     clearSnapshots();
+    clearSettings();
     clearChat();
     return;
   }
@@ -190,6 +252,9 @@ async function loadPersonaDetails(personaId) {
         snapshotsSection.style.display = 'block';
       }
     }
+    
+    // Load settings
+    await loadPersonaSettings(personaId);
   } catch (error) {
     console.error('Failed to load persona details:', error);
     showError('Failed to load persona details');
@@ -587,6 +652,134 @@ async function restoreSnapshot(snapshotId) {
     console.error('Failed to restore snapshot:', error);
     showError('Failed to restore snapshot');
   }
+}
+
+// Load persona settings
+async function loadPersonaSettings(personaId) {
+  try {
+    const response = await fetch(`/api/personas/${personaId}/settings`);
+    const result = await response.json();
+    
+    if (result.success) {
+      settings = result.data;
+      displaySettings();
+      if (settingsSection) {
+        settingsSection.style.display = 'block';
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load settings:', error);
+    showError('Failed to load settings');
+  }
+}
+
+// Display settings in UI
+function displaySettings() {
+  if (!settings) return;
+  
+  // Set tone mode
+  if (toneModeSelect) {
+    toneModeSelect.value = settings.default_tone_mode || 'auto';
+  }
+  
+  // Set slider values
+  if (humorSlider) {
+    humorSlider.value = settings.humor_level || 3;
+    humorValue.textContent = settings.humor_level || 3;
+  }
+  if (honestySlider) {
+    honestySlider.value = settings.honesty_level || 3;
+    honestyValue.textContent = settings.honesty_level || 3;
+  }
+  if (sentimentalitySlider) {
+    sentimentalitySlider.value = settings.sentimentality_level || 3;
+    sentimentalityValue.textContent = settings.sentimentality_level || 3;
+  }
+  if (energySlider) {
+    energySlider.value = settings.energy_level || 3;
+    energyValue.textContent = settings.energy_level || 3;
+  }
+  if (adviceSlider) {
+    adviceSlider.value = settings.advice_level || 2;
+    adviceValue.textContent = settings.advice_level || 2;
+  }
+  
+  // Set boundaries checkboxes
+  if (settings.boundaries) {
+    if (avoidRegretSpirals) {
+      avoidRegretSpirals.checked = settings.boundaries.avoid_regret_spirals !== false;
+    }
+    if (noParanormalLanguage) {
+      noParanormalLanguage.checked = settings.boundaries.no_paranormal_language !== false;
+    }
+    if (softenSensitiveTopics) {
+      softenSensitiveTopics.checked = settings.boundaries.soften_sensitive_topics !== false;
+    }
+    if (preferReassurance) {
+      preferReassurance.checked = settings.boundaries.prefer_reassurance !== false;
+    }
+  }
+}
+
+// Clear settings
+function clearSettings() {
+  settings = null;
+  if (settingsSection) {
+    settingsSection.style.display = 'none';
+  }
+}
+
+// Handle save settings
+async function handleSaveSettings() {
+  if (!selectedPersonaId) return;
+  
+  try {
+    const updatedSettings = {
+      default_tone_mode: toneModeSelect.value,
+      humor_level: parseFloat(humorSlider.value),
+      honesty_level: parseFloat(honestySlider.value),
+      sentimentality_level: parseFloat(sentimentalitySlider.value),
+      energy_level: parseFloat(energySlider.value),
+      advice_level: parseFloat(adviceSlider.value),
+      boundaries: {
+        avoid_regret_spirals: avoidRegretSpirals.checked,
+        no_paranormal_language: noParanormalLanguage.checked,
+        soften_sensitive_topics: softenSensitiveTopics.checked,
+        prefer_reassurance: preferReassurance.checked
+      }
+    };
+    
+    const response = await fetch(`/api/personas/${selectedPersonaId}/settings`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedSettings)
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      settings = result.data;
+      showSettingsFeedback('Settings saved successfully!', 'success');
+    } else {
+      showSettingsFeedback(result.message || 'Failed to save settings', 'error');
+    }
+  } catch (error) {
+    console.error('Failed to save settings:', error);
+    showSettingsFeedback('Failed to save settings', 'error');
+  }
+}
+
+// Show settings feedback message
+function showSettingsFeedback(message, type) {
+  if (!settingsFeedback) return;
+  
+  settingsFeedback.textContent = message;
+  settingsFeedback.className = `settings-feedback ${type}`;
+  settingsFeedback.style.display = 'block';
+  
+  setTimeout(() => {
+    settingsFeedback.style.display = 'none';
+  }, 3000);
 }
 
 // Handle send message

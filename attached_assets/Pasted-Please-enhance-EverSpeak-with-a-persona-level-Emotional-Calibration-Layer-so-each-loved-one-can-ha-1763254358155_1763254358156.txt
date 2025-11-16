@@ -1,0 +1,181 @@
+Please enhance EverSpeak with a persona-level “Emotional Calibration Layer” so each loved one can have custom communication settings that influence AI responses.
+
+Do NOT break any existing endpoints, JSON structures, or flows. Only extend.
+
+A. Backend: Persona Settings / Calibration
+
+1) Extend the persona model in src/personas/personas.json to include a new optional field `settings` on each persona. For example:
+
+{
+  "id": "uuid",
+  "name": "Jimmy",
+  "relationship": "Brother",
+  "description": "Short summary",
+  "memories": [ ... ],
+  "settings": {
+    "default_tone_mode": "auto",
+    "humor_level": 3,
+    "honesty_level": 4,
+    "sentimentality_level": 2,
+    "energy_level": 3,
+    "advice_level": 2,
+    "boundaries": {
+      "avoid_regret_spirals": true,
+      "no_paranormal_language": true,
+      "soften_sensitive_topics": true,
+      "prefer_reassurance": true
+    }
+  },
+  "snapshots": [ ... ],
+  "created_at": "...",
+  "updated_at": "..."
+}
+
+2) Add new REST endpoints for calibration under /api/personas:
+
+- GET /api/personas/:id/settings
+  - Returns the `settings` object for that persona.
+  - If no settings exist yet, return a default settings object with reasonable defaults:
+    - default_tone_mode: "auto"
+    - humor_level: 3
+    - honesty_level: 3
+    - sentimentality_level: 3
+    - energy_level: 3
+    - advice_level: 2
+    - boundaries:
+      - avoid_regret_spirals: true
+      - no_paranormal_language: true
+      - soften_sensitive_topics: true
+      - prefer_reassurance: true
+
+- PUT /api/personas/:id/settings
+  - Accepts a JSON body with any/all of these fields:
+    - default_tone_mode: "auto" | "gentle" | "casual" | "real_talk" | "playful"
+    - humor_level: number 0–5
+    - honesty_level: number 0–5
+    - sentimentality_level: number 0–5
+    - energy_level: number 0–5
+    - advice_level: number 0–5
+    - boundaries: object with:
+      - avoid_regret_spirals: boolean
+      - no_paranormal_language: boolean
+      - soften_sensitive_topics: boolean
+      - prefer_reassurance: boolean
+  - Perform validation:
+    - tone_mode must be one of the allowed values if provided.
+    - levels must be numbers between 0 and 5 if provided.
+    - boundaries booleans must be booleans if present.
+  - Merge updates into existing settings (partial updates allowed) and persist to personas.json.
+  - Return the updated settings.
+
+3) Include `settings` inside persona snapshots:
+   - When creating a snapshot, include `settings` inside `persona_state`.
+   - When restoring from a snapshot, restore `settings` too (along with name, relationship, description, memories).
+
+4) Update src/personas/utils.js as needed to safely handle reading/writing the new settings and snapshot fields.
+
+B. Backend: Use Calibration in /api/message AI Prompt
+
+1) Update the /api/message controller to:
+   - Accept an optional `persona_id` (already done) and now also load that persona’s `settings`.
+   - If `persona_id` is provided:
+     - load persona
+     - load its settings (or defaults if missing)
+     - include those settings in the AI prompt context.
+
+2) When constructing the AI prompt for OpenAI, append a section describing the calibration, for example:
+
+- “Calibration profile:
+   - Default tone mode: <default_tone_mode>
+   - Humor level (0–5): <humor_level>
+   - Honesty level (0–5): <honesty_level>
+   - Sentimentality level (0–5): <sentimentality_level>
+   - Energy level (0–5): <energy_level>
+   - Advice level (0–5): <advice_level>
+
+  Boundaries:
+   - Avoid regret spirals: <true/false>
+   - No paranormal language: <true/false>
+   - Soften sensitive topics: <true/false>
+   - Prefer reassurance over harshness: <true/false>”
+
+- Also add an instruction like:
+
+  “You MUST respect this calibration:
+   - Humor, honesty, sentimentality, energy, and advice-giving should roughly match the 0–5 sliders.
+   - If avoid_regret_spirals is true: do not feed guilt spirals; gently steer away from self-blame loops.
+   - If no_paranormal_language is true: do not imply an afterlife, ghosts, watching from elsewhere, or spiritual claims.
+   - If soften_sensitive_topics is true: respond more gently when messages contain shame, trauma, or addiction-related content.
+   - If prefer_reassurance is true: lean toward emotional reassurance and validation instead of harsh realism.”
+
+3) If no persona_id is provided, keep behavior exactly as it is today (do not require settings).
+
+4) You may include a `calibration` object in the `meta` field of the /api/message response (optional) as long as it does not break the existing structure used by the frontend.
+
+C. Frontend: Calibration UI in Persona Panel
+
+Modify public/index.html, public/styles.css, and public/app.js to add a “Persona Settings” / “Calibration” section.
+
+1) In the Persona Panel (where persona details and snapshots are), add a new section:
+
+- Title: “Persona Settings”
+- Controls:
+  - Dropdown: Default tone mode
+    - Options: Auto, Gentle, Casual, Real talk, Playful
+  - Sliders (range inputs 0–5) with labels:
+    - Humor
+    - Honesty
+    - Sentimentality
+    - Energy
+    - Advice-giving
+  - Boundaries (checkboxes):
+    - “Avoid regret spirals”
+    - “No paranormal language”
+    - “Soften sensitive topics”
+    - “Prefer reassurance”
+
+- A “Save Settings” button at the bottom of this section.
+
+2) Behavior in app.js:
+
+- When a persona is selected:
+  - Fetch its settings from GET /api/personas/:id/settings.
+  - Populate the dropdown, sliders, and checkboxes with the returned values (or defaults if none yet).
+  - Reset any local calibration state when switching personas.
+
+- When the user adjusts controls and clicks “Save Settings”:
+  - Send a PUT /api/personas/:id/settings with the current values.
+  - On success:
+    - Optionally show a small non-blocking message near the settings (e.g., “Settings saved.”).
+    - Do NOT reload the whole page; just keep the current persona and UI.
+
+3) When sending messages via POST /api/message:
+  - Keep sending `tone_mode` and `emotional_state` as you already do.
+  - No need to send the calibration fields manually; the backend will read them from the persona settings.
+  - If desired and easy, you may choose to “sync” the message’s default tone_mode with the persona’s default_tone_mode when the user hasn’t explicitly picked one (but keep current behavior working).
+
+D. Consistency and Testing
+
+- Do NOT:
+  - Remove or rename existing endpoints.
+  - Break strict mode, grounding banner, grounding line, healthy-use nudge, snapshots, or memory editing.
+
+- Ensure:
+  - Creating a persona with no settings still works and defaults are used.
+  - Snapshots save and restore settings correctly.
+  - The UI still looks clean and responsive on desktop and mobile.
+  - All flows:
+    - Create persona
+    - Edit persona
+    - Add/edit/delete memories
+    - Create/restore snapshots
+    - Toggle strict mode
+    - Chat
+    - Now also: view + update settings
+    all work end-to-end.
+
+After implementation:
+- Confirm via quick manual checks or tests:
+  - Selecting a persona loads its calibration settings.
+  - Saving settings persists and is reflected in subsequent GET /api/personas/:id/settings calls.
+  - /api/message uses persona settings in the prompt when persona_id is provided.

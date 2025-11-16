@@ -25,6 +25,20 @@
           "weight": 2.5
         }
       ],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
       "snapshots": [],
       "created_at": "2025-11-15T22:58:00.603Z",
       "updated_at": "2025-11-15T23:35:39.260Z"

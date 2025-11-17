@@ -1279,7 +1279,7 @@ function getStepProgressText(step) {
   const progressTexts = {
     1: '', // Step 1 doesn't show progress text
     2: "Learning your lost one's name...Next: Your Relationship",
-    3: "Understanding how you connected...Next: Their Humor",
+    3: "Your Relationship...Next: Time of Passing",
     4: "Capturing their humor...Next: When They Passed",
     5: "Acknowledging the loss...Next: Your Relationship",
     6: "Exploring your bond...Next: The Circumstances",
@@ -1302,13 +1302,29 @@ function updateWizardUI() {
     }
   }
   
-  // Update acknowledgment text for current step
-  const currentStep = document.getElementById(`wizard-step-${wizardCurrentStep}`);
-  if (currentStep && wizardAcknowledgments[wizardCurrentStep]) {
-    const acknowledgment = currentStep.querySelector('.step-acknowledgment');
-    if (acknowledgment) {
-      acknowledgment.textContent = wizardAcknowledgments[wizardCurrentStep];
-      acknowledgment.style.display = 'block';
+  // Special handling for Step 3: Insert name dynamically
+  if (wizardCurrentStep === 3) {
+    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const acknowledgmentEl = document.getElementById('step-3-acknowledgment');
+    const questionEl = document.getElementById('step-3-question');
+    
+    if (acknowledgmentEl) {
+      acknowledgmentEl.textContent = `Thank you for sharing that with me, ${firstName}.`;
+      acknowledgmentEl.style.display = 'block';
+    }
+    if (questionEl) {
+      questionEl.textContent = `Would you feel comfortable telling me when ${firstName} passed away?`;
+      questionEl.style.display = 'block';
+    }
+  } else {
+    // Update acknowledgment text for other steps
+    const currentStep = document.getElementById(`wizard-step-${wizardCurrentStep}`);
+    if (currentStep && wizardAcknowledgments[wizardCurrentStep]) {
+      const acknowledgment = currentStep.querySelector('.step-acknowledgment');
+      if (acknowledgment) {
+        acknowledgment.textContent = wizardAcknowledgments[wizardCurrentStep];
+        acknowledgment.style.display = 'block';
+      }
     }
   }
   

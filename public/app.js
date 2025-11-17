@@ -1279,7 +1279,7 @@ function getStepProgressText(step) {
   const progressTexts = {
     1: '', // Step 1 doesn't show progress text
     2: "Learning your lost one's name...Next: Your Relationship",
-    3: "Your Relationship...Next: Time of Passing",
+    3: "Date of Passing...Next: Reason",
     4: "Capturing their humor...Next: When They Passed",
     5: "Acknowledging the loss...Next: Your Relationship",
     6: "Exploring your bond...Next: The Circumstances",
@@ -1868,9 +1868,9 @@ function getCurrentWizardInputField() {
   // Map each step to its input field
   const stepInputMap = {
     2: 'wizard-first-name',
-    3: 'wizard-communication-style',
+    3: 'wizard-date-passed',
     4: 'wizard-humor',
-    5: 'wizard-date-passed',
+    5: 'wizard-communication-style',
     6: 'wizard-relationship-end',
     7: 'wizard-circumstances',
     8: 'wizard-memories',

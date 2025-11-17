@@ -1257,6 +1257,25 @@ const wizardAcknowledgments = {
 };
 
 // Update wizard UI
+// Get step-specific progress text
+function getStepProgressText(step) {
+  const progressTexts = {
+    1: '', // Step 1 doesn't show progress text
+    2: "Learning your lost one's name...Next: Your Relationship",
+    3: "Understanding how you connected...Next: Their Humor",
+    4: "Capturing their humor...Next: When They Passed",
+    5: "Acknowledging the loss...Next: Your Relationship",
+    6: "Exploring your bond...Next: The Circumstances",
+    7: "Honoring how it happened...Next: Key Memories",
+    8: "Gathering cherished memories...Next: Conversations",
+    9: "Remembering what they'd say...Next: Tone Settings",
+    10: "Customizing their communication style...Next: Boundaries",
+    11: "Setting healthy boundaries...Almost done"
+  };
+  
+  return progressTexts[step] || '';
+}
+
 function updateWizardUI() {
   // Hide all steps
   for (let i = 1; i <= WIZARD_TOTAL_STEPS; i++) {
@@ -1281,11 +1300,19 @@ function updateWizardUI() {
   if (wizardProgressFill) {
     wizardProgressFill.style.width = `${progressPercent}%`;
   }
-  if (wizardCurrentStepText) {
-    wizardCurrentStepText.textContent = wizardCurrentStep;
-  }
-  if (wizardTotalStepsText) {
-    wizardTotalStepsText.textContent = WIZARD_TOTAL_STEPS;
+  
+  // Update progress text based on step
+  const progressTextEl = document.getElementById('wizard-progress-text');
+  if (wizardCurrentStep === 1) {
+    // Step 1 doesn't show progress
+    if (progressTextEl) {
+      progressTextEl.style.display = 'none';
+    }
+  } else {
+    if (progressTextEl) {
+      progressTextEl.style.display = 'block';
+      progressTextEl.textContent = getStepProgressText(wizardCurrentStep);
+    }
   }
   
   // Update navigation buttons

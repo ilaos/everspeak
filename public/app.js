@@ -990,11 +990,14 @@ async function handleWizardSubmit(event) {
       // Reload persona details to refresh settings and snapshots
       await loadPersonaDetails(selectedPersonaId);
       
-      // Close modal
-      closeWizardModal();
-      
       // Generate and send first message from persona
       await generateFirstMessage(wizardInputs);
+      
+      // Hide loading and close modal
+      if (loadingEl) {
+        loadingEl.style.display = 'none';
+      }
+      closeWizardModal();
       
       showSuccess(`Persona Ready! Created ${result.memories_created} memories.`);
     } else {

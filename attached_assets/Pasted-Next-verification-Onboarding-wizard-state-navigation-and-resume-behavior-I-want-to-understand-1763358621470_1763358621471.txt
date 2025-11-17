@@ -1,0 +1,47 @@
+Next verification: Onboarding wizard state, navigation, and resume behavior.
+
+I want to understand how resilient and forgiving the onboarding wizard is.
+
+1. Wizard State Persistence
+- If the user closes the wizard mid-way (e.g., hits X, reloads the page, or navigates away):
+  - Does the wizard progress (current step + answers so far) get saved anywhere?
+  - On returning, does the user see a "resume where you left off" experience?
+  - Or does the wizard always restart at Step 1?
+
+- Please confirm:
+  - Where (if anywhere) wizard state is stored (frontend state only, localStorage, backend, etc.)
+  - What happens after a full browser refresh during onboarding.
+
+2. Persona Creation Timing
+- At what point is the persona actually created?
+  - Before the wizard starts (placeholder persona)?
+  - After the wizard completes?
+- If a persona is created BEFORE wizard completion:
+  - What happens if the user abandons onboarding?
+  - Do we end up with partially-configured personas in the list?
+  - Is there any cleanup logic for incomplete personas?
+
+3. "Continue Setup" Behavior
+- When a persona is in an incomplete state:
+  - How does the "Continue Setup" button know which step to resume at?
+  - Does it:
+    - Always start back at Step 1?
+    - Use any stored progress to jump back to the last answered step?
+- Please describe the exact logic used to determine the resume step.
+
+4. Edge Cases
+Please confirm current behavior for these situations:
+  - User clicks "Need more time" in Step Zero, closes the app, and returns later.
+  - User starts onboarding, answers up to Step 5, then refreshes the page.
+  - User completes onboarding, then reopens the wizard via some UI — what do they see?
+
+5. Deviations from Ideal UX
+Compared to an ideal grief-aware onboarding experience that:
+  - Allows resuming mid-way without losing answers
+  - Avoids cluttering the persona list with half-finished entries
+  - Treats onboarding as a meaningful ritual, not something to restart repeatedly
+
+Please list:
+  - Anything that is currently rough, incomplete, or could feel "jarring" to the user.
+
+No code changes yet — just describe current behavior and limitations.

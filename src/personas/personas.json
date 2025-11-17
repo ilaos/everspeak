@@ -747,6 +747,30 @@
       "snapshots": [],
       "created_at": "2025-11-17T00:39:29.863Z",
       "updated_at": "2025-11-17T00:39:29.863Z"
+    },
+    {
+      "id": "de229a9f-1a6f-485b-93a5-d4188bc91ce1",
+      "name": "Test",
+      "relationship": "Friend",
+      "description": "Kind",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "created_at": "2025-11-17T00:44:27.563Z",
+      "updated_at": "2025-11-17T00:44:27.563Z"
     }
   ]
 }

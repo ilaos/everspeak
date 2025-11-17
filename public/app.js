@@ -1289,7 +1289,7 @@ async function handleWizardSubmit(event) {
   
   // Collect wizard inputs
   const wizardInputs = {
-    personality: document.getElementById('wizard-personality').value.trim(),
+    first_name: document.getElementById('wizard-first-name').value.trim(),
     communication_style: document.getElementById('wizard-communication-style').value.trim(),
     humor: document.getElementById('wizard-humor').value.trim(),
     date_passed: document.getElementById('wizard-date-passed').value.trim(),

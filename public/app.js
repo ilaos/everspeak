@@ -38,6 +38,12 @@ let currentBoostRecommendations = null;
 let stepZeroModal, stepZeroMain, stepZeroMore, btnReadyToBegin, btnTellMeMore, btnOkayLetsBegin, btnNeedMoreTime;
 let needTimeBanner, btnStartEverspeak, btnCloseTimeBanner;
 
+// Conversation Room elements
+let conversationRoom, personaAvatar, avatarInitials, roomTitle, roomSubtitle;
+let textSizeNormal, textSizeLarge, voiceToggle;
+let emptyState;
+let isFirstConversation = false;
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
   // Get DOM element references
@@ -134,9 +140,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnStartEverspeak = document.getElementById('btn-start-everspeak');
   btnCloseTimeBanner = document.getElementById('btn-close-time-banner');
   
+  // Conversation Room elements
+  conversationRoom = document.getElementById('conversation-room');
+  personaAvatar = document.getElementById('persona-avatar');
+  avatarInitials = document.getElementById('avatar-initials');
+  roomTitle = document.getElementById('room-title');
+  roomSubtitle = document.getElementById('room-subtitle');
+  textSizeNormal = document.getElementById('text-size-normal');
+  textSizeLarge = document.getElementById('text-size-large');
+  voiceToggle = document.getElementById('voice-toggle');
+  emptyState = document.getElementById('empty-state');
+  
   await loadPersonas();
   await loadJournalEntries();
   setupEventListeners();
+  
+  // Initialize Conversation Room settings
+  initializeConversationRoom();
   
   // Check if we should show Step Zero on initial load
   checkAndShowStepZero();
@@ -185,6 +205,137 @@ async function handleBeginConversationFromBanner() {
   // Reload wizard inputs from persona or generate first message
   // For now, we'll just send a simple first message
   await generateFirstMessageFromBanner();
+}
+
+// Initialize Conversation Room
+function initializeConversationRoom() {
+  // Load text size preference
+  const savedTextSize = localStorage.getItem('everspeak_chat_text_size') || 'normal';
+  if (savedTextSize === 'large') {
+    textSizeLarge.classList.add('active');
+    textSizeNormal.classList.remove('active');
+    conversationRoom.classList.add('text-size-large');
+  }
+  
+  // Set up text size listeners
+  textSizeNormal.addEventListener('click', () => handleTextSizeChange('normal'));
+  textSizeLarge.addEventListener('click', () => handleTextSizeChange('large'));
+  
+  // Voice toggle is UI only - just update visual state
+  if (voiceToggle) {
+    voiceToggle.addEventListener('change', () => {
+      // Visual feedback only - no actual functionality yet
+      if (voiceToggle.checked) {
+        console.log('Voice preview enabled (UI only)');
+      } else {
+        console.log('Voice preview disabled (UI only)');
+      }
+    });
+  }
+  
+  // Update room state for initial empty state
+  updateConversationRoomState();
+}
+
+// Handle text size change
+function handleTextSizeChange(size) {
+  if (size === 'large') {
+    textSizeLarge.classList.add('active');
+    textSizeNormal.classList.remove('active');
+    conversationRoom.classList.add('text-size-large');
+    localStorage.setItem('everspeak_chat_text_size', 'large');
+  } else {
+    textSizeNormal.classList.add('active');
+    textSizeLarge.classList.remove('active');
+    conversationRoom.classList.remove('text-size-large');
+    localStorage.setItem('everspeak_chat_text_size', 'normal');
+  }
+}
+
+// Update Conversation Room state based on selected persona
+function updateConversationRoomState() {
+  if (!selectedPersonaId) {
+    // No persona selected
+    avatarInitials.textContent = '?';
+    roomTitle.textContent = 'Connection';
+    roomSubtitle.textContent = 'Select someone to begin a conversation.';
+    
+    // Show empty state
+    if (emptyState) {
+      emptyState.style.display = 'block';
+    }
+    return;
+  }
+  
+  const persona = personas.find(p => p.id === selectedPersonaId);
+  if (!persona) return;
+  
+  // Update avatar initials
+  const initials = getPersonaInitials(persona.name);
+  avatarInitials.textContent = initials;
+  
+  // Update room title
+  roomTitle.textContent = persona.name || 'Connection';
+  
+  // Check if wizard is completed (has onboarding_context or has memories)
+  const isWizardComplete = persona.onboarding_context || (persona.memories && persona.memories.length > 0);
+  
+  if (!isWizardComplete) {
+    // Incomplete setup state
+    roomSubtitle.textContent = 'Complete setup to begin meaningful conversations.';
+    showIncompleteSetupState();
+  } else {
+    // Ready state
+    roomSubtitle.textContent = 'Based on the memories you\'ve shared about this person.';
+    hideIncompleteSetupState();
+    
+    // Hide empty state
+    if (emptyState) {
+      emptyState.style.display = 'none';
+    }
+  }
+}
+
+// Get initials from persona name
+function getPersonaInitials(name) {
+  if (!name) return '?';
+  
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) {
+    return words[0].charAt(0).toUpperCase();
+  } else {
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+  }
+}
+
+// Show incomplete setup state
+function showIncompleteSetupState() {
+  if (emptyState) {
+    emptyState.innerHTML = `
+      <div class="incomplete-setup-state">
+        <p>You\'ve started setting up this connection. To make conversations feel meaningful, complete the setup first.</p>
+        <button class="btn-continue-setup" id="btn-continue-setup-inline" data-testid="button-continue-setup-inline">Continue Setup</button>
+      </div>
+    `;
+    emptyState.style.display = 'block';
+    
+    // Add event listener to the continue setup button
+    const continueBtn = document.getElementById('btn-continue-setup-inline');
+    if (continueBtn) {
+      continueBtn.addEventListener('click', () => {
+        if (setupWizardBtn) {
+          setupWizardBtn.click();
+        }
+      });
+    }
+  }
+}
+
+// Hide incomplete setup state
+function hideIncompleteSetupState() {
+  if (emptyState && emptyState.querySelector('.incomplete-setup-state')) {
+    emptyState.style.display = 'none';
+  }
 }
 
 // Setup event listeners
@@ -490,11 +641,13 @@ async function handlePersonaChange(event) {
     clearSnapshots();
     clearSettings();
     clearChat();
+    updateConversationRoomState();
     return;
   }
   
   selectedPersonaId = personaId;
   await loadPersonaDetails(personaId);
+  updateConversationRoomState();
 }
 
 // Load persona details and memories
@@ -999,14 +1152,31 @@ async function handleWizardSubmit(event) {
       // Reload persona details to refresh settings and snapshots
       await loadPersonaDetails(selectedPersonaId);
       
-      // Generate and send first message from persona
-      await generateFirstMessage(wizardInputs);
-      
-      // Hide loading and close modal
+      // Hide loading and close modal first
       if (loadingEl) {
         loadingEl.style.display = 'none';
       }
       closeWizardModal();
+      
+      // Scroll to conversation room and add highlight effect
+      if (conversationRoom) {
+        conversationRoom.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        conversationRoom.style.boxShadow = '0 0 20px rgba(212, 165, 116, 0.5)';
+        setTimeout(() => {
+          conversationRoom.style.transition = 'box-shadow 2s ease-out';
+          conversationRoom.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.06)';
+        }, 1000);
+      }
+      
+      // Show pre-roll message
+      showPreRollMessage();
+      
+      // Wait a moment, then generate first message
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      removePreRollMessage();
+      
+      // Generate and send first message from persona
+      await generateFirstMessage(wizardInputs);
       
       showSuccess(`Persona Ready! Created ${result.memories_created} memories.`);
     } else {
@@ -1054,9 +1224,10 @@ async function generateFirstMessage(wizardInputs) {
     
     const result = await response.json();
     
-    if (result.success && result.reply) {
-      // Display the first message in chat
-      displayMessage(result.reply, 'assistant');
+    if (result.success && result.data && result.data.reply) {
+      const personaName = result.data.meta?.persona_name || persona.name || 'Persona';
+      // Display the first message in chat with special first-message styling
+      addMessageToChat(personaName, result.data.reply, false, true);
       userMessageCount = 0; // Reset count since this is AI-initiated
     }
   } catch (error) {
@@ -1092,8 +1263,9 @@ async function generateFirstMessageFromBanner() {
     
     const result = await response.json();
     
-    if (result.success && result.reply) {
-      displayMessage(result.reply, 'assistant');
+    if (result.success && result.data && result.data.reply) {
+      const personaName = result.data.meta?.persona_name || persona.name || 'Persona';
+      addMessageToChat(personaName, result.data.reply, false, true);
       userMessageCount = 0;
     }
   } catch (error) {
@@ -1117,7 +1289,7 @@ function buildFirstMessagePrompt(persona, wizardInputs) {
   }
   
   parts.push(
-    `Generate a warm, grounded first message. Make it feel like you're genuinely reaching out - familiar, natural, and true to who you were. Not spooky, not omniscient, not supernatural. Just... you.`,
+    `Generate a warm, grounded first message. Make it feel like you\'re genuinely reaching out - familiar, natural, and true to who you were. Not spooky, not omniscient, not supernatural. Just... you.`,
     `Keep it brief (2-3 sentences max).`
   );
   
@@ -1910,10 +2082,48 @@ async function handleSendMessage(event) {
   }
 }
 
+// Show pre-roll message for first conversation
+function showPreRollMessage() {
+  // Remove empty state or incomplete setup state
+  if (emptyState) {
+    emptyState.style.display = 'none';
+  }
+  
+  // Add pre-roll message
+  const preRoll = document.createElement('div');
+  preRoll.className = 'pre-roll-message';
+  preRoll.id = 'pre-roll-message';
+  preRoll.innerHTML = `
+    <p>EverSpeak is gently gathering what you\'ve shared about this person…</p>
+    <div class="loading-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  `;
+  
+  chatMessages.appendChild(preRoll);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  
+  return preRoll;
+}
+
+// Remove pre-roll message
+function removePreRollMessage() {
+  const preRoll = document.getElementById('pre-roll-message');
+  if (preRoll) {
+    preRoll.remove();
+  }
+}
+
 // Add message to chat
-function addMessageToChat(sender, message, isUser) {
+function addMessageToChat(sender, message, isUser, isFirstMessage = false) {
   const messageDiv = document.createElement('div');
-  messageDiv.className = `message ${isUser ? 'user' : 'persona'}`;
+  let className = `message ${isUser ? 'user' : 'persona'}`;
+  if (isFirstMessage && !isUser) {
+    className += ' first-message';
+  }
+  messageDiv.className = className;
   messageDiv.setAttribute('data-testid', `message-${isUser ? 'user' : 'persona'}`);
   
   let messageHTML = `
@@ -1925,7 +2135,7 @@ function addMessageToChat(sender, message, isUser) {
   if (!isUser && sender !== 'System') {
     const personaName = sender;
     messageHTML += `
-      <div class="message-grounding">Based on the memories you've shared about ${escapeHtml(personaName)}.</div>
+      <div class="message-grounding">Based on the memories you\'ve shared about ${escapeHtml(personaName)}.</div>
     `;
   }
   
@@ -1945,10 +2155,13 @@ function addMessageToChat(sender, message, isUser) {
     messageDiv.appendChild(strictLink);
   }
   
-  // Remove placeholder if exists
+  // Remove placeholder or empty state if exists
   const placeholder = chatMessages.querySelector('.placeholder');
   if (placeholder) {
     placeholder.remove();
+  }
+  if (emptyState) {
+    emptyState.style.display = 'none';
   }
   
   chatMessages.appendChild(messageDiv);
@@ -1974,7 +2187,21 @@ function addTypingIndicator() {
 
 // Clear chat
 function clearChat() {
-  chatMessages.innerHTML = '<p class="placeholder">Select a persona and start chatting</p>';
+  // Remove all messages but preserve the empty-state div
+  const messages = chatMessages.querySelectorAll('.message, .pre-roll-message');
+  messages.forEach(msg => msg.remove());
+  
+  // Remove placeholder if exists
+  const placeholder = chatMessages.querySelector('.placeholder');
+  if (placeholder) {
+    placeholder.remove();
+  }
+  
+  // Show empty state with default message
+  if (emptyState) {
+    emptyState.innerHTML = '<p>To begin, create or select someone you\'d like to talk to.</p>';
+    emptyState.style.display = 'block';
+  }
   
   // Reset message counter and healthy-use nudge when switching personas
   userMessageCount = 0;
@@ -2221,7 +2448,7 @@ function showStepZeroMore() {
   }
 }
 
-// Handle "I'm ready to begin" or "Okay, let's begin"
+// Handle "I\'m ready to begin" or "Okay, let\'s begin"
 async function handleReadyToBegin() {
   // Mark Step Zero as completed in localStorage
   localStorage.setItem('stepZeroCompleted', 'true');

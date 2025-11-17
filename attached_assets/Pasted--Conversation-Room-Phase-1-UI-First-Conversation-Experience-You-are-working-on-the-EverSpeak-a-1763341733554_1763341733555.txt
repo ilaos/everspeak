@@ -1,0 +1,304 @@
+“Conversation Room” Phase 1 (UI + First Conversation Experience)
+
+You are working on the EverSpeak app in this Replit project. The backend, personas, onboarding wizard, grounding features, journaling, and first-message onboarding_context logic are already implemented and working.
+
+Now I want you to redesign and upgrade the conversation experience (the chat panel) into a warm, emotionally grounded “Conversation Room” while keeping all existing functionality intact.
+
+🔷 High-Level Goals
+
+Transform the current chat panel UI into a dedicated, emotionally warm “conversation room” that feels like a safe, special space to talk to a loved one.
+
+Make the first conversation after onboarding feel like a significant, gentle moment, visually and emotionally distinct from everything else.
+
+Improve readability and accessibility (especially for older users) with a simple text-size control.
+
+Prepare non-functional UI hooks for future voice & photo features (UI only, no real TTS or image upload yet).
+
+Do not introduce any monetization, upsells, or spammy elements here.
+
+Work primarily in public/index.html, public/styles.css, and public/app.js. Keep all existing APIs, backend behavior, and data models unchanged.
+
+1️⃣ Conversation Room Layout & Visual Design
+A. Chat Panel Becomes the “Conversation Room”
+
+Currently the chat panel is functional but feels utilitarian. I want you to restyle and restructure it so it feels like a soft, private room just for the user and their loved one.
+
+Requirements:
+
+Keep the existing chat logic and DOM hooks, but:
+
+Wrap the chat area in a container like .conversation-room.
+
+Add a header, message area, and footer controls structure.
+
+Header contents should include:
+
+Persona name (or “Connection” if no name yet).
+
+A small line like:
+
+When persona is selected:
+
+“Based on the memories you’ve shared about this person.”
+
+When no persona selected:
+
+“Select someone to begin a conversation.”
+
+A subtle, calm background (soft gradient or gentle solid color) using the existing palette style (match rest of app).
+
+Message area:
+
+Use a card-like, softly rounded container for the messages.
+
+Give messages more breathing room (padding, line-height).
+
+User messages and persona messages should be visually distinct:
+
+User bubble aligned to the right.
+
+Persona bubble aligned to the left.
+
+Keep the grounding line under persona replies, but style it gently:
+
+Smaller text, italic, muted color.
+
+It should look intentional and reassuring, not like debug text.
+
+Footer:
+
+Contains:
+
+Text input box.
+
+Send button.
+
+Emotional state and tone dropdowns (keep current functionality, but visually de-emphasize them so they don’t feel like required “form fields”).
+
+Place them below or beside the input with smaller labels like “Optional: mood” / “Optional: tone”.
+
+Make sure the whole conversation room looks and feels:
+
+Warm
+
+Safe
+
+Uncluttered
+
+Emotionally inviting
+
+2️⃣ First Conversation Visual Transition
+
+You already implemented onboarding_context and is_first_message: true to generate a special, warm first message.
+
+Now I want to visually mark that moment as special.
+
+A. When a persona completes the wizard
+
+After the 10-step wizard is completed and the persona is saved:
+
+Automatically focus the conversation room:
+
+Scroll or visually bring the chat area into view.
+
+You can add a subtle highlight (e.g., a temporary glow around .conversation-room that fades out after ~2 seconds).
+
+Before the first message appears, show a short “pre-roll” state in the conversation room:
+
+For example, in the messages area:
+
+Show a small system message like:
+
+“EverSpeak is gently gathering what you shared about this person…”
+
+Show a subtle loading shimmer or three-dot indicator for a couple of seconds while /api/message with is_first_message: true is called.
+
+When the first AI reply comes back:
+
+Fade it in smoothly (CSS transition).
+
+Possibly use a slightly different bubble style for this very first persona message (e.g., a slightly softer background) to emphasize “this is the first hello”.
+
+Still include the grounding line under it.
+
+B. Subsequent Chats
+
+After the first message:
+
+Return to normal chat bubbles.
+
+No more pre-roll message.
+
+Ensure is_first_message logic is only used once per persona/session, as you already implemented.
+
+3️⃣ Accessibility: Text Size Control for Conversation
+
+We want this to be usable for older parents and anyone who prefers larger text.
+
+Add a simple text size toggle for the conversation room only.
+
+Requirements:
+
+In the conversation room header or footer, add a small control like:
+
+Label: “Text size”
+
+Options: Normal / Large
+
+Could be:
+
+a small toggle switch, or
+
+a segmented control with two buttons.
+
+When set to Large:
+
+Increase font-size for:
+
+Persona messages
+
+User messages
+
+Grounding lines
+
+Ensure it still looks clean and doesn’t break layout.
+
+Persist the setting in localStorage:
+
+Key something like everspeak_chat_text_size.
+
+Load preference on page load.
+
+Apply immediately when persona or chat is visible.
+
+Do not change global font sizes—only within the conversation room.
+
+4️⃣ Voice UI Hooks (UI Only, No Audio Yet)
+
+We are NOT implementing TTS or real audio in this phase, just preparing the UI.
+
+Requirements:
+
+In the conversation room header or footer, add a small toggle control for “Voice playback”:
+
+Label example: “Voice responses (coming soon)” or “Read messages aloud (preview)”.
+
+This should:
+
+Change visual state (on/off).
+
+Be clearly marked as optional and in preview / not active yet.
+
+For now:
+
+Do not call any audio APIs.
+
+No real behavior beyond updating UI state and maybe adding/removing a CSS class like .voice-preview-enabled.
+
+We are just creating a visually discoverable but honest hook for future voice features.
+
+5️⃣ Photo / Avatar Framework (UI Only)
+
+Again, UI only, no upload backend yet.
+
+Requirements:
+
+In the conversation room header, add a circular avatar area on the left:
+
+If the persona has no photo:
+
+Show initials (e.g., “J” or “JD” from the persona name).
+
+Use a soft, tasteful background color that matches the palette.
+
+Architect this in a way that:
+
+Later, when persona data has a photoUrl, we can easily drop in a real image.
+
+For now, no upload flows, no extra modals.
+
+Just render based on persona.name.
+
+6️⃣ State Handling: No Persona vs Persona Selected
+
+Update the conversation room to handle three user states gracefully:
+
+No persona selected
+
+Show an empty state message in the conversation room, e.g.:
+
+“To begin, create or select someone you’d like to talk to.”
+
+Disable the input box or show it but gray it out with a note.
+
+No pre-roll, no first message behavior.
+
+Persona selected but onboarding not completed (if this situation can still happen)
+
+Show a message:
+
+“You’ve started setting up this connection. To make conversations feel meaningful, complete the setup first.”
+
+Provide a button: “Continue Setup” that re-opens the wizard for that persona.
+
+Do not allow normal chat until wizard is complete.
+
+Persona selected and onboarding completed
+
+Show normal conversation room.
+
+If this is the first conversation (no messages yet for this persona session):
+
+Trigger the pre-roll first message flow from section 2.
+
+If your existing data model already has a way to detect onboarding completion, use that. If not, reuse whatever logic you already had for the wizard to infer when a persona is “ready”.
+
+7️⃣ Implementation Constraints & Testing
+
+Do not break any existing functionality:
+
+Persona CRUD
+
+Memories panel
+
+Journaling panel
+
+Strict mode
+
+Calibration settings
+
+Grounding banner
+
+Step Zero flows
+
+Reuse existing CSS variables and fonts where possible; keep the design consistent with the current visual language.
+
+After implementing:
+
+Verify the conversation still works end-to-end.
+
+Manually test:
+
+First-time onboarding → wizard complete → first message.
+
+Returning user with existing personas.
+
+Text-size toggle persists.
+
+Voice toggle visually works (even if non-functional).
+
+No persona selected state.
+
+If any existing Playwright/end-to-end tests are coupled to the old chat DOM structure, update them carefully to target the new structure without losing the intent of the tests.
+
+Finally, update replit.md with a short section describing:
+
+The new “Conversation Room” UI.
+
+The text-size preference.
+
+The is_first_message visual behavior.
+
+The new UI-only voice and avatar hooks.
+
+Please implement all of this now, end-to-end.

@@ -39,6 +39,7 @@ let wizardMediaRecorder = null;
 let wizardAudioChunks = [];
 let isWizardRecording = false;
 let wizardVoiceBtn;
+let wizardWelcomeMain, wizardWelcomeMore, btnWizardReady, btnWizardTellMore, btnWizardOkayBegin, btnWizardBack;
 let boostPersonaBtn, boostModal, closeBoost, refreshBoostBtn, applyToneBtn;
 let boostLoading, boostResults;
 let currentBoostRecommendations = null;
@@ -119,6 +120,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   wizardTotalStepsText = document.getElementById('wizard-total-steps');
   skipCircumstancesBtn = document.getElementById('skip-circumstances');
   wizardVoiceBtn = document.getElementById('wizard-voice-btn');
+  
+  // Wizard welcome screen elements
+  wizardWelcomeMain = document.getElementById('wizard-welcome-main');
+  wizardWelcomeMore = document.getElementById('wizard-welcome-more');
+  btnWizardReady = document.getElementById('btn-wizard-ready');
+  btnWizardTellMore = document.getElementById('btn-wizard-tell-more');
+  btnWizardOkayBegin = document.getElementById('btn-wizard-okay-begin');
+  btnWizardBack = document.getElementById('btn-wizard-back');
   
   // First conversation banner
   firstConversationBanner = document.getElementById('first-conversation-banner');
@@ -525,6 +534,20 @@ function setupEventListeners() {
   // Wizard voice button
   if (wizardVoiceBtn) {
     wizardVoiceBtn.addEventListener('click', handleWizardVoiceRecording);
+  }
+  
+  // Wizard welcome screen buttons
+  if (btnWizardReady) {
+    btnWizardReady.addEventListener('click', wizardNextStep);
+  }
+  if (btnWizardTellMore) {
+    btnWizardTellMore.addEventListener('click', showWizardTellMore);
+  }
+  if (btnWizardOkayBegin) {
+    btnWizardOkayBegin.addEventListener('click', wizardNextStep);
+  }
+  if (btnWizardBack) {
+    btnWizardBack.addEventListener('click', showWizardMain);
   }
   
   // Wizard slider value updates
@@ -1725,6 +1748,22 @@ function getCurrentWizardInputField() {
   }
   
   return null;
+}
+
+// Show "tell me more" section in wizard welcome
+function showWizardTellMore() {
+  if (wizardWelcomeMain && wizardWelcomeMore) {
+    wizardWelcomeMain.style.display = 'none';
+    wizardWelcomeMore.style.display = 'block';
+  }
+}
+
+// Show main welcome section
+function showWizardMain() {
+  if (wizardWelcomeMain && wizardWelcomeMore) {
+    wizardWelcomeMain.style.display = 'block';
+    wizardWelcomeMore.style.display = 'none';
+  }
 }
 
 // Open boost modal

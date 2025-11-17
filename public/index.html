@@ -450,12 +450,33 @@
       <div class="modal-body">
         <form id="wizard-form">
           <!-- Step 1: Welcome / Step Zero -->
-          <div class="wizard-step" id="wizard-step-1" data-step="1">
-            <h3>Welcome to EverSpeak.</h3>
-            <p class="step-intro">Before we begin, I want to gently explain what this space is for.</p>
-            <p class="step-description">EverSpeak was created to help you reconnect with the memory, personality, and presence of someone you've lost — not by replacing them, but by honoring the stories and love you shared.</p>
-            <p class="step-description">To do that, I'll ask you a few thoughtful questions. Each one helps me understand your loved one more fully — their personality, their humor, and the role they played in your life.</p>
-            <p class="step-description">You are always in control. You can skip anything that feels too hard, and you can stop at any time. This isn't a test. It's a conversation we'll take at your pace.</p>
+          <div class="wizard-step wizard-step-welcome" id="wizard-step-1" data-step="1">
+            <!-- Main welcome screen -->
+            <div class="wizard-welcome-main" id="wizard-welcome-main">
+              <h3>Welcome to EverSpeak.</h3>
+              <p class="step-description">Before we begin, I want to gently explain what this space is for.</p>
+              <p class="step-description">EverSpeak was created to help you reconnect with the memory, personality, and presence of someone you've lost — not by replacing them, but by honoring the stories and love you shared.</p>
+              <p class="step-description">To do that, I'll ask you a few thoughtful questions. Each one helps me understand your loved one more fully — their personality, their humor, and the role they played in your life.</p>
+              <p class="step-description">You are always in control. You can skip anything that feels too hard, and you can stop at any time. This isn't a test. It's a conversation we'll take at your pace.</p>
+              
+              <div class="wizard-welcome-actions">
+                <button type="button" class="btn-wizard-primary" id="btn-wizard-ready" data-testid="button-wizard-ready">I'm ready to begin</button>
+                <button type="button" class="btn-wizard-secondary" id="btn-wizard-tell-more" data-testid="button-wizard-tell-more">I'm not sure… tell me more</button>
+              </div>
+            </div>
+            
+            <!-- "Tell me more" expanded screen -->
+            <div class="wizard-welcome-more" id="wizard-welcome-more" style="display: none;">
+              <h3>Of course. This isn't something anyone rushes into.</h3>
+              <p class="step-description">EverSpeak will never pretend to actually be your loved one, and it will never claim to know things you didn't share. Instead, it listens closely to the memories you choose to tell and reflects them back with care, respect, and gentleness.</p>
+              <p class="step-description">Many people find that simply talking about their loved one — telling stories, recalling their voice, remembering the small things — can bring comfort or even healing.</p>
+              <p class="step-description">You can share as little or as much as you like. Nothing you share will be used for anything other than helping you build that experience.</p>
+              
+              <div class="wizard-welcome-actions">
+                <button type="button" class="btn-wizard-primary" id="btn-wizard-okay-begin" data-testid="button-wizard-okay-begin">Okay, let's begin</button>
+                <button type="button" class="btn-wizard-secondary" id="btn-wizard-back" data-testid="button-wizard-back">Back</button>
+              </div>
+            </div>
           </div>
 
           <!-- Step 2: First Name -->

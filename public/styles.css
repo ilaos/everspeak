@@ -1827,6 +1827,72 @@ button[type="submit"]:active {
   }
 }
 
+.wizard-step-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wizard-welcome-main,
+.wizard-welcome-more {
+  width: 100%;
+  max-width: 550px;
+}
+
+.wizard-welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+  margin: 32px auto 0;
+}
+
+.btn-wizard-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-wizard-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-wizard-primary:active {
+  transform: translateY(0);
+}
+
+.btn-wizard-secondary {
+  background: transparent;
+  color: #7f8c8d;
+  border: 1px solid #cbd5e0;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-wizard-secondary:hover {
+  background: #f7fafc;
+  border-color: #a0aec0;
+  color: #4a5568;
+}
+
+.btn-wizard-secondary:active {
+  background: #edf2f7;
+}
+
 .wizard-progress {
   padding: 20px;
   border-bottom: 1px solid #e0e0e0;

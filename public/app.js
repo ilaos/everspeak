@@ -35,6 +35,10 @@ let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
+let wizardMediaRecorder = null;
+let wizardAudioChunks = [];
+let isWizardRecording = false;
+let wizardVoiceBtn;
 let boostPersonaBtn, boostModal, closeBoost, refreshBoostBtn, applyToneBtn;
 let boostLoading, boostResults;
 let currentBoostRecommendations = null;
@@ -114,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   wizardCurrentStepText = document.getElementById('wizard-current-step');
   wizardTotalStepsText = document.getElementById('wizard-total-steps');
   skipCircumstancesBtn = document.getElementById('skip-circumstances');
+  wizardVoiceBtn = document.getElementById('wizard-voice-btn');
   
   // First conversation banner
   firstConversationBanner = document.getElementById('first-conversation-banner');
@@ -515,6 +520,11 @@ function setupEventListeners() {
         closeWizardModal();
       }
     });
+  }
+  
+  // Wizard voice button
+  if (wizardVoiceBtn) {
+    wizardVoiceBtn.addEventListener('click', handleWizardVoiceRecording);
   }
   
   // Wizard slider value updates
@@ -1593,6 +1603,128 @@ function showVoiceStatus(message, type) {
     }
     voiceStatus.style.display = 'block';
   }
+}
+
+// ===================================
+// Wizard Voice Recording Functions
+// ===================================
+
+// Handle wizard voice recording
+async function handleWizardVoiceRecording() {
+  if (!isWizardRecording) {
+    // Start recording
+    await startWizardVoiceRecording();
+  } else {
+    // Stop recording
+    await stopWizardVoiceRecording();
+  }
+}
+
+// Start wizard voice recording
+async function startWizardVoiceRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    
+    wizardMediaRecorder = new MediaRecorder(stream);
+    wizardAudioChunks = [];
+    
+    wizardMediaRecorder.addEventListener('dataavailable', (event) => {
+      wizardAudioChunks.push(event.data);
+    });
+    
+    wizardMediaRecorder.addEventListener('stop', async () => {
+      const audioBlob = new Blob(wizardAudioChunks, { type: 'audio/webm' });
+      await transcribeWizardAudio(audioBlob);
+      
+      // Stop all tracks
+      stream.getTracks().forEach(track => track.stop());
+    });
+    
+    wizardMediaRecorder.start();
+    isWizardRecording = true;
+    
+    // Update UI
+    wizardVoiceBtn.classList.add('recording');
+    wizardVoiceBtn.title = 'Recording... Click to stop';
+  } catch (error) {
+    console.error('Failed to start wizard recording:', error);
+    showError('Could not access microphone. Please check permissions.');
+  }
+}
+
+// Stop wizard voice recording
+async function stopWizardVoiceRecording() {
+  if (wizardMediaRecorder && isWizardRecording) {
+    wizardMediaRecorder.stop();
+    isWizardRecording = false;
+    
+    // Update UI
+    wizardVoiceBtn.classList.remove('recording');
+    wizardVoiceBtn.title = 'Speak instead of typing';
+  }
+}
+
+// Transcribe wizard audio
+async function transcribeWizardAudio(audioBlob) {
+  try {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'wizard-recording.webm');
+    
+    const response = await fetch('/api/transcribe', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.text) {
+      // Get the current step's input field
+      const currentInputField = getCurrentWizardInputField();
+      
+      if (currentInputField) {
+        const currentText = currentInputField.value.trim();
+        if (currentText) {
+          // Append to existing text
+          currentInputField.value = currentText + ' ' + result.text;
+        } else {
+          // Replace empty field
+          currentInputField.value = result.text;
+        }
+        showSuccess('Voice transcribed successfully');
+      } else {
+        showError('No input field available for this step');
+      }
+    } else {
+      showError(result.error || 'Could not transcribe audio. Please try again.');
+    }
+  } catch (error) {
+    console.error('Wizard transcription error:', error);
+    showError('Could not transcribe audio. Please try again.');
+  }
+}
+
+// Get the current wizard step's input field
+function getCurrentWizardInputField() {
+  const currentStep = wizardCurrentStep;
+  
+  // Map each step to its input field
+  const stepInputMap = {
+    2: 'wizard-first-name',
+    3: 'wizard-communication-style',
+    4: 'wizard-humor',
+    5: 'wizard-date-passed',
+    6: 'wizard-relationship-end',
+    7: 'wizard-circumstances',
+    8: 'wizard-memories',
+    9: 'wizard-conversations'
+  };
+  
+  const inputId = stepInputMap[currentStep];
+  if (inputId) {
+    return document.getElementById(inputId);
+  }
+  
+  return null;
 }
 
 // Open boost modal

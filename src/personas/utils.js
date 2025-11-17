@@ -56,6 +56,7 @@ export function createPersona(name, relationship, description) {
     memories: [],
     settings: getDefaultSettings(),
     snapshots: [],
+    onboarding_context: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
@@ -98,7 +99,10 @@ export function createSnapshot(persona, name) {
       memories: JSON.parse(JSON.stringify(persona.memories)),
       settings: persona.settings 
         ? JSON.parse(JSON.stringify(persona.settings))
-        : getDefaultSettings()
+        : getDefaultSettings(),
+      onboarding_context: persona.onboarding_context 
+        ? JSON.parse(JSON.stringify(persona.onboarding_context))
+        : null
     }
   };
 }
@@ -120,6 +124,9 @@ export function restoreFromSnapshot(persona, snapshot) {
     settings: snapshot.persona_state.settings 
       ? JSON.parse(JSON.stringify(snapshot.persona_state.settings))
       : getDefaultSettings(),
+    onboarding_context: snapshot.persona_state.onboarding_context 
+      ? JSON.parse(JSON.stringify(snapshot.persona_state.onboarding_context))
+      : null,
     updated_at: new Date().toISOString()
   };
 }

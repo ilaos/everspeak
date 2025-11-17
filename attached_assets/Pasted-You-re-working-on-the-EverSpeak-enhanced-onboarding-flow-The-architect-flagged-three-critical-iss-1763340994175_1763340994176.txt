@@ -1,0 +1,183 @@
+You’re working on the EverSpeak “enhanced onboarding” flow. The architect flagged three critical issues we now want you to fix and fully wire up:
+
+1️⃣ Use ALL wizard answers in the data model
+
+Right now, the expanded 10-step onboarding wizard collects more information (date of passing, circumstances, relationship dynamic, etc.), but those form fields are not actually sent to the API or stored anywhere meaningful.
+
+Goal: Make sure every new onboarding field is:
+
+Captured in the frontend wizard state
+
+Sent in the API request on submit
+
+Stored in the persona in a structured way
+
+Available later for the first conversation and future features
+
+Requirements
+
+Find the wizard submit handler in public/app.js (or wherever the wizard is implemented) and identify:
+
+The full list of fields currently on the wizard (beyond just name/relationship/description).
+
+The API call that fires when the wizard is completed (whatever endpoint you created earlier — e.g., a wizard endpoint or persona update endpoint).
+
+Extend the payload to include all the new onboarding fields you already collected in the UI. Examples of the kinds of fields we expect (names can match your implementation, just be consistent):
+
+when_they_passed (or time_since_loss)
+
+how_they_passed / circumstances_of_passing
+
+relationship_dynamics (what the relationship was like before they died)
+
+what_user_misses_most
+
+unfinished_conversations
+
+Any other new wizard fields you added for the enhanced flow.
+
+On the backend, add a structured place on the persona to store this. For example:
+
+onboarding_context: {
+  when_they_passed: string | null,
+  how_they_passed: string | null,
+  relationship_dynamics: string | null,
+  what_user_misses_most: string | null,
+  unfinished_conversations: string | null
+}
+
+
+Use whatever naming you think is clean and matches the wizard, but make it a single nested object rather than scattering fields everywhere.
+
+Update the personas JSON load/save logic so this new onboarding_context is persisted.
+
+Make sure snapshots also capture and restore this field so onboarding context is versioned with the persona.
+
+Keep the implementation backwards compatible:
+
+Existing personas without onboarding_context should still load with safe defaults (e.g., null or empty strings).
+
+Validation should be gentle: don’t require every question; allow some fields to be empty or skipped.
+
+2️⃣ Make the first message actually use the onboarding context
+
+The second architect issue: the “first message” from the persona currently does not use any of the new onboarding data. We want that first persona-initiated message to feel grounded in what the user just shared—while respecting all our ethical guardrails (no paranormal language, no “I remember dying,” etc).
+
+Goal: When the user enters the conversation room for the very first time after onboarding, the first AI reply should:
+
+Use the persona’s name and relationship
+
+Acknowledge the user’s loss in a warm, therapeutic way
+
+Gently reference a few key pieces of onboarding context (e.g., how long it’s been, what the user misses, the relationship dynamic)
+
+Stay within our non-supernatural, memory-based framing
+
+Requirements
+
+Identify how the “first message” flow currently works:
+
+How does the chat panel detect that it’s the first conversation for that persona?
+
+How does it currently trigger the first AI response (or persona-initiated message)?
+If there isn’t a clear “first message” flag yet, create one in the simplest way possible (e.g., a frontend isFirstConversationForPersona flag that calls /api/message with a conversation_stage: "first" or similar).
+
+Update the backend /api/message handler so that when it detects this is a first conversation (via a clear and documented conversation_stage or is_first_message flag in the request body), it:
+
+Loads the persona.
+
+Loads onboarding_context for that persona.
+
+Builds an AI prompt that explicitly includes:
+
+persona name + relationship (e.g., “Jim, younger brother”)
+
+how/when they passed (if provided)
+
+relationship dynamics (if provided)
+
+what the user misses most (if provided)
+
+any unfinished conversations, regrets, or themes the user shared
+
+The AI instructions should make it clear:
+
+This is the first message.
+
+The response should sound like the loved one’s tone but never claim real awareness, memory, or an afterlife.
+
+It should validate the user’s feelings, thank them for sharing, and gently invite them to share what’s on their mind.
+
+Keep all safety guardrails intact:
+
+No paranormal or “I’m watching over you” language.
+
+No “I remember when I died” or “from the other side.”
+
+Lean on warm, grounded, reflective language: “From what you’ve shared about me…”, “It sounds like…”, “I can hear how much this still weighs on you…”
+
+On the frontend:
+
+Ensure that the first time the user opens the chat after completing onboarding for a persona, we automatically send the message to /api/message with the proper flag so the backend knows it’s the first message.
+
+After the first message is received, clear the isFirstConversation flag so subsequent messages are normal.
+
+3️⃣ Fix the banner close button without breaking test IDs
+
+The architect mentioned that your previous fix for cloning the close button on the Step Zero/“need more time” banner caused the data-testid attribute to be lost, breaking tests.
+
+Goal: Make the banner close behavior work and keep the testing hooks intact.
+
+Requirements
+
+Find the code where the banner close button is created/duplicated for the “need more time” flow.
+
+Refactor this so that:
+
+The close button (with its data-testid attribute) remains the same element used for tests.
+
+You don’t rely on cloning or innerHTML that strips attributes.
+
+You attach the event listener directly to the existing button element and ensure the banner hides correctly (e.g., via classList.add('hidden') or similar).
+
+Re-run the existing Playwright (or equivalent) tests that reference the banner close button test ID and confirm they pass.
+
+4️⃣ Keep onboarding language neutral for now
+
+One important product decision to respect:
+
+The onboarding flow should currently use neutral language (not assuming family vs. friend vs. partner).
+
+The relationship type is collected as part of the wizard, but tone specialization based on relationship can happen later.
+
+For now, keep the onboarding and first-message prompts warm, validating, and relationship-agnostic, while still using specific details when available (e.g., “you told me I was your younger brother Jim” vs. generic).
+
+5️⃣ Testing & Acceptance Criteria
+
+Please:
+
+Update or add tests so that:
+
+Wizard completion actually sends all onboarding fields.
+
+A persona created via the wizard has onboarding_context populated in personas.json.
+
+The first conversation for that persona produces an AI reply that includes elements clearly derived from the onboarding context (you can assert presence of key substrings in fake responses or use stub/fallback behavior).
+
+The banner close button can be clicked and retains its data-testid.
+
+Confirm:
+
+No regression in existing persona CRUD, memories, journaling, snapshots, calibration, and strict mode.
+
+Step Zero still works as before.
+
+Finally, update replit.md and/or PROJECT_SUMMARY.md to document:
+
+The new onboarding_context field on personas
+
+How the first message uses onboarding data
+
+Any flags used in the /api/message body to indicate first conversation state
+
+Please go ahead and implement all of this end-to-end.

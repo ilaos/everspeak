@@ -159,17 +159,6 @@ function showFirstConversationBanner() {
   if (firstConversationBanner) {
     firstConversationBanner.style.display = 'flex';
     console.log('Banner shown, display:', firstConversationBanner.style.display);
-    
-    // Re-attach close button listener to ensure it's connected
-    const closeBtn = document.getElementById('btn-close-conversation-banner');
-    if (closeBtn) {
-      // Remove any existing listeners by cloning and replacing
-      const newCloseBtn = closeBtn.cloneNode(true);
-      closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-      // Attach fresh listener
-      newCloseBtn.addEventListener('click', closeFirstConversationBanner);
-      console.log('Close button listener re-attached');
-    }
   }
 }
 
@@ -1058,7 +1047,8 @@ async function generateFirstMessage(wizardInputs) {
         persona_id: selectedPersonaId,
         emotional_state: 'neutral',
         tone_mode: 'auto',
-        strict_persona: false
+        strict_persona: false,
+        is_first_message: true
       })
     });
     
@@ -1095,7 +1085,8 @@ async function generateFirstMessageFromBanner() {
         persona_id: selectedPersonaId,
         emotional_state: 'neutral',
         tone_mode: 'auto',
-        strict_persona: false
+        strict_persona: false,
+        is_first_message: true
       })
     });
     

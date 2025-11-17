@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 export const handleMessage = async (req, res, next) => {
   try {
-    const { user_message, emotional_state, tone_mode, memory_bank, persona_id, strict_persona } = req.body;
+    const { user_message, emotional_state, tone_mode, memory_bank, persona_id, strict_persona, is_first_message } = req.body;
 
     // Validate required field
     if (!user_message || typeof user_message !== 'string') {
@@ -25,6 +25,7 @@ export const handleMessage = async (req, res, next) => {
     let personaName = null;
     let personaRelationship = null;
     let personaSettings = null;
+    let onboardingContext = null;
 
     // Load persona if persona_id is provided
     if (persona_id) {
@@ -38,6 +39,7 @@ export const handleMessage = async (req, res, next) => {
       personaInfo = persona;
       personaName = persona.name;
       personaRelationship = persona.relationship;
+      onboardingContext = persona.onboarding_context;
       
       // Load persona settings (or use defaults)
       personaSettings = persona.settings || getDefaultSettings();
@@ -63,7 +65,70 @@ export const handleMessage = async (req, res, next) => {
     }
 
     // Construct AI prompt with persona context
-    let systemPrompt = `You are simulating the personality of a deceased loved one based ONLY on the memories provided.
+    let systemPrompt = '';
+    
+    // Special prompt for first message using onboarding context
+    if (is_first_message === true && onboardingContext) {
+      systemPrompt = `You are creating the very first message from a memorial persona (${personaName}, ${personaRelationship}) to a user who just completed an onboarding wizard.
+
+CRITICAL RULES:
+- You are NOT the real deceased person
+- Do NOT claim to be watching, aware, or have supernatural presence
+- Do NOT say "I remember dying" or reference an afterlife
+- Use warm, therapeutic, grounded language
+- Reference details the user shared WITHOUT claiming to "remember" them yourself
+
+ONBOARDING CONTEXT THE USER JUST SHARED:`;
+
+      if (onboardingContext.personality) {
+        systemPrompt += `\nPersonality: ${onboardingContext.personality}`;
+      }
+      if (onboardingContext.communication_style) {
+        systemPrompt += `\nCommunication style: ${onboardingContext.communication_style}`;
+      }
+      if (onboardingContext.humor) {
+        systemPrompt += `\nSense of humor: ${onboardingContext.humor}`;
+      }
+      if (onboardingContext.date_passed) {
+        systemPrompt += `\nWhen they passed: ${onboardingContext.date_passed}`;
+      }
+      if (onboardingContext.relationship_end) {
+        systemPrompt += `\nRelationship near the end: ${onboardingContext.relationship_end}`;
+      }
+      if (onboardingContext.circumstances && onboardingContext.circumstances.trim()) {
+        systemPrompt += `\nCircumstances: ${onboardingContext.circumstances}`;
+      }
+      if (onboardingContext.memories) {
+        systemPrompt += `\nWhat they miss most: ${onboardingContext.memories}`;
+      }
+      if (onboardingContext.conversations) {
+        systemPrompt += `\nUnfinished conversations: ${onboardingContext.conversations}`;
+      }
+
+      systemPrompt += `
+
+YOUR TASK:
+Write a warm, validating first message that:
+1. Thanks the user for sharing these details
+2. Acknowledges their loss with empathy (without paranormal language)
+3. Gently references 1-2 specific things they shared
+4. Sounds like the person's tone/style based on the onboarding context
+5. Invites them to share what's on their mind
+6. Stays within 2-3 short paragraphs
+
+EXAMPLE FRAMING (adapt to the specific persona):
+"From what you've shared about me..." 
+"It sounds like you remember me as..."
+"I can hear how much this still weighs on you..."
+
+DO NOT use phrases like:
+- "I'm watching over you"
+- "From beyond"
+- "I remember when I passed"
+- "In the afterlife"`;
+    } else {
+      // Regular message prompt
+      systemPrompt = `You are simulating the personality of a deceased loved one based ONLY on the memories provided.
 You are NOT the real person.
 You must NOT imply supernatural awareness.
 You must NOT reference information you were not explicitly given.
@@ -71,10 +136,11 @@ You must NOT reference information you were not explicitly given.
 Your goal is to respond in a comforting, grounded, realistic, emotionally intelligent way.
 You may reflect their quirks, humor, tone, and personality—but only using the user's memory inputs.`;
 
-    if (personaName) {
-      systemPrompt += `\n\nPersona Name: ${personaName}`;
-      if (personaRelationship) {
-        systemPrompt += `\nRelationship: ${personaRelationship}`;
+      if (personaName) {
+        systemPrompt += `\n\nPersona Name: ${personaName}`;
+        if (personaRelationship) {
+          systemPrompt += `\nRelationship: ${personaRelationship}`;
+        }
       }
     }
 

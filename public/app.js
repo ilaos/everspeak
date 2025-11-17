@@ -12,7 +12,6 @@ let strictMode = false;
 let strictModeNoticeShown = false;
 let editingMemoryId = null;
 let wizardCurrentStep = 1;
-let stepZeroCompleted = false;
 
 // DOM Elements
 let personaDropdown, personaForm, memoryForm, chatForm, memoriesList, chatMessages;
@@ -39,8 +38,6 @@ let isRecording = false;
 let boostPersonaBtn, boostModal, closeBoost, refreshBoostBtn, applyToneBtn;
 let boostLoading, boostResults;
 let currentBoostRecommendations = null;
-let stepZeroModal, stepZeroMain, stepZeroMore, btnReadyToBegin, btnTellMeMore, btnOkayLetsBegin, btnNeedMoreTime;
-let needTimeBanner, btnStartEverspeak, btnCloseTimeBanner;
 
 // Conversation Room elements
 let conversationRoom, personaAvatar, avatarInitials, roomTitle, roomSubtitle;
@@ -137,18 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   boostLoading = document.getElementById('boost-loading');
   boostResults = document.getElementById('boost-results');
   
-  // Step Zero elements
-  stepZeroModal = document.getElementById('step-zero-modal');
-  stepZeroMain = document.getElementById('step-zero-main');
-  stepZeroMore = document.getElementById('step-zero-more');
-  btnReadyToBegin = document.getElementById('btn-ready-to-begin');
-  btnTellMeMore = document.getElementById('btn-tell-me-more');
-  btnOkayLetsBegin = document.getElementById('btn-okay-lets-begin');
-  btnNeedMoreTime = document.getElementById('btn-need-more-time');
-  needTimeBanner = document.getElementById('need-time-banner');
-  btnStartEverspeak = document.getElementById('btn-start-everspeak');
-  btnCloseTimeBanner = document.getElementById('btn-close-time-banner');
-  
   // Conversation Room elements
   conversationRoom = document.getElementById('conversation-room');
   personaAvatar = document.getElementById('persona-avatar');
@@ -175,9 +160,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Initialize Conversation Room settings
   initializeConversationRoom();
-  
-  // Check if we should show Step Zero on initial load
-  checkAndShowStepZero();
 });
 
 // Check if wizard is incomplete for current persona
@@ -584,26 +566,6 @@ function setupEventListeners() {
         closeBoostModal();
       }
     });
-  }
-  
-  // Step Zero modal handlers
-  if (btnReadyToBegin) {
-    btnReadyToBegin.addEventListener('click', handleReadyToBegin);
-  }
-  if (btnTellMeMore) {
-    btnTellMeMore.addEventListener('click', showStepZeroMore);
-  }
-  if (btnOkayLetsBegin) {
-    btnOkayLetsBegin.addEventListener('click', handleReadyToBegin);
-  }
-  if (btnNeedMoreTime) {
-    btnNeedMoreTime.addEventListener('click', handleNeedMoreTime);
-  }
-  if (btnStartEverspeak) {
-    btnStartEverspeak.addEventListener('click', handleStartEverspeak);
-  }
-  if (btnCloseTimeBanner) {
-    btnCloseTimeBanner.addEventListener('click', closeNeedTimeBanner);
   }
   
   // Check if user is waiting for first conversation
@@ -2638,133 +2600,4 @@ function updateJournalPersonaDropdown() {
 // Initialize journal event listeners
 if (journalForm) {
   journalForm.addEventListener('submit', handleJournalSubmit);
-}
-
-// ===================================
-// Step Zero Welcome Flow Functions
-// ===================================
-
-// Check if we should show Step Zero on initial load
-function checkAndShowStepZero() {
-  // Check localStorage to see if Step Zero was already completed
-  const stepZeroCompleted = localStorage.getItem('stepZeroCompleted');
-  
-  // Only show Step Zero if:
-  // 1. No personas exist yet
-  // 2. Step Zero hasn't been completed before
-  if (personas.length === 0 && !stepZeroCompleted) {
-    showStepZeroModal();
-  }
-}
-
-// Show Step Zero modal with main screen
-function showStepZeroModal() {
-  if (stepZeroModal) {
-    // Reset to main screen
-    stepZeroMain.style.display = 'flex';
-    stepZeroMore.style.display = 'none';
-    stepZeroModal.style.display = 'flex';
-  }
-}
-
-// Show "Tell me more" subscreen
-function showStepZeroMore() {
-  if (stepZeroMain && stepZeroMore) {
-    stepZeroMain.style.display = 'none';
-    stepZeroMore.style.display = 'flex';
-  }
-}
-
-// Handle "I\'m ready to begin" or "Okay, let\'s begin"
-async function handleReadyToBegin() {
-  // Mark Step Zero as completed in localStorage
-  localStorage.setItem('stepZeroCompleted', 'true');
-  stepZeroCompleted = true;
-  
-  // Close Step Zero modal
-  closeStepZero();
-  
-  // Create a placeholder persona and then open wizard
-  await createPlaceholderPersonaAndOpenWizard();
-}
-
-// Handle "I need more time"
-function handleNeedMoreTime() {
-  // Mark Step Zero as completed so it doesn't show again automatically
-  localStorage.setItem('stepZeroCompleted', 'true');
-  stepZeroCompleted = true;
-  
-  // Close Step Zero modal
-  closeStepZero();
-  
-  // Show the "need more time" banner
-  showNeedTimeBanner();
-}
-
-// Handle "Start EverSpeak" button from banner
-async function handleStartEverspeak() {
-  // Hide the banner
-  closeNeedTimeBanner();
-  
-  // Create a placeholder persona and then open wizard
-  await createPlaceholderPersonaAndOpenWizard();
-}
-
-// Close Step Zero modal
-function closeStepZero() {
-  if (stepZeroModal) {
-    stepZeroModal.style.display = 'none';
-  }
-}
-
-// Show "I need more time" banner
-function showNeedTimeBanner() {
-  if (needTimeBanner) {
-    needTimeBanner.style.display = 'flex';
-  }
-}
-
-// Close "I need more time" banner
-function closeNeedTimeBanner() {
-  if (needTimeBanner) {
-    needTimeBanner.style.display = 'none';
-  }
-}
-
-// Create a placeholder persona and open wizard
-async function createPlaceholderPersonaAndOpenWizard() {
-  try {
-    // Create a minimal placeholder persona
-    const response = await fetch('/api/personas', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: 'New Connection',
-        relationship: '',
-        description: ''
-      })
-    });
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      // Reload personas from API to get the new one
-      await loadPersonas();
-      
-      // The new persona should now be selected (loadPersonas auto-selects first one)
-      // Open the wizard to complete the setup
-      if (selectedPersonaId) {
-        openWizardModal();
-      } else {
-        showError('Failed to initialize persona setup');
-      }
-    } else {
-      showError(result.message || 'Failed to create persona');
-    }
-  } catch (error) {
-    console.error('Failed to create placeholder persona:', error);
-    showError('Failed to start setup');
-  }
 }

@@ -51,6 +51,7 @@ Preferred communication style: Simple, everyday language.
   - Processes conversational messages using OpenAI GPT-4o-mini.
   - Supports `persona_id` for context, emotional state, tone mode, memory bank, and a `strict_persona` mode to keep AI responses close to stored memories.
   - Includes grounding and healthy-use features (e.g., grounding banner, "Based on memories" line, healthy-use nudge).
+  - First message detection: when `is_first_message: true` is sent, builds special warm AI prompt using `onboarding_context` from wizard.
 - **Personas Resource (CRUD)**:
   - `GET /api/personas`
   - `GET /api/personas/:id`
@@ -64,8 +65,10 @@ Preferred communication style: Simple, everyday language.
   - `DELETE /api/personas/:id/memories/:memoryId`
   - `POST /api/personas/:id/memories/bulk-import` (bulk memory import with AI categorization/weighting)
 - **Setup Wizard**:
-  - `POST /api/personas/:id/wizard` (6-step guided persona setup with AI memory extraction)
+  - `POST /api/personas/:id/wizard` (10-step guided persona setup with AI memory extraction)
+  - Includes Step Zero pre-onboarding education flow
   - Creates snapshot, extracts memories from wizard inputs, applies tone preferences
+  - Saves `onboarding_context` field with all wizard responses for first-message generation
 - **Voice-to-Text Transcription**:
   - `POST /api/transcribe` (transcribe audio to text using OpenAI Whisper)
   - Accepts audio file uploads (webm, wav, mp3, m4a)
@@ -96,6 +99,9 @@ Preferred communication style: Simple, everyday language.
 ### Data Storage
 
 - **Personas and Memories**: Stored in a JSON file (`src/personas/personas.json`) for persistence across sessions.
+  - Each persona includes `onboarding_context` field containing wizard responses (personality, communication_style, humor, date_passed, relationship_end, circumstances, memories, conversations)
+  - `onboarding_context` is saved in snapshots for complete state preservation
+  - Used for generating warm, personalized first messages after wizard completion
 - **Journal Entries**: Stored in a JSON file (`src/journal/journal.json`) for persistence across sessions.
 - **Examples**: Stored in an in-memory JavaScript Map, resetting on server restart.
 - UUID generation for unique identifiers using Node.js crypto.randomUUID().

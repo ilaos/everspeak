@@ -1,0 +1,297 @@
+You are working on the EverSpeak project.
+We have a 10-step onboarding wizard that is technically correct but feels like a cold form. We want it to feel like a warm grief counselor guiding the user.
+
+Important constraints:
+
+Do not change the structure of the wizard payloads (wizard_inputs) or the backend API contract.
+
+Keep the same steps and fields currently sent to /api/personas/:id/wizard.
+
+Step Zero (emotional prep modal) is already implemented and approved. Do not change its logic, only minor wording if absolutely needed.
+
+Focus on: tone, copy, micro-acknowledgments, and emotional pacing inside the wizard.
+
+We want this to feel like a therapist / grief counselor, not like a survey.
+
+1. Files to Work In
+
+Frontend: public/index.html, public/app.js, and any CSS where wizard UI text / labels / headings / helper copy live.
+
+Do not change backend files or payload structure for this task, unless it’s purely for text constants in a shared config.
+
+You already verified the current wizard steps:
+
+Personality Snapshot
+
+How They Communicated
+
+Their Humor
+
+When Did They Pass?
+
+What Was Your Relationship Like Near the End?
+
+If You're Comfortable Sharing… (Circumstances – optional)
+
+Memories That Matter
+
+Unfinished Conversations
+
+Tone Preferences (sliders)
+
+“Thank You for Sharing / Ready to Begin?” screen
+
+Keep this structure and ordering. We are only making it feel like the therapist-style flow below.
+
+2. New Therapist-Style Copy for Each Step
+
+Update the headings, prompts, placeholders, and button labels for each step to match this tone. You can adjust line breaks as needed, but keep wording as close as possible.
+
+STEP 1 – Personality Snapshot
+
+Heading:
+“Getting to Know Who They Were”
+
+Intro text (static on the step):
+“Before we go any further, I want to acknowledge something important:
+you’re here because you lost someone who mattered deeply to you.
+That takes courage. We’ll go through this slowly and gently.”
+
+Prompt:
+“When you think about who they were as a person, how would you describe their personality?”
+
+Placeholder:
+“Were they gentle, intense, steady, silly, serious, nurturing, reserved…? Anything that feels true.”
+
+STEP 2 – How They Communicated
+
+Acknowledgment shown at top when arriving on Step 2:
+“Thank you for sharing that. It gives me a sense of who they were.”
+
+Heading:
+“How It Felt to Talk With Them”
+
+Prompt:
+“When you talked with them, what did it feel like?”
+
+Placeholder:
+“Did they listen quietly? Tease you? Get straight to the point? Wrap you in warmth? Something else?”
+
+STEP 3 – Their Humor
+
+Acknowledgment at top of Step 3:
+“I hear you. That paints a more human picture of them.”
+
+Heading:
+“Their Humor (If Any)”
+
+Prompt:
+“Did they have a sense of humor? If so, what was it like?”
+
+Placeholder:
+“Dry, goofy, sarcastic, gentle, punny, dark, playful… or you can say they weren’t really the joking type.”
+
+STEP 4 – When Did They Pass?
+
+Acknowledgment at top of Step 4:
+“Thank you. Those details matter, even if they’re hard to put into words.”
+
+Heading:
+“When You Lost Them”
+
+Prompt:
+“When did you lose them? It’s okay if you only remember the general time.”
+
+Placeholder:
+“For example: ‘Spring 2023’, ‘about two years ago’, or ‘November 15, 2021’.”
+
+STEP 5 – Relationship Near the End
+
+Acknowledgment at top of Step 5:
+“I hear you. That time in your life can hold a lot.”
+
+Heading:
+“How Things Were Near the End”
+
+Prompt:
+“How were things between you near the end? There’s no right or wrong answer.”
+
+Placeholder:
+“Were you close? Was it complicated? Was it sudden, or a long illness? Were there things that never got said?”
+
+STEP 6 – Circumstances (Optional / Skippable)
+
+Acknowledgment at top of Step 6:
+“Thank you for sharing that. We’ll keep moving gently.”
+
+Heading:
+“If You’re Comfortable Sharing…”
+
+Prompt:
+“If you feel okay sharing, how did they pass?
+This is completely optional — you can skip it if it feels too heavy right now.”
+
+Textarea placeholder:
+“You can share as much or as little as you’d like. It’s also okay to leave this blank.”
+
+Skip button label:
+“I’m not ready to talk about this yet”
+
+Skip behavior:
+
+Keep the existing behavior: do not save a value, advance to the next step.
+
+Keep the existing onboarding_context behavior as-is (no new fields, no change in payload structure).
+
+STEP 7 – Memories That Matter
+
+Acknowledgment at top of Step 7:
+“Thank you. That tells me a lot about the emotional space you’re coming from.”
+
+Heading:
+“Memories That Stay With You”
+
+Prompt:
+“Tell me about a few moments you think of often. They don’t need to be big or dramatic — just real.”
+
+Placeholder:
+“Everyday routines, little rituals, big days, private jokes… anything that still feels vivid.”
+
+STEP 8 – Unfinished Conversations
+
+Acknowledgment at top of Step 8:
+“Those memories are important. Thank you for trusting me with them.”
+
+Heading:
+“Things Left Unsaid”
+
+Prompt:
+“Is there anything you wish you could have said to them, or heard from them?”
+
+Placeholder:
+“Regrets, apologies, reassurances, questions — anything you still find yourself carrying.”
+
+STEP 9 – Tone Preferences (Sliders)
+
+Acknowledgment at top of Step 9:
+“Thank you. You’ve shared a lot already, and you’re doing more work than it might seem.”
+
+Heading:
+“How You’d Like Them to Sound Here”
+
+Prompt (above sliders):
+“Now we’ll set how you’d like them to show up in these conversations.
+There are no perfect settings — just choose what feels most supportive for you right now.”
+
+Update helper text around sliders to feel more therapeutic, for example:
+
+Humor: “How much lightness or playfulness feels okay for you?”
+
+Honesty: “Do you want them to be very gentle, or more direct?”
+
+Sentimentality: “How emotional or tender do you want the tone to be?”
+
+Energy: “Do you prefer a calm, steady presence or more enthusiasm?”
+
+Advice: “Do you want a lot of advice, or mostly listening and reflecting?”
+
+Keep the actual slider values and backend fields exactly as they are.
+
+STEP 10 – Final Transition Screen
+
+Heading:
+“Thank You for Sharing All of That”
+
+Body copy (replace current copy with this style):
+“I know none of this is easy to talk about.
+Everything you’ve shared will be held carefully and used to shape how they ‘sound’ here — drawn only from your memories, never pretending to be more than that.”
+
+“We’ll use this to:”
+
+“shape a gentle first message in their voice,”
+
+“honor the way you described their personality and presence,”
+
+“respect the boundaries and tone that feel safest for you right now.”
+
+Question:
+“Would you like to begin your first conversation now, or take a moment before we continue?”
+
+Buttons:
+
+Primary: “Begin our first conversation”
+
+Secondary: “Give me a moment”
+
+Keep all existing behavior wired as-is:
+
+“Begin our first conversation” submits to /api/personas/:id/wizard, closes the wizard, scrolls to the Conversation Room, shows the pre-roll, and sends the first message with is_first_message: true.
+
+“Give me a moment” keeps the persona, closes the wizard, sets the existing “waiting” flag, and shows whatever banner you currently have.
+
+3. Add Per-Step Acknowledgments (Micro-Responses)
+
+Right now, when the user clicks “Next,” the wizard jumps immediately to the next step with no emotional acknowledgment.
+
+Add a simple per-step acknowledgment block at the top of each step (under the step heading) that:
+
+Shows a short, static sentence that reflects what they just did in the previous step.
+
+Does not require dynamic personalization for now (no need to inject their actual text).
+
+Only appears after step 1 (since step 1 itself is the starting point).
+
+Implementation suggestion:
+
+In app.js, where you manage wizardCurrentStep and updateWizardUI(), introduce a small map like:
+
+const wizardAcknowledgments = {
+  2: "Thank you for sharing that. It gives me a sense of who they were.",
+  3: "I hear you. That paints a more human picture of them.",
+  4: "Thank you. Those details matter, even if they’re hard to put into words.",
+  5: "I hear you. That time in your life can hold a lot.",
+  6: "Thank you for sharing that. We’ll keep moving gently.",
+  7: "Thank you. That tells me a lot about the emotional space you’re coming from.",
+  8: "Those memories are important. Thank you for trusting me with them.",
+  9: "Thank you. You’ve shared a lot already, and you’re doing more work than it might seem.",
+  10: "Everything you’ve shared so far will be held carefully here."
+};
+
+
+In updateWizardUI(), when rendering a step, check wizardAcknowledgments[wizardCurrentStep] and, if present, show it in a small, soft-styled paragraph under the heading.
+
+Styling guidance:
+
+Make the acknowledgment text slightly softer-looking than the main prompt:
+
+Smaller font-size or lighter weight
+
+Maybe italic or a subtle muted color
+
+No animations are required for now; simple fade-in via CSS is fine if easy.
+
+4. Acceptance Criteria
+
+Please implement the above and then verify:
+
+All wizard steps still submit the same wizard_inputs structure as before to /api/personas/:id/wizard. No field additions, renames, or removals.
+
+Step 6 skip behavior still works exactly as before, with the new compassionate labels.
+
+After each step, the next step shows a brief acknowledgment line at the top, matching the copy above.
+
+The user experience feels like a gentle, grief-aware guided conversation, not a dry form:
+
+No abrupt jumps with zero acknowledgment.
+
+All language is warm, non-clinical, and non-patronizing.
+
+Step Zero remains the same structurally, and the Step 10 “Begin our first conversation / Give me a moment” behavior is unchanged.
+
+When you’re done, summarize:
+
+Which files you changed
+
+Any places where you had to slightly adapt the wording
+
+Confirmation that no backend contracts were altered

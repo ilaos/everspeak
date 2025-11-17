@@ -1,0 +1,96 @@
+Next verification: Conversation engine behavior, timing, emotional pacing, and system prompt consistency.
+
+I want to analyze how the messageController currently manages the conversation once onboarding is complete.
+
+1. System Prompt Consistency
+For ongoing messages (when is_first_message !== true):
+- What EXACT system prompt is being sent to GPT?
+- Please paste the full template used for ongoing conversations.
+- Does the system prompt include:
+    - persona identity rules?
+    - tone boundaries?
+    - default tone levels from settings?
+    - memories?
+    - any contextual “state” like previous replies/emotions?
+- Are any pieces missing compared to the artifact’s intended design?
+
+2. Emotional Pacing / Delay Behavior
+- After the user sends a message, is there any artificial delay before showing the AI message?
+- Any “typing simulation,” randomized timing, or naturalistic delay?
+- If not, please confirm that replies appear instantly.
+- Is there room in the current architecture for a delay hook?
+
+3. Response Length Controls
+- Does the system enforce:
+    - max paragraph count?
+    - max message length?
+    - short, medium, long response modes?
+- Or is GPT free to produce any length of message?
+
+4. Tone Calibration — Real Impact
+Based on persona.settings:
+- humor_level
+- honesty_level
+- sentimentality_level
+- energy_level
+- advice_level
+
+Please confirm:
+- Where these settings are injected into the prompt.
+- Whether GPT is explicitly instructed how to interpret these numeric values.
+- Whether the values actually influence GPT behavior today or are just “listed.”
+
+5. Emotional State Tracking
+- Is there any tracking of user emotional state over time?
+- Are messages analyzed to determine:
+    - sadness?
+    - distress?
+    - panic?
+    - guilt?
+    - longing?
+- If so, where is it stored?
+- If not, please confirm that emotional_state is always “not specified.”
+
+6. Conversation History Use
+- How many previous messages are included in the prompt?
+- Are all past messages included every time?
+- Or is there truncation?
+- How is history formatted for the OpenAI API call?
+- Is there any summarization or pruning?
+
+7. Response Safety Filtering (post-processing)
+After GPT responds:
+- Does the system scan the text for restricted phrases (like supernatural claims)?
+- Does it run regex validation?
+- Does it re-prompt or retry if GPT violates rules?
+- Or does it send the response directly to the user with no checks?
+
+8. Multi-Turn Context and Memory Interaction
+- Is there any mechanism to detect if the AI is drifting?
+- Does the prompt reinforce identity rules every message?
+- Does it include reminders to avoid:
+    - supernatural claims
+    - guilt spirals
+    - hard blame
+    - unapproved topics
+- Or is this only done on the first message?
+
+9. Handling Repeated Topics
+- If the user keeps bringing up the same regret, does the system have:
+    - loop detection?
+    - grounding responses?
+    - gentle redirection?
+- Or does GPT repeat therapeutic platitudes with no real structure?
+
+10. Deviations From Ideal
+Please compare current behavior to the intended design of a grief-safe conversation engine:
+- consistent therapeutic pacing
+- adaptive delay
+- short but meaningful responses
+- emotional stabilization
+- strong identity guardrails
+- drift prevention
+
+List anything missing or unsafe.
+
+No code changes yet — just describe current behavior.

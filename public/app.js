@@ -27,6 +27,7 @@ let bulkImportBtn, bulkImportModal, bulkImportForm, closeBulkImport, cancelBulkI
 let wizardSection, setupWizardBtn, wizardModal, wizardForm, closeWizard, wizardPrev, wizardNext, wizardBeginConversation, wizardGiveMoment;
 let wizardProgressFill, wizardCurrentStepText, wizardTotalStepsText;
 let skipCircumstancesBtn;
+let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 const WIZARD_TOTAL_STEPS = 10;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
@@ -101,6 +102,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Wizard elements
   wizardSection = document.getElementById('wizard-section');
   setupWizardBtn = document.getElementById('setup-wizard-btn');
+  continueSetupContainer = document.getElementById('continue-setup-container');
+  continueSetupBtn = document.getElementById('continue-setup-btn');
   wizardModal = document.getElementById('wizard-modal');
   wizardForm = document.getElementById('wizard-form');
   closeWizard = document.getElementById('close-wizard');
@@ -189,6 +192,17 @@ function isWizardSnoozed() {
     return true;
   } catch (e) {
     return false;
+  }
+}
+
+// Update continue setup button visibility
+function updateContinueSetupButton() {
+  if (continueSetupContainer) {
+    if (isWizardIncomplete()) {
+      continueSetupContainer.style.display = 'block';
+    } else {
+      continueSetupContainer.style.display = 'none';
+    }
   }
 }
 
@@ -457,6 +471,9 @@ function setupEventListeners() {
   // Wizard modal handlers
   if (setupWizardBtn) {
     setupWizardBtn.addEventListener('click', openWizardModal);
+  }
+  if (continueSetupBtn) {
+    continueSetupBtn.addEventListener('click', openWizardModal);
   }
   if (closeWizard) {
     closeWizard.addEventListener('click', closeWizardModal);
@@ -744,6 +761,9 @@ async function loadPersonaDetails(personaId) {
     if (wizardSection) {
       wizardSection.style.display = 'block';
     }
+    
+    // Update continue setup button visibility
+    updateContinueSetupButton();
     
     // Auto-open wizard if incomplete and not snoozed
     checkAndAutoOpenWizard();

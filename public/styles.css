@@ -1524,6 +1524,41 @@ button[type="submit"]:active {
   margin-top: 20px;
 }
 
+/* Continue Setup Section */
+.continue-setup-container {
+  background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  text-align: center;
+  border: 2px solid #d4a574;
+}
+
+.btn-continue-setup {
+  background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 8px;
+}
+
+.btn-continue-setup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+}
+
+.setup-hint {
+  color: #8b7355;
+  font-size: 0.85rem;
+  margin: 0;
+  font-style: italic;
+}
+
 /* Wizard Section */
 .wizard-section {
   background: #f8f9fa;

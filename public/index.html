@@ -488,6 +488,17 @@
             <p class="step-intro">Before we go any further, I want to acknowledge something important: you're here because you lost someone who mattered deeply to you. That takes courage. We'll go through this slowly and gently.</p>
             <p class="step-question">Would you mind sharing their first name with me?</p>
             <input type="text" id="wizard-first-name" class="wizard-text-input" data-testid="input-wizard-first-name" placeholder="Their first name">
+            
+            <!-- Voice confirmation (only shows after voice input) -->
+            <div id="voice-name-confirmation" class="voice-confirmation" style="display: none;">
+              <p class="voice-confirmation-text">You said <strong id="voice-detected-name"></strong>. Did I get that right?</p>
+              <p class="voice-confirmation-prompt">If not, please spell it for me below:</p>
+              <input type="text" id="voice-name-correction" class="wizard-text-input" data-testid="input-voice-name-correction" placeholder="Correct spelling">
+              <div class="voice-confirmation-actions">
+                <button type="button" class="btn-confirm-name" id="btn-confirm-voice-name" data-testid="button-confirm-voice-name">That's correct</button>
+                <button type="button" class="btn-use-correction" id="btn-use-correction" data-testid="button-use-correction">Use my spelling</button>
+              </div>
+            </div>
           </div>
 
           <!-- Step 3: Communication Style -->

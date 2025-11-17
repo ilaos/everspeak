@@ -1857,6 +1857,68 @@ button[type="submit"]:active {
   font-size: 1rem;
 }
 
+.voice-confirmation {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f0f4f8;
+  border-radius: 8px;
+  border: 1px solid #cbd5e0;
+}
+
+.voice-confirmation-text {
+  font-size: 1rem;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.voice-confirmation-text strong {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.voice-confirmation-prompt {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin-bottom: 12px;
+}
+
+.voice-confirmation-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-confirm-name,
+.btn-use-correction {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-confirm-name {
+  background: #667eea;
+  color: white;
+}
+
+.btn-confirm-name:hover {
+  background: #5568d3;
+}
+
+.btn-use-correction {
+  background: white;
+  color: #2c3e50;
+  border: 1px solid #cbd5e0;
+}
+
+.btn-use-correction:hover {
+  background: #f7fafc;
+}
+
 .wizard-step-welcome {
   display: flex;
   flex-direction: column;

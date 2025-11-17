@@ -40,6 +40,8 @@ let wizardAudioChunks = [];
 let isWizardRecording = false;
 let wizardVoiceBtn;
 let wizardWelcomeMain, wizardWelcomeMore, btnWizardReady, btnWizardTellMore, btnWizardOkayBegin, btnWizardBack;
+let voiceNameConfirmation, voiceDetectedName, voiceNameCorrection, btnConfirmVoiceName, btnUseCorrection;
+let detectedNameFromVoice = '';
 let boostPersonaBtn, boostModal, closeBoost, refreshBoostBtn, applyToneBtn;
 let boostLoading, boostResults;
 let currentBoostRecommendations = null;
@@ -128,6 +130,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnWizardTellMore = document.getElementById('btn-wizard-tell-more');
   btnWizardOkayBegin = document.getElementById('btn-wizard-okay-begin');
   btnWizardBack = document.getElementById('btn-wizard-back');
+  
+  // Voice name confirmation elements
+  voiceNameConfirmation = document.getElementById('voice-name-confirmation');
+  voiceDetectedName = document.getElementById('voice-detected-name');
+  voiceNameCorrection = document.getElementById('voice-name-correction');
+  btnConfirmVoiceName = document.getElementById('btn-confirm-voice-name');
+  btnUseCorrection = document.getElementById('btn-use-correction');
   
   // First conversation banner
   firstConversationBanner = document.getElementById('first-conversation-banner');
@@ -548,6 +557,14 @@ function setupEventListeners() {
   }
   if (btnWizardBack) {
     btnWizardBack.addEventListener('click', showWizardMain);
+  }
+  
+  // Voice name confirmation buttons
+  if (btnConfirmVoiceName) {
+    btnConfirmVoiceName.addEventListener('click', confirmVoiceName);
+  }
+  if (btnUseCorrection) {
+    btnUseCorrection.addEventListener('click', useNameCorrection);
   }
   
   // Wizard slider value updates
@@ -1714,6 +1731,27 @@ async function stopWizardVoiceRecording() {
   }
 }
 
+// Extract name from transcription text
+function extractNameFromTranscription(text) {
+  // Common patterns: "Her name was X", "His name was X", "Their name was X", "It was X", or just "X"
+  const patterns = [
+    /(?:her|his|their|the)\s+name\s+(?:was|is)\s+([a-zA-Z]+)/i,
+    /(?:name|called)\s+(?:was|is)\s+([a-zA-Z]+)/i,
+    /(?:it|that)(?:'s|\s+is|\s+was)\s+([a-zA-Z]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  
+  // If no pattern matches, assume the whole text is the name (trimmed and take first word)
+  const words = text.trim().split(/\s+/);
+  return words[0] || text.trim();
+}
+
 // Transcribe wizard audio
 async function transcribeWizardAudio(audioBlob) {
   try {
@@ -1728,21 +1766,40 @@ async function transcribeWizardAudio(audioBlob) {
     const result = await response.json();
     
     if (result.success && result.text) {
-      // Get the current step's input field
-      const currentInputField = getCurrentWizardInputField();
-      
-      if (currentInputField) {
-        const currentText = currentInputField.value.trim();
-        if (currentText) {
-          // Append to existing text
-          currentInputField.value = currentText + ' ' + result.text;
-        } else {
-          // Replace empty field
-          currentInputField.value = result.text;
+      // Special handling for Step 2 (first name)
+      if (wizardCurrentStep === 2) {
+        const extractedName = extractNameFromTranscription(result.text);
+        detectedNameFromVoice = extractedName;
+        
+        // Show confirmation UI
+        if (voiceDetectedName && voiceNameConfirmation) {
+          voiceDetectedName.textContent = extractedName;
+          voiceNameConfirmation.style.display = 'block';
+          
+          // Prefill the correction field with detected name
+          if (voiceNameCorrection) {
+            voiceNameCorrection.value = extractedName;
+          }
+          
+          showSuccess('Name detected from voice');
         }
-        showSuccess('Voice transcribed successfully');
       } else {
-        showError('No input field available for this step');
+        // For other steps, use normal behavior
+        const currentInputField = getCurrentWizardInputField();
+        
+        if (currentInputField) {
+          const currentText = currentInputField.value.trim();
+          if (currentText) {
+            // Append to existing text
+            currentInputField.value = currentText + ' ' + result.text;
+          } else {
+            // Replace empty field
+            currentInputField.value = result.text;
+          }
+          showSuccess('Voice transcribed successfully');
+        } else {
+          showError('No input field available for this step');
+        }
       }
     } else {
       showError(result.error || 'Could not transcribe audio. Please try again.');
@@ -1751,6 +1808,41 @@ async function transcribeWizardAudio(audioBlob) {
     console.error('Wizard transcription error:', error);
     showError('Could not transcribe audio. Please try again.');
   }
+}
+
+// Confirm the detected voice name
+function confirmVoiceName() {
+  const firstNameInput = document.getElementById('wizard-first-name');
+  if (firstNameInput && detectedNameFromVoice) {
+    firstNameInput.value = detectedNameFromVoice;
+    hideVoiceNameConfirmation();
+    showSuccess('Name confirmed');
+  }
+}
+
+// Use the corrected spelling
+function useNameCorrection() {
+  const firstNameInput = document.getElementById('wizard-first-name');
+  const correctionValue = voiceNameCorrection ? voiceNameCorrection.value.trim() : '';
+  
+  if (firstNameInput && correctionValue) {
+    firstNameInput.value = correctionValue;
+    hideVoiceNameConfirmation();
+    showSuccess('Name updated with your spelling');
+  } else if (!correctionValue) {
+    showError('Please enter the correct spelling');
+  }
+}
+
+// Hide voice name confirmation UI
+function hideVoiceNameConfirmation() {
+  if (voiceNameConfirmation) {
+    voiceNameConfirmation.style.display = 'none';
+  }
+  if (voiceNameCorrection) {
+    voiceNameCorrection.value = '';
+  }
+  detectedNameFromVoice = '';
 }
 
 // Get the current wizard step's input field

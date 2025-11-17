@@ -1,0 +1,84 @@
+Next verification: Safety systems, distress handling, and human safeguards.
+
+We’ve already checked high-level guardrails. Now I want to see all the "what if this goes wrong" protections.
+
+1. Global Disclaimers & Framing
+- Where in the app is EverSpeak described as:
+    - NOT a replacement for therapy?
+    - NOT a real person or spirit?
+    - NOT a source of medical/mental health advice?
+- Please list:
+    - Any disclaimers shown in the UI (onboarding, footer, settings, etc.)
+    - Any disclaimers baked into the system prompts
+    - Any explicit language that says “this is not therapy / not professional help.”
+
+2. Crisis / Self-Harm / Suicide Handling
+- Is there ANY logic (frontend or backend) that:
+    - Scans messages for self-harm / suicide / crisis phrases?
+    - Detects phrases like “I want to die”, “I can’t go on”, “I want to hurt myself”, etc.?
+    - Changes the AI response when such phrases appear?
+    - Shows a crisis message or hotline info?
+- If yes:
+    - Where is this implemented? (file + functions)
+    - What phrases / patterns are checked?
+    - What exactly is shown to the user?
+- If no:
+    - Please confirm there is currently ZERO crisis detection logic.
+
+3. Grounding & Overwhelm Handling
+- Aside from the “12 messages → take a break” nudge:
+    - Are there any grounding tools (breathing, look-around exercises, body scans, etc.)?
+    - Are there any special responses when the user says “I’m overwhelmed”, “I can’t do this,” “this is too much,” etc.?
+- If yes, where are they implemented?
+- If no, please confirm nothing exists beyond the 12-message nudge.
+
+4. Healthy Use / Overuse Protections
+- Beyond the 12-message break reminder:
+    - Is there any limit on how many messages per day/session?
+    - Any “You’ve been here a long time, maybe take a break” logic?
+    - Any “Try journaling / talking to someone in your life” encouragement?
+- Is usage tracked anywhere to inform these nudges, or is it all one-off?
+
+5. “Not a Doctor / Not a Therapist” Boundaries
+- Does the system prompt (or any response logic) explicitly forbid:
+    - Diagnosing mental health conditions?
+    - Giving medical advice?
+    - Telling the user what to do about medication?
+- If yes, please paste or summarize those rules.
+- If no, please confirm there is no explicit anti-diagnosis boundary.
+
+6. Human-Support Pathways
+- Is there anywhere in the UI that:
+    - Suggests talking to a real therapist, counselor, or trusted person?
+    - Provides links to resources (even static ones)?
+    - Encourages involving others if grief is too heavy?
+- If yes, where?
+- If no, please confirm no human-support suggestions exist.
+
+7. Logging, Monitoring & Error Handling
+- If the AI returns an error or can’t respond:
+    - What does the user see?
+    - Is there any messaging that frames this gently (so it doesn’t feel like rejection)?
+- Are there any logs or flags for:
+    - “Conversations that failed”
+    - “Potentially unsafe responses”
+    - “High-distress sessions”
+  (It’s OK if the answer is no — just confirm.)
+
+8. Explicit “I Am an AI Simulation” Reminders
+- Outside of the system prompt, does the user ever see messaging like:
+    - “This is an AI simulation based on your memories, not the actual person.”
+- If yes, where does it appear? (Step Zero, Conversation Room header, etc.)
+- If no, please confirm it is only expressed indirectly (e.g., in Step Zero text).
+
+9. Deviations From Trauma-Aware Best Practices
+Given everything above, please summarize:
+- What safety systems we DO have (list them clearly).
+- What is currently missing to reach a trauma-aware baseline:
+    - Crisis handling
+    - Clear disclaimers
+    - Grounding tools
+    - Human-referral paths
+    - Overuse protections
+
+No code changes yet — just an honest safety audit.

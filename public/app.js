@@ -1244,7 +1244,7 @@ function wizardPreviousStep() {
 
 // Wizard acknowledgments for each step
 const wizardAcknowledgments = {
-  2: "Thank you. Let's begin.",
+  2: "",
   3: "Thank you for sharing that. It gives me a sense of who they were.",
   4: "I hear you. That paints a more human picture of them.",
   5: "Thank you. Those details matter, even if they're hard to put into words.",

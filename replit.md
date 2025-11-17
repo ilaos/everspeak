@@ -69,6 +69,7 @@ Preferred communication style: Simple, everyday language.
   - Includes Step Zero pre-onboarding education flow
   - Creates snapshot, extracts memories from wizard inputs, applies tone preferences
   - Saves `onboarding_context` field with all wizard responses for first-message generation
+  - Returns full updated persona object with `onboarding_context.completed_at` timestamp
 - **Voice-to-Text Transcription**:
   - `POST /api/transcribe` (transcribe audio to text using OpenAI Whisper)
   - Accepts audio file uploads (webm, wav, mp3, m4a)
@@ -100,6 +101,7 @@ Preferred communication style: Simple, everyday language.
 
 - **Personas and Memories**: Stored in a JSON file (`src/personas/personas.json`) for persistence across sessions.
   - Each persona includes `onboarding_context` field containing wizard responses (personality, communication_style, humor, date_passed, relationship_end, circumstances, memories, conversations)
+  - `onboarding_context.completed_at` timestamp marks wizard completion (server's source of truth)
   - `onboarding_context` is saved in snapshots for complete state preservation
   - Used for generating warm, personalized first messages after wizard completion
 - **Journal Entries**: Stored in a JSON file (`src/journal/journal.json`) for persistence across sessions.
@@ -131,6 +133,55 @@ Preferred communication style: Simple, everyday language.
 - `@types/express`, `@types/cors`, `@types/morgan`, `@types/swagger-ui-express`, `@types/swagger-jsdoc`, `@types/node`: Type definitions for respective libraries and Node.js.
 
 ## Frontend Features
+
+### Wizard Auto-Reopen System
+
+The wizard automatically guides users through setup for incomplete personas while respecting user agency.
+
+**Completion Detection**
+- Uses `onboarding_context.completed_at` timestamp as single source of truth
+- Backend sets this field only when wizard successfully completes
+- Frontend checks completion before any auto-open logic
+
+**Auto-Reopen Logic**
+- On page load or persona selection, checks if wizard is incomplete
+- Incomplete persona + not snoozed → wizard opens automatically
+- Completed persona → wizard never opens, even after page refresh
+- LocalStorage snooze cleared on page load but set when user dismisses wizard
+- Snooze persists only for current session (cleared on new page visit)
+
+**Continue Setup Button**
+- Inline button appears near persona dropdown
+- Shows only for incomplete personas
+- Opens wizard when clicked
+- Automatically hides when persona setup completes
+
+**State Synchronization**
+- POST /wizard returns full persona with completed_at
+- Frontend applies persona synchronously before UI updates
+- Sidebar, continue button, and auto-open all see fresh state immediately
+- No race conditions or timing gaps
+
+### Settings Sidebar Navigation
+
+Hamburger menu in header opens a sliding sidebar overlay with organized settings sections.
+
+**Structure**
+- **Persona Setup Section**: Current persona name, completion status ("Setup complete" in green or "Setup incomplete" in default text), and "Restart Wizard" button
+- **Conversation Preferences Section**: Text size toggle, voice response toggle (preview)
+- **Safety & Grounding Section**: Crisis resources, disclaimers
+
+**Behavior**
+- Hamburger menu icon in header toggles sidebar open/close
+- X button in sidebar header closes sidebar
+- Clicking backdrop overlay closes sidebar
+- Sidebar slides in from left, overlays existing layout (no reflow)
+- Content updates immediately when persona changes or wizard completes
+
+**Restart Wizard Functionality**
+- "Restart Wizard" button in sidebar clears any snooze and opens wizard modal
+- Allows users to re-do setup even for completed personas
+- Sidebar automatically closes when wizard opens
 
 ### Conversation Room
 

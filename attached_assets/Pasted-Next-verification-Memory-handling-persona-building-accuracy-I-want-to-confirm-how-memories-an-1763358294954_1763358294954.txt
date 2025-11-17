@@ -1,0 +1,56 @@
+Next verification: Memory handling + persona-building accuracy.
+
+I want to confirm how memories and persona modeling are currently implemented.
+
+1. Memory Extraction
+From the onboarding wizard:
+- Which specific fields are treated as "memories"?
+- Where in the code does memory extraction happen?
+- Are memories stored as a list, a single text blob, or both?
+
+2. Persona Creation Details
+When onboarding completes:
+- What data is currently used to construct the persona’s long-term identity?
+- Does the persona object store:
+    - personality traits?
+    - communication style?
+    - humor details?
+    - memories from Step 7?
+    - unresolved conversations from Step 8?
+- Please list each field and where it is stored (which part of persona).
+
+3. Memory Storage Location
+Please confirm:
+- Where are memories stored? (e.g., persona.memories, persona.notes, onboarding_context.memories, etc.)
+- What is the shape of the data structure?
+- Are memories retrievable and used during conversations?
+
+4. How AI Uses Memories in Conversations
+For ongoing conversation messages (NOT first message):
+- Does the prompt send memories to the AI?
+- If so, how many?
+- In what format?
+- Is there a mechanism to:
+    - summarize them?
+    - compress them?
+    - limit the number sent for token efficiency?
+
+5. Memory Retrieval Logic
+Please confirm the logic for retrieving memories:
+- Is it always the full array?
+- Is it selecting “recent” memories?
+- Is it selecting by relevance?
+- Is it selecting based on emotional content?
+- Or is it simple: “send everything every time”?
+
+6. Updating or Expanding Memories
+When users add more memories later (outside onboarding):
+- Where does this feature currently live?
+- Does the current version allow adding new memories at all?
+- If yes, where are they stored and how do they affect persona behavior?
+- If no, just confirm it’s not implemented.
+
+7. Missing or Deviations
+Please list any gaps between the current memory-handling system and the ideal version described in the artifact (e.g., future memory gallery, guided memory prompts, curated persona evolution, etc.).
+
+No code changes yet — just confirm current implementation.

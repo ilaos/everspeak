@@ -142,6 +142,42 @@ document.addEventListener('DOMContentLoaded', async () => {
   checkAndShowStepZero();
 });
 
+// Handle "Give me a moment" button
+function handleGiveMeAMoment() {
+  // Close the wizard modal
+  closeWizardModal();
+  
+  // Show the first conversation banner
+  showFirstConversationBanner();
+  
+  // Store state to remember we're waiting for first conversation
+  localStorage.setItem('waitingForFirstConversation', 'true');
+}
+
+// Show first conversation banner
+function showFirstConversationBanner() {
+  if (firstConversationBanner) {
+    firstConversationBanner.style.display = 'flex';
+  }
+}
+
+// Close first conversation banner
+function closeFirstConversationBanner() {
+  if (firstConversationBanner) {
+    firstConversationBanner.style.display = 'none';
+  }
+  localStorage.removeItem('waitingForFirstConversation');
+}
+
+// Handle "Begin Conversation" from banner
+async function handleBeginConversationFromBanner() {
+  closeFirstConversationBanner();
+  
+  // Reload wizard inputs from persona or generate first message
+  // For now, we'll just send a simple first message
+  await generateFirstMessageFromBanner();
+}
+
 // Setup event listeners
 function setupEventListeners() {
   personaDropdown.addEventListener('change', handlePersonaChange);
@@ -236,6 +272,15 @@ function setupEventListeners() {
         circumstancesInput.value = '';
       }
       wizardNextStep();
+    });
+  }
+  if (wizardBeginConversation) {
+    wizardBeginConversation.addEventListener('click', async (e) => {
+      e.preventDefault();
+      // Trigger the wizard form submission which will generate first message
+      if (wizardForm) {
+        wizardForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
     });
   }
   if (wizardGiveMoment) {
@@ -967,42 +1012,6 @@ async function handleWizardSubmit(event) {
   }
 }
 
-// Handle "Give me a moment" button
-function handleGiveMeAMoment() {
-  // Close the wizard modal
-  closeWizardModal();
-  
-  // Show the first conversation banner
-  showFirstConversationBanner();
-  
-  // Store state to remember we're waiting for first conversation
-  localStorage.setItem('waitingForFirstConversation', 'true');
-}
-
-// Show first conversation banner
-function showFirstConversationBanner() {
-  if (firstConversationBanner) {
-    firstConversationBanner.style.display = 'flex';
-  }
-}
-
-// Close first conversation banner
-function closeFirstConversationBanner() {
-  if (firstConversationBanner) {
-    firstConversationBanner.style.display = 'none';
-  }
-  localStorage.removeItem('waitingForFirstConversation');
-}
-
-// Handle "Begin Conversation" from banner
-async function handleBeginConversationFromBanner() {
-  closeFirstConversationBanner();
-  
-  // Reload wizard inputs from persona or generate first message
-  // For now, we'll just send a simple first message
-  await generateFirstMessageFromBanner();
-}
-
 // Generate first message from persona
 async function generateFirstMessage(wizardInputs) {
   if (!selectedPersonaId) return;
@@ -1022,7 +1031,7 @@ async function generateFirstMessage(wizardInputs) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        message: firstMessagePrompt,
+        user_message: firstMessagePrompt,
         persona_id: selectedPersonaId,
         emotional_state: 'neutral',
         tone_mode: 'auto',
@@ -1059,7 +1068,7 @@ async function generateFirstMessageFromBanner() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        message: prompt,
+        user_message: prompt,
         persona_id: selectedPersonaId,
         emotional_state: 'neutral',
         tone_mode: 'auto',

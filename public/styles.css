@@ -375,6 +375,25 @@ button[type="submit"]:active {
   background: #7f8c8d;
 }
 
+.memory-hint {
+  margin: 16px 0;
+  padding: 12px;
+  background: #f0f7ff;
+  border-left: 3px solid #2563eb;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.memory-hint p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.memory-hint strong {
+  color: #1e40af;
+}
+
 .add-memory-form {
   border-top: 1px solid #e8eef5;
   padding-top: 16px;

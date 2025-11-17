@@ -1,6 +1,7 @@
 // State
 let personas = [];
 let selectedPersonaId = null;
+let selectedPersona = null;
 let memories = [];
 let snapshots = [];
 let settings = null;
@@ -46,6 +47,9 @@ let isFirstConversation = false;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+  // Clear wizard snooze from previous session
+  localStorage.removeItem('wizardSnoozed');
+  
   // Get DOM element references
   personaDropdown = document.getElementById('persona-dropdown');
   personaForm = document.getElementById('persona-form');
@@ -162,8 +166,50 @@ document.addEventListener('DOMContentLoaded', async () => {
   checkAndShowStepZero();
 });
 
+// Check if wizard is incomplete for current persona
+function isWizardIncomplete() {
+  if (!selectedPersona) return false;
+  
+  // Check if wizard is completed (has onboarding_context or has memories)
+  const isComplete = selectedPersona.onboarding_context || (memories && memories.length > 0);
+  return !isComplete;
+}
+
+// Check if wizard is snoozed for current session
+function isWizardSnoozed() {
+  const snoozeData = localStorage.getItem('wizardSnoozed');
+  if (!snoozeData) return false;
+  
+  try {
+    const { personaId, timestamp } = JSON.parse(snoozeData);
+    // Check if snooze is for current persona
+    if (personaId !== selectedPersonaId) return false;
+    
+    // Snooze is only valid for current session (cleared on page load)
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Auto-open wizard if incomplete and not snoozed
+function checkAndAutoOpenWizard() {
+  if (isWizardIncomplete() && !isWizardSnoozed()) {
+    // Small delay to let UI settle
+    setTimeout(() => {
+      openWizardModal();
+    }, 300);
+  }
+}
+
 // Handle "Give me a moment" button
 function handleGiveMeAMoment() {
+  // Snooze wizard for current session
+  localStorage.setItem('wizardSnoozed', JSON.stringify({
+    personaId: selectedPersonaId,
+    timestamp: Date.now()
+  }));
+  
   // Close the wizard modal
   closeWizardModal();
   
@@ -661,6 +707,7 @@ async function loadPersonaDetails(personaId) {
     const personaResult = await personaResponse.json();
     
     if (personaResult.success) {
+      selectedPersona = personaResult.data;
       displayPersonaInfo(personaResult.data);
     }
     
@@ -697,6 +744,9 @@ async function loadPersonaDetails(personaId) {
     if (wizardSection) {
       wizardSection.style.display = 'block';
     }
+    
+    // Auto-open wizard if incomplete and not snoozed
+    checkAndAutoOpenWizard();
   } catch (error) {
     console.error('Failed to load persona details:', error);
     showError('Failed to load persona details');
@@ -1034,6 +1084,14 @@ function openWizardModal() {
 
 // Close wizard modal
 function closeWizardModal() {
+  // Snooze wizard for current session if it's incomplete
+  if (isWizardIncomplete() && selectedPersonaId) {
+    localStorage.setItem('wizardSnoozed', JSON.stringify({
+      personaId: selectedPersonaId,
+      timestamp: Date.now()
+    }));
+  }
+  
   if (wizardModal) {
     wizardModal.style.display = 'none';
   }

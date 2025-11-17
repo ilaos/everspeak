@@ -1,0 +1,122 @@
+1. Does the frontend currently support rendering dynamic “micro-responses” between steps?
+
+We need to know:
+
+Can you show an acknowledgment before moving to the next step?
+
+Or does the wizard move immediately by design?
+
+This determines whether:
+
+We add a pacing delay,
+
+Or we restructure the wizard UI to allow for acknowledgment messages.
+
+📌 Without this, we don’t know if our conversational onboarding style is compatible with the current UI architecture.
+
+2. Can the wizard support a 2-phase pattern per step?
+
+Example:
+
+Phase A — Acknowledge
+Phase B — Ask next question
+
+This is critical, because our conversational flow depends on it.
+
+Ask:
+
+Does the wizard architecture allow sub-states per step?
+
+Or do we need to redesign the component?
+
+3. What mechanism is used for step transitions?
+
+We need to know:
+
+Are steps controlled by a currentStep index?
+
+Is it a router-based step flow?
+
+Or a state machine?
+
+This affects how we introduce pacing, micro-responses, and emotional transitions.
+
+4. Can the user’s typed response be intercepted BEFORE moving to the next step?
+
+Ask Replit:
+
+When the user presses “Next,” can we run logic before changing steps?
+
+We need this for:
+
+showing the acknowledgment,
+
+adding natural delays,
+
+triggering animation or fade,
+
+and then moving on.
+
+5. Is the wizard currently able to hold local draft state per step (before saving)?
+
+We need clarity on:
+
+Where responses are stored (component state? global store? memory?)
+
+Whether we can save partial drafts after each step
+
+Whether the system supports “resume from last step” logic
+
+We need this info before we design the persistence behavior.
+
+6. Does the codebase have a central place to insert pacing/timing logic (delays, fade transitions)?
+
+For example:
+
+A central UI layer that handles “typing” simulation
+
+Or individual step components we’ll need to modify
+
+We need to know whether pacing is controlled:
+
+Globally
+
+Or at the level of each step
+
+7. How did Replit envision tone preferences (Step 9)?
+
+We need to know:
+
+Is Step 9 coded as sliders inside a settings component?
+
+Or as a regular step in the onboarding wizard?
+
+This determines how we reframe it conversationally without breaking UI.
+
+8. Does the codebase already support mid-wizard data persistence?
+
+Replit needs to confirm explicitly:
+
+Do we have any technical hook for partial saves?
+
+Or do we need to create a draft persona object?
+
+Or do we need to write new backend endpoints?
+
+This is essential.
+
+9. Can we add “emotional transitions” between questions?
+
+Ask whether the frontend can:
+
+fade out the question,
+
+show acknowledgment,
+
+fade in the next question.
+
+Or:
+
+if it requires new components,
+
+or if the current flow is too rigid.

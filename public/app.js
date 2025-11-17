@@ -31,7 +31,7 @@ let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
 let sidebarPersonaName, sidebarPersonaCompletion;
-const WIZARD_TOTAL_STEPS = 10;
+const WIZARD_TOTAL_STEPS = 11;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -1249,15 +1249,16 @@ function wizardPreviousStep() {
 
 // Wizard acknowledgments for each step
 const wizardAcknowledgments = {
-  2: "Thank you for sharing that. It gives me a sense of who they were.",
-  3: "I hear you. That paints a more human picture of them.",
-  4: "Thank you. Those details matter, even if they're hard to put into words.",
-  5: "I hear you. That time in your life can hold a lot.",
-  6: "Thank you for sharing that. We'll keep moving gently.",
-  7: "Thank you. That tells me a lot about the emotional space you're coming from.",
-  8: "Those memories are important. Thank you for trusting me with them.",
-  9: "Thank you. You've shared a lot already, and you're doing more work than it might seem.",
-  10: "Everything you've shared so far will be held carefully here."
+  2: "Thank you. Let's begin.",
+  3: "Thank you for sharing that. It gives me a sense of who they were.",
+  4: "I hear you. That paints a more human picture of them.",
+  5: "Thank you. Those details matter, even if they're hard to put into words.",
+  6: "I hear you. That time in your life can hold a lot.",
+  7: "Thank you for sharing that. We'll keep moving gently.",
+  8: "Thank you. That tells me a lot about the emotional space you're coming from.",
+  9: "Those memories are important. Thank you for trusting me with them.",
+  10: "Thank you. You've shared a lot already, and you're doing more work than it might seem.",
+  11: "Everything you've shared so far will be held carefully here."
 };
 
 // Update wizard UI

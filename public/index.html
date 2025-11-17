@@ -481,48 +481,58 @@
 
       <div class="modal-body">
         <form id="wizard-form">
-          <!-- Step 1: Personality -->
+          <!-- Step 1: Welcome / Step Zero -->
           <div class="wizard-step" id="wizard-step-1" data-step="1">
+            <h3>Welcome to EverSpeak.</h3>
+            <p class="step-intro">Before we begin, I want to gently explain what this space is for.</p>
+            <p class="step-description">EverSpeak was created to help you reconnect with the memory, personality, and presence of someone you've lost — not by replacing them, but by honoring the stories and love you shared.</p>
+            <p class="step-description">To do that, I'll ask you a few thoughtful questions. Each one helps me understand your loved one more fully — their personality, their humor, and the role they played in your life.</p>
+            <p class="step-description">You are always in control. You can skip anything that feels too hard, and you can stop at any time. This isn't a test. It's a conversation we'll take at your pace.</p>
+          </div>
+
+          <!-- Step 2: Personality -->
+          <div class="wizard-step" id="wizard-step-2" data-step="2" style="display: none;">
+            <p class="step-acknowledgment"></p>
             <h3>Getting to Know Who They Were</h3>
             <p class="step-intro">Before we go any further, I want to acknowledge something important: you're here because you lost someone who mattered deeply to you. That takes courage. We'll go through this slowly and gently.</p>
             <p class="step-description">When you think about who they were as a person, how would you describe their personality?</p>
             <textarea id="wizard-personality" data-testid="input-wizard-personality" rows="4" placeholder="Were they gentle, intense, steady, silly, serious, nurturing, reserved…? Anything that feels true."></textarea>
           </div>
 
-          <!-- Step 2: Communication Style -->
-          <div class="wizard-step" id="wizard-step-2" data-step="2" style="display: none;">
+          <!-- Step 3: Communication Style -->
+          <div class="wizard-step" id="wizard-step-3" data-step="3" style="display: none;">
             <p class="step-acknowledgment"></p>
             <h3>How It Felt to Talk With Them</h3>
             <p class="step-description">When you talked with them, what did it feel like?</p>
             <textarea id="wizard-communication-style" data-testid="input-wizard-communication-style" rows="4" placeholder="Did they listen quietly? Tease you? Get straight to the point? Wrap you in warmth? Something else?"></textarea>
           </div>
 
-          <!-- Step 3: Humor -->
-          <div class="wizard-step" id="wizard-step-3" data-step="3" style="display: none;">
+          <!-- Step 4: Humor -->
+          <div class="wizard-step" id="wizard-step-4" data-step="4" style="display: none;">
             <p class="step-acknowledgment"></p>
             <h3>Their Humor (If Any)</h3>
             <p class="step-description">Did they have a sense of humor? If so, what was it like?</p>
             <textarea id="wizard-humor" data-testid="input-wizard-humor" rows="4" placeholder="Dry, goofy, sarcastic, gentle, punny, dark, playful… or you can say they weren't really the joking type."></textarea>
           </div>
 
-          <!-- Step 4: When They Passed -->
-          <div class="wizard-step" id="wizard-step-4" data-step="4" style="display: none;">
+          <!-- Step 5: When They Passed -->
+          <div class="wizard-step" id="wizard-step-5" data-step="5" style="display: none;">
             <p class="step-acknowledgment"></p>
             <h3>When You Lost Them</h3>
             <p class="step-description">When did you lose them? It's okay if you only remember the general time.</p>
             <input type="text" id="wizard-date-passed" data-testid="input-wizard-date-passed" placeholder="For example: 'Spring 2023', 'about two years ago', or 'November 15, 2021'.">
           </div>
 
-          <!-- Step 5: Relationship Dynamics -->
-          <div class="wizard-step" id="wizard-step-5" data-step="5" style="display: none;">
+          <!-- Step 6: Relationship Dynamics -->
+          <div class="wizard-step" id="wizard-step-6" data-step="6" style="display: none;">
             <p class="step-acknowledgment"></p>
             <h3>How Things Were Near the End</h3>
             <p class="step-description">How were things between you near the end? There's no right or wrong answer.</p>
             <textarea id="wizard-relationship-end" data-testid="input-wizard-relationship-end" rows="4" placeholder="Were you close? Was it complicated? Was it sudden, or a long illness? Were there things that never got said?"></textarea>
           </div>
 
-          <!-- Step 6: Circumstances (Optional) -->
-          <div class="wizard-step" id="wizard-step-6" data-step="6" style="display: none;">
+          <!-- Step 7: Circumstances (Optional) -->
+          <div class="wizard-step" id="wizard-step-7" data-step="7" style="display: none;">
             <p class="step-acknowledgment"></p>
             <h3>If You're Comfortable Sharing…</h3>
             <p class="step-description">If you feel okay sharing, how did they pass? This is completely optional — you can skip it if it feels too heavy right now.</p>
@@ -530,24 +540,24 @@
             <button type="button" class="btn-skip-step" id="skip-circumstances" data-testid="button-skip-circumstances">I'm not ready to talk about this yet</button>
           </div>
 
-          <!-- Step 7: Memories -->
-          <div class="wizard-step" id="wizard-step-7" data-step="7" style="display: none;">
+          <!-- Step 8: Memories -->
+          <div class="wizard-step" id="wizard-step-8" data-step="8" style="display: none;">
             <p class="step-acknowledgment"></p>
             <h3>Memories That Stay With You</h3>
             <p class="step-description">Tell me about a few moments you think of often. They don't need to be big or dramatic — just real.</p>
             <textarea id="wizard-memories" data-testid="input-wizard-memories" rows="5" placeholder="Everyday routines, little rituals, big days, private jokes… anything that still feels vivid."></textarea>
           </div>
 
-          <!-- Step 8: Conversations -->
-          <div class="wizard-step" id="wizard-step-8" data-step="8" style="display: none;">
+          <!-- Step 9: Conversations -->
+          <div class="wizard-step" id="wizard-step-9" data-step="9" style="display: none;">
             <p class="step-acknowledgment"></p>
             <h3>Things Left Unsaid</h3>
             <p class="step-description">Is there anything you wish you could have said to them, or heard from them?</p>
             <textarea id="wizard-conversations" data-testid="input-wizard-conversations" rows="4" placeholder="Regrets, apologies, reassurances, questions — anything you still find yourself carrying."></textarea>
           </div>
 
-          <!-- Step 9: Tone Preferences -->
-          <div class="wizard-step" id="wizard-step-9" data-step="9" style="display: none;">
+          <!-- Step 10: Tone Preferences -->
+          <div class="wizard-step" id="wizard-step-10" data-step="10" style="display: none;">
             <p class="step-acknowledgment"></p>
             <h3>How You'd Like Them to Sound Here</h3>
             <p class="step-description">Now we'll set how you'd like them to show up in these conversations. There are no perfect settings — just choose what feels most supportive for you right now.</p>
@@ -583,8 +593,8 @@
             </div>
           </div>
 
-          <!-- Step 10: Transition Screen -->
-          <div class="wizard-step" id="wizard-step-10" data-step="10" style="display: none;">
+          <!-- Step 11: Transition Screen -->
+          <div class="wizard-step" id="wizard-step-11" data-step="11" style="display: none;">
             <div class="transition-content">
               <h3>Thank You for Sharing All of That</h3>
               <p class="step-description">I know none of this is easy to talk about. Everything you've shared will be held carefully and used to shape how they 'sound' here — drawn only from your memories, never pretending to be more than that.</p>

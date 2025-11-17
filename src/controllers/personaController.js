@@ -807,6 +807,7 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
         success: true,
         memories_created: createdMemories.length,
         memories: createdMemories,
+        persona: persona,  // Return full updated persona with onboarding_context
         message: `Wizard completed! Created ${createdMemories.length} memories.`
       });
     } catch (error) {

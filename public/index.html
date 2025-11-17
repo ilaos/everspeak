@@ -56,7 +56,46 @@
     <button class="btn-close-conversation-banner" id="btn-close-conversation-banner" data-testid="button-close-conversation-banner">×</button>
   </div>
 
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar" data-testid="sidebar">
+    <div class="sidebar-header">
+      <h3>Settings</h3>
+      <button class="sidebar-close" id="sidebar-close" data-testid="button-sidebar-close">&times;</button>
+    </div>
+    
+    <div class="sidebar-content">
+      <!-- Persona Setup Section -->
+      <div class="sidebar-section">
+        <h4>Persona Setup</h4>
+        <div class="sidebar-section-content">
+          <div class="persona-status" id="sidebar-persona-status">
+            <p class="status-label">Current persona:</p>
+            <p class="status-value" id="sidebar-persona-name">None selected</p>
+            <p class="status-completion" id="sidebar-persona-completion">Setup not started</p>
+          </div>
+          <button class="btn-sidebar-action" id="sidebar-restart-wizard" data-testid="button-sidebar-restart-wizard">
+            Restart Wizard
+          </button>
+        </div>
+      </div>
+      
+      <!-- More sections will go here -->
+    </div>
+  </div>
+  
+  <!-- Sidebar Overlay (click to close) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" data-testid="sidebar-overlay"></div>
+
   <div class="container">
+    <!-- Top Bar with Hamburger -->
+    <div class="top-bar">
+      <button class="hamburger-menu" id="hamburger-menu" data-testid="button-hamburger-menu" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
     <header>
       <h1>Everspeak</h1>
       <p>Keep the conversation going with those you love</p>
@@ -85,7 +124,7 @@
 
         <div class="continue-setup-container" id="continue-setup-container" style="display: none;">
           <button class="btn-continue-setup" id="continue-setup-btn" data-testid="button-continue-setup">
-            ✨ Continue Setup
+            Continue Setup
           </button>
           <p class="setup-hint">Complete the wizard to start your first conversation</p>
         </div>

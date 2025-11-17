@@ -29,6 +29,8 @@ let wizardProgressFill, wizardCurrentStepText, wizardTotalStepsText;
 let skipCircumstancesBtn;
 let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
+let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
+let sidebarPersonaName, sidebarPersonaCompletion;
 const WIZARD_TOTAL_STEPS = 10;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
@@ -158,6 +160,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   voiceToggle = document.getElementById('voice-toggle');
   emptyState = document.getElementById('empty-state');
   
+  // Sidebar elements
+  sidebar = document.getElementById('sidebar');
+  sidebarClose = document.getElementById('sidebar-close');
+  sidebarOverlay = document.getElementById('sidebar-overlay');
+  hamburgerMenu = document.getElementById('hamburger-menu');
+  sidebarRestartWizard = document.getElementById('sidebar-restart-wizard');
+  sidebarPersonaName = document.getElementById('sidebar-persona-name');
+  sidebarPersonaCompletion = document.getElementById('sidebar-persona-completion');
+  
   await loadPersonas();
   await loadJournalEntries();
   setupEventListeners();
@@ -173,8 +184,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 function isWizardIncomplete() {
   if (!selectedPersona) return false;
   
-  // Check if wizard is completed (has onboarding_context or has memories)
-  const isComplete = selectedPersona.onboarding_context || (memories && memories.length > 0);
+  // Check if wizard is completed (has onboarding_context.completed_at from wizard submission)
+  // This is the only reliable indicator - completed_at is only set when wizard finishes
+  const isComplete = !!(selectedPersona.onboarding_context && selectedPersona.onboarding_context.completed_at);
   return !isComplete;
 }
 
@@ -599,6 +611,96 @@ function setupEventListeners() {
   if (waitingForFirstConversation === 'true' && firstConversationBanner) {
     firstConversationBanner.style.display = 'flex';
   }
+  
+  // Sidebar event listeners
+  if (hamburgerMenu) {
+    hamburgerMenu.addEventListener('click', toggleSidebar);
+  }
+  if (sidebarClose) {
+    sidebarClose.addEventListener('click', closeSidebar);
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', closeSidebar);
+  }
+  if (sidebarRestartWizard) {
+    sidebarRestartWizard.addEventListener('click', handleRestartWizard);
+  }
+}
+
+// Toggle sidebar
+function toggleSidebar() {
+  if (sidebar && sidebar.classList.contains('open')) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
+
+// Open sidebar
+function openSidebar() {
+  if (sidebar) {
+    sidebar.classList.add('open');
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.classList.add('active');
+  }
+  if (hamburgerMenu) {
+    hamburgerMenu.classList.add('active');
+  }
+  
+  // Update sidebar content
+  updateSidebarContent();
+}
+
+// Close sidebar
+function closeSidebar() {
+  if (sidebar) {
+    sidebar.classList.remove('open');
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.classList.remove('active');
+  }
+  if (hamburgerMenu) {
+    hamburgerMenu.classList.remove('active');
+  }
+}
+
+// Update sidebar content based on current persona
+function updateSidebarContent() {
+  if (!sidebarPersonaName || !sidebarPersonaCompletion) return;
+  
+  if (selectedPersona) {
+    sidebarPersonaName.textContent = selectedPersona.name;
+    
+    if (isWizardIncomplete()) {
+      sidebarPersonaCompletion.textContent = 'Setup incomplete';
+      sidebarPersonaCompletion.style.color = '#e67e22';
+    } else {
+      sidebarPersonaCompletion.textContent = 'Setup complete';
+      sidebarPersonaCompletion.style.color = '#27ae60';
+    }
+  } else {
+    sidebarPersonaName.textContent = 'None selected';
+    sidebarPersonaCompletion.textContent = 'Select a persona to begin';
+    sidebarPersonaCompletion.style.color = '#7f8c8d';
+  }
+}
+
+// Handle restart wizard from sidebar
+function handleRestartWizard() {
+  if (!selectedPersonaId) {
+    showError('Please select a persona first');
+    return;
+  }
+  
+  // Close sidebar
+  closeSidebar();
+  
+  // Clear any existing snooze
+  localStorage.removeItem('wizardSnoozed');
+  
+  // Open wizard modal
+  openWizardModal();
 }
 
 // Enable strict mode
@@ -711,6 +813,12 @@ async function handlePersonaChange(event) {
   selectedPersonaId = personaId;
   await loadPersonaDetails(personaId);
   updateConversationRoomState();
+  
+  // Update sidebar to reflect new persona
+  updateSidebarContent();
+  
+  // Update continue setup button visibility
+  updateContinueSetupButton();
 }
 
 // Load persona details and memories
@@ -762,8 +870,9 @@ async function loadPersonaDetails(personaId) {
       wizardSection.style.display = 'block';
     }
     
-    // Update continue setup button visibility
+    // Update UI after all data is loaded
     updateContinueSetupButton();
+    updateSidebarContent();
     
     // Auto-open wizard if incomplete and not snoozed
     checkAndAutoOpenWizard();
@@ -1250,10 +1359,26 @@ async function handleWizardSubmit(event) {
       memories = [...memories, ...result.memories];
       displayMemories();
       
-      // Reload persona details to refresh settings and snapshots
+      // CRITICAL: Use the returned persona from POST response
+      // This has onboarding_context.completed_at already set by the server
+      if (result.persona) {
+        selectedPersona = result.persona;
+        
+        // Also update in personas array
+        const personaIndex = personas.findIndex(p => p.id === selectedPersonaId);
+        if (personaIndex !== -1) {
+          personas[personaIndex] = result.persona;
+        }
+      }
+      
+      // Now reload all persona-related data (snapshots, settings, etc.)
       await loadPersonaDetails(selectedPersonaId);
       
-      // Hide loading and close modal first
+      // Update sidebar and continue setup button to reflect completion
+      updateSidebarContent();
+      updateContinueSetupButton();
+      
+      // Hide loading and close modal
       if (loadingEl) {
         loadingEl.style.display = 'none';
       }

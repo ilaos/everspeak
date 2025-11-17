@@ -23,8 +23,11 @@ let humorSlider, honestySlider, sentimentalitySlider, energySlider, adviceSlider
 let humorValue, honestyValue, sentimentalityValue, energyValue, adviceValue;
 let avoidRegretSpirals, noParanormalLanguage, softenSensitiveTopics, preferReassurance;
 let bulkImportBtn, bulkImportModal, bulkImportForm, closeBulkImport, cancelBulkImport;
-let wizardSection, setupWizardBtn, wizardModal, wizardForm, closeWizard, wizardPrev, wizardNext, wizardGenerate;
-let wizardProgressFill, wizardCurrentStepText;
+let wizardSection, setupWizardBtn, wizardModal, wizardForm, closeWizard, wizardPrev, wizardNext, wizardBeginConversation, wizardGiveMoment;
+let wizardProgressFill, wizardCurrentStepText, wizardTotalStepsText;
+let skipCircumstancesBtn;
+let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
+const WIZARD_TOTAL_STEPS = 10;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -93,9 +96,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   closeWizard = document.getElementById('close-wizard');
   wizardPrev = document.getElementById('wizard-prev');
   wizardNext = document.getElementById('wizard-next');
-  wizardGenerate = document.getElementById('wizard-generate');
+  wizardBeginConversation = document.getElementById('wizard-begin-conversation');
+  wizardGiveMoment = document.getElementById('wizard-give-moment');
   wizardProgressFill = document.getElementById('wizard-progress-fill');
   wizardCurrentStepText = document.getElementById('wizard-current-step');
+  wizardTotalStepsText = document.getElementById('wizard-total-steps');
+  skipCircumstancesBtn = document.getElementById('skip-circumstances');
+  
+  // First conversation banner
+  firstConversationBanner = document.getElementById('first-conversation-banner');
+  btnBeginConversationBanner = document.getElementById('btn-begin-conversation-banner');
+  btnCloseConversationBanner = document.getElementById('btn-close-conversation-banner');
   
   // Voice recording elements
   voiceRecordBtn = document.getElementById('voice-record-btn');
@@ -217,6 +228,25 @@ function setupEventListeners() {
   if (wizardForm) {
     wizardForm.addEventListener('submit', handleWizardSubmit);
   }
+  if (skipCircumstancesBtn) {
+    skipCircumstancesBtn.addEventListener('click', () => {
+      // Clear the circumstances textarea and move to next step
+      const circumstancesInput = document.getElementById('wizard-circumstances');
+      if (circumstancesInput) {
+        circumstancesInput.value = '';
+      }
+      wizardNextStep();
+    });
+  }
+  if (wizardGiveMoment) {
+    wizardGiveMoment.addEventListener('click', handleGiveMeAMoment);
+  }
+  if (btnBeginConversationBanner) {
+    btnBeginConversationBanner.addEventListener('click', handleBeginConversationFromBanner);
+  }
+  if (btnCloseConversationBanner) {
+    btnCloseConversationBanner.addEventListener('click', closeFirstConversationBanner);
+  }
   if (wizardModal) {
     wizardModal.addEventListener('click', (e) => {
       if (e.target === wizardModal) {
@@ -294,6 +324,12 @@ function setupEventListeners() {
   }
   if (btnCloseTimeBanner) {
     btnCloseTimeBanner.addEventListener('click', closeNeedTimeBanner);
+  }
+  
+  // Check if user is waiting for first conversation
+  const waitingForFirstConversation = localStorage.getItem('waitingForFirstConversation');
+  if (waitingForFirstConversation === 'true' && firstConversationBanner) {
+    firstConversationBanner.style.display = 'flex';
   }
 }
 
@@ -487,6 +523,12 @@ function clearPersonaInfo() {
 
 // Display memories
 function displayMemories() {
+  // Show memory hint when persona is selected
+  const memoryHint = document.getElementById('memory-hint');
+  if (memoryHint && selectedPersonaId) {
+    memoryHint.style.display = 'block';
+  }
+  
   if (memories.length === 0) {
     memoriesList.innerHTML = '<p class="placeholder">No memories yet. Add some below!</p>';
     return;
@@ -797,7 +839,7 @@ function closeWizardModal() {
 
 // Wizard next step
 function wizardNextStep() {
-  if (wizardCurrentStep < 6) {
+  if (wizardCurrentStep < WIZARD_TOTAL_STEPS) {
     wizardCurrentStep++;
     updateWizardUI();
   }
@@ -814,7 +856,7 @@ function wizardPreviousStep() {
 // Update wizard UI
 function updateWizardUI() {
   // Hide all steps
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= WIZARD_TOTAL_STEPS; i++) {
     const step = document.getElementById(`wizard-step-${i}`);
     if (step) {
       step.style.display = i === wizardCurrentStep ? 'block' : 'none';
@@ -822,12 +864,15 @@ function updateWizardUI() {
   }
   
   // Update progress
-  const progressPercent = (wizardCurrentStep / 6) * 100;
+  const progressPercent = (wizardCurrentStep / WIZARD_TOTAL_STEPS) * 100;
   if (wizardProgressFill) {
     wizardProgressFill.style.width = `${progressPercent}%`;
   }
   if (wizardCurrentStepText) {
     wizardCurrentStepText.textContent = wizardCurrentStep;
+  }
+  if (wizardTotalStepsText) {
+    wizardTotalStepsText.textContent = WIZARD_TOTAL_STEPS;
   }
   
   // Update navigation buttons
@@ -835,10 +880,13 @@ function updateWizardUI() {
     wizardPrev.style.display = wizardCurrentStep > 1 ? 'inline-block' : 'none';
   }
   if (wizardNext) {
-    wizardNext.style.display = wizardCurrentStep < 6 ? 'inline-block' : 'none';
+    wizardNext.style.display = wizardCurrentStep < WIZARD_TOTAL_STEPS ? 'inline-block' : 'none';
   }
-  if (wizardGenerate) {
-    wizardGenerate.style.display = wizardCurrentStep === 6 ? 'inline-block' : 'none';
+  if (wizardBeginConversation) {
+    wizardBeginConversation.style.display = wizardCurrentStep === WIZARD_TOTAL_STEPS ? 'inline-block' : 'none';
+  }
+  if (wizardGiveMoment) {
+    wizardGiveMoment.style.display = wizardCurrentStep === WIZARD_TOTAL_STEPS ? 'inline-block' : 'none';
   }
 }
 
@@ -862,7 +910,11 @@ async function handleWizardSubmit(event) {
   // Collect wizard inputs
   const wizardInputs = {
     personality: document.getElementById('wizard-personality').value.trim(),
+    communication_style: document.getElementById('wizard-communication-style').value.trim(),
     humor: document.getElementById('wizard-humor').value.trim(),
+    date_passed: document.getElementById('wizard-date-passed').value.trim(),
+    relationship_end: document.getElementById('wizard-relationship-end').value.trim(),
+    circumstances: document.getElementById('wizard-circumstances').value.trim(),
     memories: document.getElementById('wizard-memories').value.trim(),
     conversations: document.getElementById('wizard-conversations').value.trim(),
     tone_preferences: {
@@ -896,6 +948,9 @@ async function handleWizardSubmit(event) {
       // Close modal
       closeWizardModal();
       
+      // Generate and send first message from persona
+      await generateFirstMessage(wizardInputs);
+      
       showSuccess(`Persona Ready! Created ${result.memories_created} memories.`);
     } else {
       if (loadingEl) {
@@ -910,6 +965,140 @@ async function handleWizardSubmit(event) {
     }
     showError('Failed to complete wizard');
   }
+}
+
+// Handle "Give me a moment" button
+function handleGiveMeAMoment() {
+  // Close the wizard modal
+  closeWizardModal();
+  
+  // Show the first conversation banner
+  showFirstConversationBanner();
+  
+  // Store state to remember we're waiting for first conversation
+  localStorage.setItem('waitingForFirstConversation', 'true');
+}
+
+// Show first conversation banner
+function showFirstConversationBanner() {
+  if (firstConversationBanner) {
+    firstConversationBanner.style.display = 'flex';
+  }
+}
+
+// Close first conversation banner
+function closeFirstConversationBanner() {
+  if (firstConversationBanner) {
+    firstConversationBanner.style.display = 'none';
+  }
+  localStorage.removeItem('waitingForFirstConversation');
+}
+
+// Handle "Begin Conversation" from banner
+async function handleBeginConversationFromBanner() {
+  closeFirstConversationBanner();
+  
+  // Reload wizard inputs from persona or generate first message
+  // For now, we'll just send a simple first message
+  await generateFirstMessageFromBanner();
+}
+
+// Generate first message from persona
+async function generateFirstMessage(wizardInputs) {
+  if (!selectedPersonaId) return;
+  
+  try {
+    // Get current persona to construct first message
+    const persona = personas.find(p => p.id === selectedPersonaId);
+    if (!persona) return;
+    
+    // Construct a warm, grounded first message using onboarding data
+    const firstMessagePrompt = buildFirstMessagePrompt(persona, wizardInputs);
+    
+    // Send to API to generate first message
+    const response = await fetch('/api/message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: firstMessagePrompt,
+        persona_id: selectedPersonaId,
+        emotional_state: 'neutral',
+        tone_mode: 'auto',
+        strict_persona: false
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.reply) {
+      // Display the first message in chat
+      displayMessage(result.reply, 'assistant');
+      userMessageCount = 0; // Reset count since this is AI-initiated
+    }
+  } catch (error) {
+    console.error('Failed to generate first message:', error);
+  }
+}
+
+// Generate first message when coming from banner
+async function generateFirstMessageFromBanner() {
+  if (!selectedPersonaId) return;
+  
+  try {
+    const persona = personas.find(p => p.id === selectedPersonaId);
+    if (!persona) return;
+    
+    // Simpler prompt for banner case
+    const prompt = `Generate a warm, grounded first message from ${persona.name} to start a conversation. Use their personality and relationship context. Keep it natural and familiar, not spooky or supernatural. Make it feel like they're genuinely reaching out.`;
+    
+    const response = await fetch('/api/message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: prompt,
+        persona_id: selectedPersonaId,
+        emotional_state: 'neutral',
+        tone_mode: 'auto',
+        strict_persona: false
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.reply) {
+      displayMessage(result.reply, 'assistant');
+      userMessageCount = 0;
+    }
+  } catch (error) {
+    console.error('Failed to generate first message:', error);
+  }
+}
+
+// Build first message prompt using wizard inputs
+function buildFirstMessagePrompt(persona, wizardInputs) {
+  const parts = [
+    `You are ${persona.name}, reaching out to start a conversation with someone you care about.`,
+    `Your personality: ${wizardInputs.personality || persona.description}`,
+  ];
+  
+  if (wizardInputs.communication_style) {
+    parts.push(`Your communication style: ${wizardInputs.communication_style}`);
+  }
+  
+  if (wizardInputs.relationship_end) {
+    parts.push(`Context about your relationship: ${wizardInputs.relationship_end}`);
+  }
+  
+  parts.push(
+    `Generate a warm, grounded first message. Make it feel like you're genuinely reaching out - familiar, natural, and true to who you were. Not spooky, not omniscient, not supernatural. Just... you.`,
+    `Keep it brief (2-3 sentences max).`
+  );
+  
+  return parts.join(' ');
 }
 
 // Handle voice recording

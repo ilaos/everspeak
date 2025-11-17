@@ -158,13 +158,33 @@ function handleGiveMeAMoment() {
 function showFirstConversationBanner() {
   if (firstConversationBanner) {
     firstConversationBanner.style.display = 'flex';
+    console.log('Banner shown, display:', firstConversationBanner.style.display);
+    
+    // Re-attach close button listener to ensure it's connected
+    const closeBtn = document.getElementById('btn-close-conversation-banner');
+    if (closeBtn) {
+      // Remove any existing listeners by cloning and replacing
+      const newCloseBtn = closeBtn.cloneNode(true);
+      closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+      // Attach fresh listener
+      newCloseBtn.addEventListener('click', closeFirstConversationBanner);
+      console.log('Close button listener re-attached');
+    }
   }
 }
 
 // Close first conversation banner
 function closeFirstConversationBanner() {
+  console.log('closeFirstConversationBanner called', {
+    element: firstConversationBanner,
+    currentDisplay: firstConversationBanner?.style.display
+  });
+  
   if (firstConversationBanner) {
     firstConversationBanner.style.display = 'none';
+    console.log('Banner hidden, new display:', firstConversationBanner.style.display);
+  } else {
+    console.error('firstConversationBanner element not found!');
   }
   localStorage.removeItem('waitingForFirstConversation');
 }

@@ -651,6 +651,102 @@
       ],
       "created_at": "2025-11-17T00:19:04.029Z",
       "updated_at": "2025-11-17T00:21:17.582Z"
+    },
+    {
+      "id": "a198f14f-7253-40d4-a40f-cdb0a299f466",
+      "name": "Test",
+      "relationship": "Friend",
+      "description": "Kind",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "created_at": "2025-11-17T00:27:25.260Z",
+      "updated_at": "2025-11-17T00:27:25.260Z"
+    },
+    {
+      "id": "6c2614ac-d82f-4f41-b8d2-e67d0a865de6",
+      "name": "Sarah",
+      "relationship": "Sister",
+      "description": "Loving and funny",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "created_at": "2025-11-17T00:31:29.001Z",
+      "updated_at": "2025-11-17T00:31:29.001Z"
+    },
+    {
+      "id": "1fded1cc-cf25-4261-8d28-620e845420d9",
+      "name": "Test",
+      "relationship": "Friend",
+      "description": "Kind",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "created_at": "2025-11-17T00:35:20.068Z",
+      "updated_at": "2025-11-17T00:35:20.068Z"
+    },
+    {
+      "id": "23a6955f-e6c6-4e5d-8f11-ae599648eb6b",
+      "name": "Alex",
+      "relationship": "Brother",
+      "description": "Funny and smart",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "created_at": "2025-11-17T00:39:29.863Z",
+      "updated_at": "2025-11-17T00:39:29.863Z"
     }
   ]
 }

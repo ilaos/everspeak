@@ -1259,11 +1259,26 @@ function wizardPreviousStep() {
   }
 }
 
+// Check if date is near holidays
+function isDateNearHolidays(dateText) {
+  if (!dateText) return false;
+  
+  const lowerText = dateText.toLowerCase();
+  
+  // Holiday keywords
+  const holidayKeywords = [
+    'christmas', 'xmas', 'holiday', 'holidays', 'new year', 'thanksgiving',
+    'december', 'dec', 'november', 'nov', 'january', 'jan'
+  ];
+  
+  return holidayKeywords.some(keyword => lowerText.includes(keyword));
+}
+
 // Wizard acknowledgments for each step
 const wizardAcknowledgments = {
   2: "",
   3: "Thank you for sharing that. It gives me a sense of who they were.",
-  4: "I hear you. That paints a more human picture of them.",
+  4: "", // Will be set dynamically based on date
   5: "Thank you. Those details matter, even if they're hard to put into words.",
   6: "I hear you. That time in your life can hold a lot.",
   7: "Thank you for sharing that. We'll keep moving gently.",
@@ -1315,6 +1330,21 @@ function updateWizardUI() {
     if (questionEl) {
       questionEl.textContent = `Would you feel comfortable telling me when ${firstName} passed away?`;
       questionEl.style.display = 'block';
+    }
+  } else if (wizardCurrentStep === 4) {
+    // Special handling for Step 4: Dynamic acknowledgment based on date
+    const currentStep = document.getElementById(`wizard-step-${wizardCurrentStep}`);
+    const acknowledgment = currentStep?.querySelector('.step-acknowledgment');
+    
+    if (acknowledgment) {
+      const datePassed = document.getElementById('wizard-date-passed')?.value.trim() || '';
+      
+      if (isDateNearHolidays(datePassed)) {
+        acknowledgment.textContent = "Thank you for sharing that. I know that must be very difficult being that it happened around the holidays.";
+      } else {
+        acknowledgment.textContent = "Thank you for sharing that. I know that specific dates can hold a lot of weight.";
+      }
+      acknowledgment.style.display = 'block';
     }
   } else {
     // Update acknowledgment text for other steps

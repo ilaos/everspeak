@@ -777,7 +777,7 @@ button[type="submit"]:active {
   margin-left: -150%;
   margin-top: -150%;
   background: radial-gradient(circle at center, rgba(211,84,0,0.12) 0%, rgba(255,255,255,0.06) 30%, transparent 60%);
-  animation: rotate-slow 40s linear infinite;
+  animation: rotate-slow 5s linear infinite;
   pointer-events: none;
 }
 
@@ -792,7 +792,7 @@ button[type="submit"]:active {
   margin-left: -100%;
   margin-top: -100%;
   background: radial-gradient(ellipse at 30% 40%, rgba(211,84,0,0.15) 0%, rgba(100,60,30,0.08) 40%, transparent 70%);
-  animation: rotate-medium 50s linear infinite reverse;
+  animation: rotate-medium 7s linear infinite reverse;
   pointer-events: none;
 }
 
@@ -806,7 +806,7 @@ button[type="submit"]:active {
   margin-left: -75%;
   margin-top: -75%;
   background: radial-gradient(circle at 70% 60%, rgba(211,84,0,0.08) 0%, transparent 50%);
-  animation: rotate-fast 35s linear infinite;
+  animation: rotate-fast 3s linear infinite;
   pointer-events: none;
   z-index: 0;
 }

@@ -1344,7 +1344,7 @@ function updateWizardUI() {
       
       let acknowledgmentText;
       if (isPhrasePattern) {
-        acknowledgmentText = `I appreciate you sharing that. I know that ${relationshipLower} and that this is a profound and unique kind of loss.`;
+        acknowledgmentText = `I appreciate you sharing that. I know that this is a profound and unique kind of loss.`;
       } else {
         const article = /^[aeiou]/i.test(relationshipLower) ? 'an' : 'a';
         acknowledgmentText = `I appreciate you sharing that. I know that losing ${article} ${relationshipLower} is a profound and unique kind of loss.`;

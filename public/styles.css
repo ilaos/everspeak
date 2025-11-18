@@ -715,13 +715,12 @@ button[type="submit"]:active {
   background: #2c3e50;
   display: flex;
   flex-direction: column;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
   isolation: isolate;
-  margin: 0;
+  min-height: calc(100vh - 200px);
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
   padding: 0;
 }
 

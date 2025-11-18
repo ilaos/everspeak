@@ -2027,6 +2027,7 @@ button[type="submit"]:active {
   color: #7f8c8d;
   margin-bottom: 20px;
   font-size: 1.05rem;
+  font-style: italic;
 }
 
 .step-intro {
@@ -2042,7 +2043,6 @@ button[type="submit"]:active {
 
 .step-acknowledgment {
   color: #8b7355;
-  font-style: italic;
   font-size: 1.1rem;
   margin-bottom: 16px;
   padding: 8px 12px;

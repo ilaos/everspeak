@@ -42,20 +42,6 @@
           <span>Settings</span>
         </button>
       </nav>
-      
-      <!-- Quick Persona Status -->
-      <div class="sidebar-section">
-        <h4>Current Persona</h4>
-        <div class="sidebar-section-content">
-          <select id="persona-dropdown" data-testid="select-persona">
-            <option value="">-- Choose a persona --</option>
-          </select>
-          <div class="persona-status" id="sidebar-persona-status">
-            <p class="status-value" id="sidebar-persona-name">None selected</p>
-            <p class="status-completion" id="sidebar-persona-completion">Setup not started</p>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
   
@@ -308,6 +294,17 @@
           <p class="page-description">Create and manage the people you'd like to talk to</p>
         </div>
         <div class="page-content">
+          <div class="persona-selector-section">
+            <h3>Select Persona</h3>
+            <select id="persona-dropdown" data-testid="select-persona">
+              <option value="">-- Choose a persona --</option>
+            </select>
+            <div class="persona-status" id="sidebar-persona-status">
+              <p class="status-value" id="sidebar-persona-name">None selected</p>
+              <p class="status-completion" id="sidebar-persona-completion">Setup not started</p>
+            </div>
+          </div>
+
           <div class="persona-info-section">
             <h3>Current Persona Info</h3>
             <div class="persona-info" id="persona-info">

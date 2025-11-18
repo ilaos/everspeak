@@ -190,11 +190,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   setupNavigation(navLinks);
   
-  // Show default page (Speak Now / Conversation)
-  if (conversationPage) {
-    conversationPage.style.display = 'flex';
-  }
-  
   // Initialize Conversation Room settings
   initializeConversationRoom();
 });

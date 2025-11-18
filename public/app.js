@@ -1295,7 +1295,7 @@ function getStepProgressText(step) {
     1: '', // Step 1 doesn't show progress text
     2: "Learning your lost one's name...Next: Your Relationship",
     3: "Your Relationship...Next: Date of Passing",
-    4: "Date of Passing...Next: Loved One's Age at Passing",
+    4: "Date of Passing...Next: Reason for Loss",
     5: "Their Humor...Next: Relationship Dynamics",
     6: "Relationship Dynamics...Next: Circumstances",
     7: "Circumstances...Next: Memories",

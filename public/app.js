@@ -296,6 +296,7 @@ async function handleBeginConversationFromBanner() {
 // Setup Navigation
 function setupNavigation(navLinks) {
   const allPages = [
+    document.getElementById('page-home'),
     document.getElementById('page-conversation'),
     document.getElementById('page-journal'),
     document.getElementById('page-memories'),

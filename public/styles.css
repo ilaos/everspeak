@@ -712,12 +712,10 @@ button[type="submit"]:active {
 /* ===================== */
 
 .conversation-room {
-  background: #DFD0B8;
-  border-radius: 16px;
+  background: transparent;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* Room Header */
@@ -895,7 +893,7 @@ button[type="submit"]:active {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-  background: linear-gradient(135deg, #fdfbf9 0%, #f9f5f1 100%);
+  background: #393E46;
   min-height: 400px;
   max-height: 500px;
 }
@@ -904,7 +902,7 @@ button[type="submit"]:active {
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #9b8670;
+  color: #EEEEEE;
   font-style: italic;
 }
 
@@ -922,7 +920,7 @@ button[type="submit"]:active {
 }
 
 .incomplete-setup-state p {
-  color: #8b7355;
+  color: #EEEEEE;
   margin-bottom: 20px;
   line-height: 1.6;
 }

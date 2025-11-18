@@ -340,58 +340,14 @@ function setupNavigation(navLinks) {
 
 // Initialize Conversation Room
 function initializeConversationRoom() {
-  // Load text size preference
-  const savedTextSize = localStorage.getItem('everspeak_chat_text_size') || 'normal';
-  if (savedTextSize === 'large') {
-    textSizeLarge.classList.add('active');
-    textSizeNormal.classList.remove('active');
-    conversationRoom.classList.add('text-size-large');
-  }
-  
-  // Set up text size listeners
-  textSizeNormal.addEventListener('click', () => handleTextSizeChange('normal'));
-  textSizeLarge.addEventListener('click', () => handleTextSizeChange('large'));
-  
-  // Voice toggle is UI only - just update visual state
-  if (voiceToggle) {
-    voiceToggle.addEventListener('change', () => {
-      // Visual feedback only - no actual functionality yet
-      if (voiceToggle.checked) {
-        console.log('Voice preview enabled (UI only)');
-      } else {
-        console.log('Voice preview disabled (UI only)');
-      }
-    });
-  }
-  
   // Update room state for initial empty state
   updateConversationRoomState();
-}
-
-// Handle text size change
-function handleTextSizeChange(size) {
-  if (size === 'large') {
-    textSizeLarge.classList.add('active');
-    textSizeNormal.classList.remove('active');
-    conversationRoom.classList.add('text-size-large');
-    localStorage.setItem('everspeak_chat_text_size', 'large');
-  } else {
-    textSizeNormal.classList.add('active');
-    textSizeLarge.classList.remove('active');
-    conversationRoom.classList.remove('text-size-large');
-    localStorage.setItem('everspeak_chat_text_size', 'normal');
-  }
 }
 
 // Update Conversation Room state based on selected persona
 function updateConversationRoomState() {
   if (!selectedPersonaId) {
-    // No persona selected
-    avatarInitials.textContent = '?';
-    roomTitle.textContent = 'Connection';
-    roomSubtitle.textContent = 'Select someone to begin a conversation.';
-    
-    // Show empty state
+    // No persona selected - show empty state
     if (emptyState) {
       emptyState.style.display = 'block';
     }
@@ -401,41 +357,20 @@ function updateConversationRoomState() {
   const persona = personas.find(p => p.id === selectedPersonaId);
   if (!persona) return;
   
-  // Update avatar initials
-  const initials = getPersonaInitials(persona.name);
-  avatarInitials.textContent = initials;
-  
-  // Update room title
-  roomTitle.textContent = persona.name || 'Connection';
-  
   // Check if wizard is completed (has onboarding_context or has memories)
   const isWizardComplete = persona.onboarding_context || (persona.memories && persona.memories.length > 0);
   
   if (!isWizardComplete) {
     // Incomplete setup state
-    roomSubtitle.textContent = 'Complete setup to begin meaningful conversations.';
     showIncompleteSetupState();
   } else {
     // Ready state
-    roomSubtitle.textContent = 'Based on the memories you\'ve shared about this person.';
     hideIncompleteSetupState();
     
     // Hide empty state
     if (emptyState) {
       emptyState.style.display = 'none';
     }
-  }
-}
-
-// Get initials from persona name
-function getPersonaInitials(name) {
-  if (!name) return '?';
-  
-  const words = name.trim().split(/\s+/);
-  if (words.length === 1) {
-    return words[0].charAt(0).toUpperCase();
-  } else {
-    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
   }
 }
 
@@ -2765,8 +2700,8 @@ async function handleSendMessage(event) {
   }
   
   const userMessage = document.getElementById('chat-input').value.trim();
-  const emotionalState = document.getElementById('emotional-state').value;
-  const toneMode = document.getElementById('tone-mode').value;
+  const emotionalState = 'neutral';  // Default value since controls removed
+  const toneMode = 'auto';  // Default value since controls removed
   
   if (!userMessage) {
     showError('Please enter a message');

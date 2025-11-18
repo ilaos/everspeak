@@ -48,15 +48,14 @@ Preferred communication style: Simple, everyday language.
 ### Frontend Features
 - **Wizard Auto-Reopen System**: Guides users through incomplete persona setup based on `onboarding_context.completed_at`. Features snooze functionality and a "Continue Setup" button.
 - **Settings Sidebar Navigation**: Sliding overlay with persona setup status, "Restart Wizard" option, conversation preferences (text size, voice response preview), and safety sections.
-- **Conversation Room**: Warm, emotionally grounded chat UI.
-    - **Visuals**: Soft gradients, distinct message styling (user, persona, first message), persona avatar.
-    - **Accessibility**: Text size toggle (Normal/Large), persists in local storage.
-    - **Voice UI**: Toggle for future voice response preview.
-    - **States**: Handles no persona, incomplete setup, and ready states.
-    - **First Conversation**: Special pre-roll message and AI-generated first message styling.
-    - **Message Features**: Grounding line, "Doesn't sound like them?" link for strict mode, healthy use nudges, smooth animations, auto-scroll.
-    - **Optional Controls**: De-emphasized mood/tone selectors.
-    - **Responsiveness**: Adapts for various screen sizes.
+- **Conversation Room (Speak Now Page)**: Minimalist, focused chat interface with dark aesthetic.
+    - **Design Philosophy**: Clean, distraction-free layout emphasizing the conversation itself
+    - **Chat Area**: Dark slate background (#393E46) for reduced visual strain
+    - **Core Elements**: Message display area, text input field, and send button only
+    - **Removed Elements**: No header, no controls, no background panels - only essential chat functionality
+    - **States**: Handles no persona, incomplete setup, and ready states with light text on dark background
+    - **Message Features**: User/persona message styling, first message detection, smooth animations, auto-scroll
+    - **Backend Features**: All advanced features (grounding, strict mode, emotional calibration) remain functional
 
 ## External Dependencies
 

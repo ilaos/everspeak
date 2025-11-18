@@ -65,39 +65,6 @@
     <main class="panels">
       <!-- Conversation Room / Speak Now Page -->
       <section class="page-view conversation-room" id="page-conversation" data-page="conversation" style="display: none;">
-        <!-- Room Header -->
-        <div class="room-header">
-          <div class="room-header-left">
-            <div class="persona-avatar" id="persona-avatar" data-testid="persona-avatar">
-              <span id="avatar-initials" data-testid="avatar-initials">?</span>
-            </div>
-            <div class="room-title-area">
-              <h2 class="room-title" id="room-title" data-testid="room-title">Connection</h2>
-              <p class="room-subtitle" id="room-subtitle" data-testid="room-subtitle">Select someone to begin a conversation.</p>
-            </div>
-          </div>
-          <div class="room-header-right">
-            <div class="room-controls">
-              <!-- Text Size Control -->
-              <div class="text-size-control">
-                <span class="control-label">Text size:</span>
-                <div class="segmented-control">
-                  <button class="segment-btn active" id="text-size-normal" data-testid="button-text-size-normal">Normal</button>
-                  <button class="segment-btn" id="text-size-large" data-testid="button-text-size-large">Large</button>
-                </div>
-              </div>
-              <!-- Voice Control (UI only) -->
-              <div class="voice-control">
-                <label class="toggle-label">
-                  <input type="checkbox" id="voice-toggle" data-testid="checkbox-voice-toggle">
-                  <span class="toggle-slider"></span>
-                  <span class="toggle-text">Voice responses (preview)</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Messages Container -->
         <div class="messages-container">
           <div class="chat-messages" id="chat-messages" data-testid="chat-messages">
@@ -106,49 +73,11 @@
               <p>To begin, create or select someone you'd like to talk to.</p>
             </div>
           </div>
-
-          <!-- Healthy Use Nudge -->
-          <div class="healthy-use-nudge" id="healthy-use-nudge" data-testid="healthy-use-nudge" style="display: none;">
-            <p>
-              You've been talking for a while. It might help to take a short break, stretch, or write down how you're feeling. 
-              I'll be here when you come back.
-            </p>
-          </div>
-
-          <!-- Strict Mode Indicator -->
-          <div class="strict-mode-indicator" id="strict-mode-indicator" data-testid="strict-mode-indicator" style="display: none;">
-            <span class="strict-mode-text">Strict mode: staying closer to their real personality.</span>
-            <a href="#" id="strict-mode-turn-off" data-testid="link-strict-mode-turn-off">Turn off</a>
-          </div>
         </div>
 
         <!-- Room Footer -->
         <div class="room-footer">
           <form id="chat-form">
-            <!-- Optional Controls -->
-            <div class="optional-controls">
-              <div class="optional-control-item">
-                <label for="emotional-state">Optional: mood</label>
-                <select id="emotional-state" data-testid="select-emotional-state">
-                  <option value="neutral">Neutral</option>
-                  <option value="sad">Sad</option>
-                  <option value="reflective">Reflective</option>
-                  <option value="anxious">Anxious</option>
-                  <option value="excited">Excited</option>
-                  <option value="nostalgic">Nostalgic</option>
-                </select>
-              </div>
-              <div class="optional-control-item">
-                <label for="tone-mode">Optional: tone</label>
-                <select id="tone-mode" data-testid="select-chat-tone-mode">
-                  <option value="auto">Auto</option>
-                  <option value="comforting">Comforting</option>
-                  <option value="honest">Honest</option>
-                  <option value="playful">Playful</option>
-                  <option value="balanced">Balanced</option>
-                </select>
-              </div>
-            </div>
             <!-- Main Input -->
             <div class="main-input-area">
               <textarea id="chat-input" data-testid="input-chat-message" rows="2" placeholder="Type your message..." required></textarea>

@@ -1339,7 +1339,9 @@ function updateWizardUI() {
     const questionEl = document.getElementById('step-4-question');
     
     if (acknowledgmentEl) {
-      acknowledgmentEl.textContent = `I appreciate you sharing that. I know that losing a ${relationship} is a profound and unique kind of loss.`;
+      const relationshipLower = relationship.toLowerCase();
+      const article = /^[aeiou]/i.test(relationshipLower) ? 'an' : 'a';
+      acknowledgmentEl.textContent = `I appreciate you sharing that. I know that losing ${article} ${relationshipLower} is a profound and unique kind of loss.`;
       acknowledgmentEl.style.display = 'block';
     }
     if (questionEl) {

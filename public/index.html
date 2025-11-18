@@ -558,6 +558,19 @@
             <textarea id="wizard-conversations" class="wizard-text-input" data-testid="input-wizard-conversations" rows="4" placeholder="Things you wish you could have said or heard..."></textarea>
           </div>
 
+          <!-- Step 10: Wrapping Up -->
+          <div class="wizard-step" id="wizard-step-10" data-step="10" style="display: none;">
+            <p class="step-acknowledgment" id="step-10-acknowledgment"></p>
+            <p class="step-question" id="step-10-question"></p>
+            <p class="step-description">This is optional, but if something comes to mind, it might shape how your first conversation begins.</p>
+            <textarea id="wizard-final-note" class="wizard-text-input" data-testid="input-wizard-final-note" rows="3" placeholder="Anything you want to say..."></textarea>
+            <button type="button" class="btn-skip-step" id="skip-final-note" data-testid="button-skip-final-note">Not right now</button>
+            
+            <div class="wizard-transition-summary">
+              <p class="transition-text">What happens next: The details you've shared will help create a conversational space where you can reflect, remember, and process your feelings at your own pace. You can pause anytime, and all of this can be adjusted in settings whenever you need.</p>
+            </div>
+          </div>
+
           <!-- Navigation Buttons -->
           <div class="wizard-navigation">
             <button type="button" class="btn-secondary" id="wizard-prev" data-testid="button-wizard-prev" style="display: none;">Previous</button>

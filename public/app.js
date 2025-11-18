@@ -30,7 +30,7 @@ let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
 let sidebarPersonaName, sidebarPersonaCompletion;
-const WIZARD_TOTAL_STEPS = 9;
+const WIZARD_TOTAL_STEPS = 10;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -524,6 +524,18 @@ function setupEventListeners() {
         }
         wizardNextStep();
       }, 2000);
+    });
+  }
+  
+  // Skip final note button
+  const skipFinalNoteBtn = document.getElementById('skip-final-note');
+  if (skipFinalNoteBtn) {
+    skipFinalNoteBtn.addEventListener('click', () => {
+      // Clear the final note textarea
+      const finalNoteInput = document.getElementById('wizard-final-note');
+      if (finalNoteInput) {
+        finalNoteInput.value = '';
+      }
     });
   }
   if (wizardBeginConversation) {
@@ -1295,7 +1307,8 @@ const wizardAcknowledgments = {
   6: "Thank you for trusting me with that. It holds a lot of weight. To help me understand more fully, let's move onto the next question. You are doing great, I want you to know.",
   7: "Thank you for sharing that. That helps me understand the situation much more clearly.",
   8: "Thank you for sharing that. It's a beautiful thing to be able to still hear the echo of someone's laughter in your memory.",
-  9: "Thank you for trusting me with that memory. It's clear that it holds a great deal of meaning for you."
+  9: "Thank you for trusting me with that memory. It's clear that it holds a great deal of meaning for you.",
+  10: "" // Set dynamically with name
 };
 
 // Update wizard UI
@@ -1310,7 +1323,8 @@ function getStepProgressText(step) {
     6: "Relationship Dynamics...Next: Their Humor",
     7: "Their Humor...Next: Share a Memory",
     8: "Sharing a Memory...Next: Things Left Unsaid",
-    9: "Things Left Unsaid...Next: Wrapping Up"
+    9: "Things Left Unsaid...Next: Wrapping Up",
+    10: "Almost there..."
   };
   
   return progressTexts[step] || '';
@@ -1462,6 +1476,20 @@ function updateWizardUI() {
       questionEl.textContent = `As you hold ${firstName} in your thoughts, do any feelings surface about things left unsaid — anything you wish you could have expressed to ${pronoun} or perhaps heard from ${pronoun}?`;
       questionEl.style.display = 'block';
     }
+  } else if (wizardCurrentStep === 10) {
+    // Special handling for Step 10: Wrapping Up with name insertion
+    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'this person';
+    const acknowledgmentEl = document.getElementById('step-10-acknowledgment');
+    const questionEl = document.getElementById('step-10-question');
+    
+    if (acknowledgmentEl) {
+      acknowledgmentEl.textContent = `You opened up about moments and feelings that aren't easy to revisit. The picture you painted of ${firstName} is full of warmth and depth. It's okay to take a breath here — you've done something tender and important.`;
+      acknowledgmentEl.style.display = 'block';
+    }
+    if (questionEl) {
+      questionEl.textContent = `Is there anything you want ${firstName} to know before we begin?`;
+      questionEl.style.display = 'block';
+    }
   } else {
     // Update acknowledgment text for other steps
     const currentStep = document.getElementById(`wizard-step-${wizardCurrentStep}`);
@@ -1500,6 +1528,12 @@ function updateWizardUI() {
   }
   if (wizardNext) {
     wizardNext.style.display = 'inline-block';
+    // Change button text for final step
+    if (wizardCurrentStep === WIZARD_TOTAL_STEPS) {
+      wizardNext.textContent = "I'm Ready to Begin";
+    } else {
+      wizardNext.textContent = "Next";
+    }
   }
 }
 
@@ -1526,6 +1560,7 @@ async function handleWizardSubmit(event) {
     relationship: document.getElementById('wizard-relationship').value.trim(),
     date_passed: document.getElementById('wizard-date-passed').value.trim(),
     humor: document.getElementById('wizard-humor').value.trim(),
+    final_note: document.getElementById('wizard-final-note')?.value.trim() || '',
     relationship_end: document.getElementById('wizard-relationship-end').value.trim(),
     circumstances: document.getElementById('wizard-circumstances').value.trim(),
     memories: document.getElementById('wizard-memories').value.trim(),

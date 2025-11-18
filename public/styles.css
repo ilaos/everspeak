@@ -2755,6 +2755,22 @@ button[type="submit"]:active {
   line-height: 1.5;
 }
 
+.wizard-transition-summary {
+  margin-top: 32px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f9f6f3 0%, #f5f0eb 100%);
+  border-radius: 8px;
+  border-left: 3px solid #d4a574;
+}
+
+.transition-text {
+  font-size: 0.9rem;
+  color: #6b5d3f;
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+}
+
 /* Transition Screen Styling */
 .transition-content {
   text-align: center;

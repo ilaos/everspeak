@@ -43,7 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Color Scheme**: Dark gradient background (`#222831` to `#393E46`), warm cream/beige panels (`#DFD0B8`), muted olive/tan buttons (`#948979`).
 - **Typography**: Outfit for titles/buttons, system fonts for body text.
 - **Logo**: Everspeak logo in header.
-- **Navigation**: Hamburger menu, sliding sidebar with "Speak Now, Journal, Memories, Personas, Settings".
+- **Navigation**: Hamburger menu, sliding sidebar with "Home, Speak Now, Journal, Memories, Personas, Settings". Home is the default landing page.
 
 ### Frontend Features
 - **Wizard Auto-Reopen System**: Guides users through incomplete persona setup based on `onboarding_context.completed_at`. Features snooze functionality and a "Continue Setup" button.

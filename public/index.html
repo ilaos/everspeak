@@ -26,7 +26,10 @@
     
     <div class="sidebar-content">
       <nav class="sidebar-nav">
-        <button class="nav-link active" data-page="conversation" data-testid="nav-conversation">
+        <button class="nav-link active" data-page="home" data-testid="nav-home">
+          <span>Home</span>
+        </button>
+        <button class="nav-link" data-page="conversation" data-testid="nav-conversation">
           <span>Speak Now</span>
         </button>
         <button class="nav-link" data-page="journal" data-testid="nav-journal">
@@ -63,6 +66,27 @@
     </header>
 
     <main class="panels">
+      <!-- Home Page -->
+      <section class="page-view" id="page-home" data-page="home" style="display: block;">
+        <div class="page-header">
+          <h2>Welcome to Everspeak</h2>
+          <p class="page-description">A space to connect with memories and process emotions</p>
+        </div>
+        <div class="page-content">
+          <div class="home-welcome">
+            <p>Everspeak helps you create meaningful AI-powered conversations based on the memories you share.</p>
+            <p>Use the menu to navigate between:</p>
+            <ul>
+              <li><strong>Speak Now:</strong> Have conversations with personas you've created</li>
+              <li><strong>Journal:</strong> Write private reflections and get AI-generated insights</li>
+              <li><strong>Memories:</strong> Add and organize memories that shape your conversations</li>
+              <li><strong>Personas:</strong> Create and manage the people you'd like to talk to</li>
+              <li><strong>Settings:</strong> Customize conversation styles and boundaries</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       <!-- Conversation Room / Speak Now Page -->
       <section class="page-view conversation-room" id="page-conversation" data-page="conversation" style="display: none;">
         <!-- Messages Container -->

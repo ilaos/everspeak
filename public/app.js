@@ -1420,13 +1420,7 @@ function updateWizardUI() {
     wizardPrev.style.display = wizardCurrentStep > 1 ? 'inline-block' : 'none';
   }
   if (wizardNext) {
-    wizardNext.style.display = wizardCurrentStep < WIZARD_TOTAL_STEPS ? 'inline-block' : 'none';
-  }
-  if (wizardBeginConversation) {
-    wizardBeginConversation.style.display = wizardCurrentStep === WIZARD_TOTAL_STEPS ? 'inline-block' : 'none';
-  }
-  if (wizardGiveMoment) {
-    wizardGiveMoment.style.display = wizardCurrentStep === WIZARD_TOTAL_STEPS ? 'inline-block' : 'none';
+    wizardNext.style.display = 'inline-block';
   }
 }
 

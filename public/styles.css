@@ -1844,7 +1844,7 @@ button[type="submit"]:active {
 }
 
 .step-question {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 20px;
@@ -2026,7 +2026,7 @@ button[type="submit"]:active {
 .step-description {
   color: #7f8c8d;
   margin-bottom: 20px;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
 }
 
 .step-intro {
@@ -2036,14 +2036,14 @@ button[type="submit"]:active {
   border-left: 3px solid #d4a574;
   border-radius: 4px;
   margin-bottom: 20px;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.6;
 }
 
 .step-acknowledgment {
   color: #8b7355;
   font-style: italic;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   margin-bottom: 16px;
   padding: 8px 12px;
   background: #fffbf7;

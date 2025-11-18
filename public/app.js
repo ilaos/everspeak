@@ -1309,7 +1309,7 @@ function updateWizardUI() {
     const questionEl = document.getElementById('step-3-question');
     
     if (acknowledgmentEl) {
-      acknowledgmentEl.textContent = `Thank you for sharing that with me, ${firstName}.`;
+      acknowledgmentEl.textContent = `Thank you for sharing that with me. ${firstName}.`;
       acknowledgmentEl.style.display = 'block';
     }
     if (questionEl) {

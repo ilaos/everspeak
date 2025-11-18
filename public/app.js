@@ -177,9 +177,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   sidebarPersonaName = document.getElementById('sidebar-persona-name');
   sidebarPersonaCompletion = document.getElementById('sidebar-persona-completion');
   
+  // Navigation elements
+  const navLinks = document.querySelectorAll('.nav-link');
+  const conversationPage = document.getElementById('conversation-room');
+  const journalPage = document.getElementById('page-journal');
+  const memoriesPage = document.getElementById('page-memories');
+  const personasPage = document.getElementById('page-personas');
+  const settingsPage = document.getElementById('page-settings');
+  
   await loadPersonas();
   await loadJournalEntries();
   setupEventListeners();
+  setupNavigation(navLinks);
   
   // Initialize Conversation Room settings
   initializeConversationRoom();
@@ -282,6 +291,46 @@ async function handleBeginConversationFromBanner() {
   // Reload wizard inputs from persona or generate first message
   // For now, we'll just send a simple first message
   await generateFirstMessageFromBanner();
+}
+
+// Setup Navigation
+function setupNavigation(navLinks) {
+  const allPages = [
+    document.getElementById('conversation-room'),
+    document.getElementById('page-journal'),
+    document.getElementById('page-memories'),
+    document.getElementById('page-personas'),
+    document.getElementById('page-settings')
+  ];
+  
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const targetPage = link.dataset.page;
+      
+      // Hide all pages
+      allPages.forEach(page => {
+        if (page) page.style.display = 'none';
+      });
+      
+      // Show target page
+      if (targetPage === 'conversation') {
+        document.getElementById('conversation-room').style.display = 'flex';
+      } else {
+        const pageElement = document.getElementById(`page-${targetPage}`);
+        if (pageElement) pageElement.style.display = 'block';
+      }
+      
+      // Update active state
+      navLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      
+      // Close sidebar on mobile
+      if (sidebar && sidebarOverlay) {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+  });
 }
 
 // Initialize Conversation Room

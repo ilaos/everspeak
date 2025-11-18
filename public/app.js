@@ -324,9 +324,11 @@ function setupNavigation(navLinks) {
       navLinks.forEach(l => l.classList.remove('active'));
       link.classList.add('active');
       
-      // Close sidebar on mobile
-      if (sidebar && sidebarOverlay) {
-        sidebar.classList.remove('active');
+      // Close sidebar after selection
+      if (sidebar) {
+        sidebar.classList.remove('open');
+      }
+      if (sidebarOverlay) {
         sidebarOverlay.classList.remove('active');
       }
     });

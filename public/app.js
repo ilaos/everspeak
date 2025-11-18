@@ -30,7 +30,7 @@ let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
 let sidebarPersonaName, sidebarPersonaCompletion;
-const WIZARD_TOTAL_STEPS = 4;
+const WIZARD_TOTAL_STEPS = 5;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -506,12 +506,24 @@ function setupEventListeners() {
   }
   if (skipCircumstancesBtn) {
     skipCircumstancesBtn.addEventListener('click', () => {
-      // Clear the circumstances textarea and move to next step
+      // Clear the circumstances textarea, show skip caption, and move to next step
       const circumstancesInput = document.getElementById('wizard-circumstances');
+      const skipCaption = document.getElementById('skip-circumstances-caption');
+      
       if (circumstancesInput) {
         circumstancesInput.value = '';
       }
-      wizardNextStep();
+      if (skipCaption) {
+        skipCaption.style.display = 'block';
+      }
+      
+      // Wait a moment for user to see the caption before moving to next step
+      setTimeout(() => {
+        if (skipCaption) {
+          skipCaption.style.display = 'none';
+        }
+        wizardNextStep();
+      }, 2000);
     });
   }
   if (wizardBeginConversation) {
@@ -1278,7 +1290,8 @@ function isDateNearHolidays(dateText) {
 const wizardAcknowledgments = {
   2: "",
   3: "", // Set dynamically with name
-  4: "" // Set dynamically based on relationship
+  4: "", // Set dynamically based on relationship
+  5: "" // Set dynamically based on date/holidays
 };
 
 // Update wizard UI
@@ -1288,7 +1301,8 @@ function getStepProgressText(step) {
     1: '', // Step 1 doesn't show progress text
     2: "Learning your lost one's name...Next: Your Relationship",
     3: "Your Relationship...Next: Date of Passing",
-    4: "Date of Passing...Next: Reason for Loss"
+    4: "Date of Passing...Next: Reason for Loss",
+    5: "Reason for loss...Next: Relationship Dynamics"
   };
   
   return progressTexts[step] || '';
@@ -1342,6 +1356,32 @@ function updateWizardUI() {
     if (questionEl) {
       questionEl.textContent = `Would you feel comfortable telling me when ${firstName} passed away?`;
       questionEl.style.display = 'block';
+    }
+  } else if (wizardCurrentStep === 5) {
+    // Special handling for Step 5: Circumstances with name insertion and date acknowledgment
+    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const datePassed = document.getElementById('wizard-date-passed')?.value.trim() || '';
+    const acknowledgmentEl = document.getElementById('step-5-acknowledgment');
+    const questionEl = document.getElementById('step-5-question');
+    const skipNamePlaceholder = document.getElementById('skip-name-placeholder');
+    
+    if (acknowledgmentEl) {
+      const isNearHolidays = isDateNearHolidays(datePassed);
+      let acknowledgmentText = 'Thank you for sharing that. I realize that specific date can hold a significant weight.';
+      
+      if (isNearHolidays) {
+        acknowledgmentText = 'Thank you for sharing that. I realize that specific date can hold a significant weight, especially during the holidays.';
+      }
+      
+      acknowledgmentEl.textContent = acknowledgmentText;
+      acknowledgmentEl.style.display = 'block';
+    }
+    if (questionEl) {
+      questionEl.textContent = `Would you feel comfortable sharing the circumstances of how ${firstName} passed away?`;
+      questionEl.style.display = 'block';
+    }
+    if (skipNamePlaceholder) {
+      skipNamePlaceholder.textContent = firstName;
     }
   } else {
     // Update acknowledgment text for other steps

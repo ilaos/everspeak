@@ -2747,6 +2747,14 @@ button[type="submit"]:active {
   color: #4a5568;
 }
 
+.skip-caption {
+  color: #718096;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
 /* Transition Screen Styling */
 .transition-content {
   text-align: center;

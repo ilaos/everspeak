@@ -196,11 +196,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Check if wizard is incomplete for current persona
 function isWizardIncomplete() {
-  if (!selectedPersona) return false;
+  if (!selectedPersona) {
+    console.log('[WIZARD DEBUG] No selectedPersona');
+    return false;
+  }
+  
+  console.log('[WIZARD DEBUG] selectedPersona:', {
+    name: selectedPersona.name,
+    hasOnboardingContext: !!selectedPersona.onboarding_context,
+    onboardingContext: selectedPersona.onboarding_context,
+    hasCompletedAt: !!(selectedPersona.onboarding_context && selectedPersona.onboarding_context.completed_at)
+  });
   
   // Check if wizard is completed (has onboarding_context.completed_at from wizard submission)
   // This is the only reliable indicator - completed_at is only set when wizard finishes
   const isComplete = !!(selectedPersona.onboarding_context && selectedPersona.onboarding_context.completed_at);
+  console.log('[WIZARD DEBUG] isComplete:', isComplete, 'should show wizard:', !isComplete);
   return !isComplete;
 }
 
@@ -234,11 +245,19 @@ function updateContinueSetupButton() {
 
 // Auto-open wizard if incomplete (NO EXCEPTIONS)
 function checkAndAutoOpenWizard() {
-  if (isWizardIncomplete()) {
+  console.log('[WIZARD DEBUG] checkAndAutoOpenWizard called');
+  const incomplete = isWizardIncomplete();
+  console.log('[WIZARD DEBUG] Wizard incomplete?', incomplete);
+  
+  if (incomplete) {
+    console.log('[WIZARD DEBUG] Opening wizard modal in 300ms...');
     // Small delay to let UI settle
     setTimeout(() => {
+      console.log('[WIZARD DEBUG] Executing openWizardModal()');
       openWizardModal();
     }, 300);
+  } else {
+    console.log('[WIZARD DEBUG] Wizard complete, not opening modal');
   }
 }
 

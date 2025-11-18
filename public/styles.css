@@ -718,6 +718,8 @@ button[type="submit"]:active {
   flex-direction: column;
   position: relative;
   isolation: isolate;
+  min-height: 600px;
+  width: 100%;
 }
 
 /* Animated fog background - Layer 1 (slowest, largest) */

@@ -127,46 +127,6 @@ header {
   margin-top: 20px;
 }
 
-/* Home Page */
-.home-welcome {
-  background: #DFD0B8;
-  border-radius: 12px;
-  padding: 32px;
-  line-height: 1.8;
-  color: #2c3e50;
-}
-
-.home-welcome p {
-  margin-bottom: 16px;
-  font-size: 1.05rem;
-}
-
-.home-welcome ul {
-  list-style: none;
-  padding-left: 0;
-  margin-top: 20px;
-}
-
-.home-welcome li {
-  margin-bottom: 12px;
-  padding-left: 24px;
-  position: relative;
-  font-size: 1rem;
-}
-
-.home-welcome li:before {
-  content: "•";
-  position: absolute;
-  left: 8px;
-  color: #948979;
-  font-weight: bold;
-}
-
-.home-welcome strong {
-  color: #34495e;
-  font-weight: 600;
-}
-
 .panel {
   background: #DFD0B8;
   border-radius: 12px;

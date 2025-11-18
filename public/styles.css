@@ -724,6 +724,39 @@ button[type="submit"]:active {
   padding: 0;
 }
 
+/* Room Welcome Header */
+.room-welcome {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 60px 40px 40px;
+  color: white;
+}
+
+.room-welcome h1 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.room-welcome .room-subtitle {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.room-welcome .room-instruction {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 12px;
+}
+
 /* Animated fog background - Layer 1 (slowest, largest) */
 .conversation-room::before {
   content: '';

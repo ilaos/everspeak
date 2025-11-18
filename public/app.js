@@ -1277,13 +1277,13 @@ function isDateNearHolidays(dateText) {
 // Wizard acknowledgments for each step
 const wizardAcknowledgments = {
   2: "",
-  3: "Thank you for sharing that. It gives me a sense of who they were.",
-  4: "", // Will be set dynamically based on date
-  5: "Thank you. Those details matter, even if they're hard to put into words.",
-  6: "I hear you. That time in your life can hold a lot.",
+  3: "", // Set dynamically with name
+  4: "", // Set dynamically based on date
+  5: "I hear you. That paints a more human picture of them.",
+  6: "Thank you. Those details matter, even if they're hard to put into words.",
   7: "Thank you for sharing that. We'll keep moving gently.",
-  8: "Thank you. That tells me a lot about the emotional space you're coming from.",
-  9: "Those memories are important. Thank you for trusting me with them.",
+  8: "Those memories are important. Thank you for trusting me with them.",
+  9: "I hear you. That tells me a lot about the emotional space you're coming from.",
   10: "Thank you. You've shared a lot already, and you're doing more work than it might seem.",
   11: "Everything you've shared so far will be held carefully here."
 };
@@ -1294,15 +1294,15 @@ function getStepProgressText(step) {
   const progressTexts = {
     1: '', // Step 1 doesn't show progress text
     2: "Learning your lost one's name...Next: Your Relationship",
-    3: "Date of Passing...Next: Reason",
-    4: "Capturing their humor...Next: When They Passed",
-    5: "Acknowledging the loss...Next: Your Relationship",
-    6: "Exploring your bond...Next: The Circumstances",
-    7: "Honoring how it happened...Next: Key Memories",
-    8: "Gathering cherished memories...Next: Conversations",
-    9: "Remembering what they'd say...Next: Tone Settings",
-    10: "Customizing their communication style...Next: Boundaries",
-    11: "Setting healthy boundaries...Almost done"
+    3: "Your Relationship...Next: Date of Passing",
+    4: "Date of Passing...Next: Their Humor",
+    5: "Their Humor...Next: Relationship Dynamics",
+    6: "Relationship Dynamics...Next: Circumstances",
+    7: "Circumstances...Next: Memories",
+    8: "Memories...Next: Conversations",
+    9: "Conversations...Next: Tone Settings",
+    10: "Tone Settings...Next: Boundaries",
+    11: "Setting Boundaries...Almost done"
   };
   
   return progressTexts[step] || '';
@@ -1317,7 +1317,7 @@ function updateWizardUI() {
     }
   }
   
-  // Special handling for Step 3: Insert name dynamically
+  // Special handling for Step 3: Relationship with name insertion
   if (wizardCurrentStep === 3) {
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
     const acknowledgmentEl = document.getElementById('step-3-acknowledgment');
@@ -1328,23 +1328,33 @@ function updateWizardUI() {
       acknowledgmentEl.style.display = 'block';
     }
     if (questionEl) {
-      questionEl.textContent = `Would you feel comfortable telling me when ${firstName} passed away?`;
+      questionEl.textContent = `What was your relationship to ${firstName}?`;
       questionEl.style.display = 'block';
     }
   } else if (wizardCurrentStep === 4) {
-    // Special handling for Step 4: Dynamic acknowledgment based on date
-    const currentStep = document.getElementById(`wizard-step-${wizardCurrentStep}`);
-    const acknowledgment = currentStep?.querySelector('.step-acknowledgment');
+    // Special handling for Step 4: Date of Passing with name insertion and dynamic acknowledgment
+    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const acknowledgmentEl = document.getElementById('step-4-acknowledgment');
+    const questionEl = document.getElementById('step-4-question');
     
-    if (acknowledgment) {
+    if (questionEl) {
+      questionEl.textContent = `Would you feel comfortable telling me when ${firstName} passed away?`;
+      questionEl.style.display = 'block';
+    }
+    
+    if (acknowledgmentEl) {
       const datePassed = document.getElementById('wizard-date-passed')?.value.trim() || '';
       
-      if (isDateNearHolidays(datePassed)) {
-        acknowledgment.textContent = "Thank you for sharing that. I know that must be very difficult being that it happened around the holidays.";
+      if (datePassed && isDateNearHolidays(datePassed)) {
+        acknowledgmentEl.textContent = "Thank you for sharing that. I know that must be very difficult being that it happened around the holidays.";
+      } else if (datePassed) {
+        acknowledgmentEl.textContent = "Thank you for sharing that. I know that specific dates can hold a lot of weight.";
       } else {
-        acknowledgment.textContent = "Thank you for sharing that. I know that specific dates can hold a lot of weight.";
+        acknowledgmentEl.style.display = 'none';
       }
-      acknowledgment.style.display = 'block';
+      if (datePassed) {
+        acknowledgmentEl.style.display = 'block';
+      }
     }
   } else {
     // Update acknowledgment text for other steps
@@ -1413,9 +1423,9 @@ async function handleWizardSubmit(event) {
   // Collect wizard inputs
   const wizardInputs = {
     first_name: document.getElementById('wizard-first-name').value.trim(),
-    communication_style: document.getElementById('wizard-communication-style').value.trim(),
-    humor: document.getElementById('wizard-humor').value.trim(),
+    relationship: document.getElementById('wizard-relationship').value.trim(),
     date_passed: document.getElementById('wizard-date-passed').value.trim(),
+    humor: document.getElementById('wizard-humor').value.trim(),
     relationship_end: document.getElementById('wizard-relationship-end').value.trim(),
     circumstances: document.getElementById('wizard-circumstances').value.trim(),
     memories: document.getElementById('wizard-memories').value.trim(),
@@ -1898,9 +1908,9 @@ function getCurrentWizardInputField() {
   // Map each step to its input field
   const stepInputMap = {
     2: 'wizard-first-name',
-    3: 'wizard-date-passed',
-    4: 'wizard-humor',
-    5: 'wizard-communication-style',
+    3: 'wizard-relationship',
+    4: 'wizard-date-passed',
+    5: 'wizard-humor',
     6: 'wizard-relationship-end',
     7: 'wizard-circumstances',
     8: 'wizard-memories',

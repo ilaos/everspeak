@@ -783,10 +783,10 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
 
       // Save onboarding context for use in first message and future features
       persona.onboarding_context = {
-        personality: wizard_inputs.personality || null,
-        communication_style: wizard_inputs.communication_style || null,
-        humor: wizard_inputs.humor || null,
+        first_name: wizard_inputs.first_name || null,
+        relationship: wizard_inputs.relationship || null,
         date_passed: wizard_inputs.date_passed || null,
+        humor: wizard_inputs.humor || null,
         relationship_end: wizard_inputs.relationship_end || null,
         circumstances: wizard_inputs.circumstances || null,
         memories: wizard_inputs.memories || null,

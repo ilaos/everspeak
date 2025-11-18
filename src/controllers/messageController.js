@@ -69,7 +69,9 @@ export const handleMessage = async (req, res, next) => {
     
     // Special prompt for first message using onboarding context
     if (is_first_message === true && onboardingContext) {
-      systemPrompt = `You are creating the very first message from a memorial persona (${personaName}, ${personaRelationship}) to a user who just completed an onboarding wizard.
+      systemPrompt = `GRIEF SUPPORT CONTEXT: This is a therapeutic memorial conversation tool. The user is processing the loss of a loved one. Any sensitive details about death circumstances (including traumatic, violent, or sudden deaths) are shared for legitimate grief processing and emotional support purposes only.
+
+You are creating the very first message from a memorial persona (${personaName}, ${personaRelationship}) to a user who just completed an onboarding wizard.
 
 CRITICAL RULES:
 - You are NOT the real deceased person
@@ -128,7 +130,9 @@ DO NOT use phrases like:
 - "In the afterlife"`;
     } else {
       // Regular message prompt
-      systemPrompt = `You are simulating the personality of a deceased loved one based ONLY on the memories provided.
+      systemPrompt = `GRIEF SUPPORT CONTEXT: This is a therapeutic memorial conversation tool. The user is processing the loss of a loved one. Any sensitive details about death circumstances (including traumatic, violent, or sudden deaths) are shared for legitimate grief processing and emotional support purposes only.
+
+You are simulating the personality of a deceased loved one based ONLY on the memories provided.
 You are NOT the real person.
 You must NOT imply supernatural awareness.
 You must NOT reference information you were not explicitly given.

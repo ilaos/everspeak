@@ -256,7 +256,44 @@
         </div>
       </div>
       
-      <!-- More sections will go here -->
+      <!-- Create New Persona Section -->
+      <div class="sidebar-section">
+        <h4>Create New Persona</h4>
+        <div class="sidebar-section-content">
+          <form id="persona-form">
+            <div class="form-group">
+              <label for="persona-name">Name *</label>
+              <input type="text" id="persona-name" data-testid="input-persona-name" required>
+            </div>
+            <div class="form-group">
+              <label for="persona-relationship">Relationship</label>
+              <input type="text" id="persona-relationship" data-testid="input-persona-relationship" placeholder="e.g., Brother, Mother, Friend">
+            </div>
+            <div class="form-group">
+              <label for="persona-description">Description</label>
+              <textarea id="persona-description" data-testid="input-persona-description" rows="3" placeholder="Tell us about this person..."></textarea>
+            </div>
+            <button type="submit" data-testid="button-save-persona">Save Persona</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Persona Info Section -->
+      <div class="sidebar-section">
+        <h4>Persona Info</h4>
+        <div class="sidebar-section-content">
+          <div class="persona-info" id="persona-info">
+            <p class="info-item"><strong>Name:</strong> <span id="info-name" data-testid="text-persona-name">-</span></p>
+            <p class="info-item"><strong>Relationship:</strong> <span id="info-relationship" data-testid="text-persona-relationship">-</span></p>
+            <p class="info-item"><strong>Description:</strong> <span id="info-description" data-testid="text-persona-description">-</span></p>
+          </div>
+          
+          <div class="wizard-section" id="wizard-section" style="display: none;">
+            <button class="btn-setup-wizard" id="setup-wizard-btn" data-testid="button-setup-wizard">Setup Wizard</button>
+            <p class="wizard-hint">Use the wizard to quickly set up this persona with AI-guided questions</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -288,41 +325,6 @@
     </div>
 
     <main class="panels">
-      <!-- Persona Panel -->
-      <section class="panel persona-panel">
-        <h2>Persona</h2>
-
-        <div class="persona-info" id="persona-info">
-          <p class="info-item"><strong>Name:</strong> <span id="info-name" data-testid="text-persona-name">-</span></p>
-          <p class="info-item"><strong>Relationship:</strong> <span id="info-relationship" data-testid="text-persona-relationship">-</span></p>
-          <p class="info-item"><strong>Description:</strong> <span id="info-description" data-testid="text-persona-description">-</span></p>
-        </div>
-
-        <div class="wizard-section" id="wizard-section" style="display: none;">
-          <button class="btn-setup-wizard" id="setup-wizard-btn" data-testid="button-setup-wizard">Setup Wizard</button>
-          <p class="wizard-hint">Use the wizard to quickly set up this persona with AI-guided questions</p>
-        </div>
-
-        <div class="create-persona-form">
-          <h3>Create New Persona</h3>
-          <form id="persona-form">
-            <div class="form-group">
-              <label for="persona-name">Name *</label>
-              <input type="text" id="persona-name" data-testid="input-persona-name" required>
-            </div>
-            <div class="form-group">
-              <label for="persona-relationship">Relationship</label>
-              <input type="text" id="persona-relationship" data-testid="input-persona-relationship" placeholder="e.g., Brother, Mother, Friend">
-            </div>
-            <div class="form-group">
-              <label for="persona-description">Description</label>
-              <textarea id="persona-description" data-testid="input-persona-description" rows="3" placeholder="Tell us about this person..."></textarea>
-            </div>
-            <button type="submit" data-testid="button-save-persona">Save Persona</button>
-          </form>
-        </div>
-      </section>
-
       <!-- Conversation Room -->
       <section class="panel conversation-room" id="conversation-room">
         <!-- Room Header -->

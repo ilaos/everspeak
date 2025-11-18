@@ -25,6 +25,24 @@
     </div>
     
     <div class="sidebar-content">
+      <!-- Persona Selection Section -->
+      <div class="sidebar-section">
+        <h4>Select Persona</h4>
+        <div class="sidebar-section-content">
+          <div class="persona-selector">
+            <select id="persona-dropdown" data-testid="select-persona">
+              <option value="">-- Choose a persona --</option>
+            </select>
+          </div>
+          <div class="continue-setup-container" id="continue-setup-container" style="display: none;">
+            <button class="btn-continue-setup" id="continue-setup-btn" data-testid="button-continue-setup">
+              Continue Setup
+            </button>
+            <p class="setup-hint">Complete the wizard to start your first conversation</p>
+          </div>
+        </div>
+      </div>
+      
       <!-- Persona Setup Section -->
       <div class="sidebar-section">
         <h4>Persona Setup</h4>
@@ -75,20 +93,6 @@
       <!-- Persona Panel -->
       <section class="panel persona-panel">
         <h2>Persona</h2>
-        
-        <div class="persona-selector">
-          <label for="persona-dropdown">Select Persona:</label>
-          <select id="persona-dropdown" data-testid="select-persona">
-            <option value="">-- Choose a persona --</option>
-          </select>
-        </div>
-
-        <div class="continue-setup-container" id="continue-setup-container" style="display: none;">
-          <button class="btn-continue-setup" id="continue-setup-btn" data-testid="button-continue-setup">
-            Continue Setup
-          </button>
-          <p class="setup-hint">Complete the wizard to start your first conversation</p>
-        </div>
 
         <div class="persona-info" id="persona-info">
           <p class="info-item"><strong>Name:</strong> <span id="info-name" data-testid="text-persona-name">-</span></p>

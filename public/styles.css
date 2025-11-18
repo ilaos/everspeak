@@ -1495,6 +1495,63 @@ button[type="submit"]:active {
   padding: 10px 0;
 }
 
+.sidebar-section .persona-selector {
+  margin-bottom: 15px;
+}
+
+.sidebar-section .persona-selector select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.sidebar-section .persona-selector select:hover {
+  border-color: #3498db;
+}
+
+.sidebar-section .persona-selector select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.sidebar-section .continue-setup-container {
+  margin-top: 15px;
+}
+
+.sidebar-section .btn-continue-setup {
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.sidebar-section .btn-continue-setup:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+}
+
+.sidebar-section .setup-hint {
+  font-size: 0.85rem;
+  color: #718096;
+  margin: 0;
+  text-align: center;
+  font-style: italic;
+}
+
 .persona-status {
   background: #f8f9fa;
   padding: 15px;

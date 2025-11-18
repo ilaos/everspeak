@@ -1295,7 +1295,7 @@ function getStepProgressText(step) {
     1: '', // Step 1 doesn't show progress text
     2: "Learning your lost one's name...Next: Your Relationship",
     3: "Your Relationship...Next: Date of Passing",
-    4: "Date of Passing...Next: Their Humor",
+    4: "Date of Passing...Next: Loved One's Age at Passing",
     5: "Their Humor...Next: Relationship Dynamics",
     6: "Relationship Dynamics...Next: Circumstances",
     7: "Circumstances...Next: Memories",
@@ -1332,29 +1332,19 @@ function updateWizardUI() {
       questionEl.style.display = 'block';
     }
   } else if (wizardCurrentStep === 4) {
-    // Special handling for Step 4: Date of Passing with name insertion and dynamic acknowledgment
+    // Special handling for Step 4: Date of Passing with name insertion and relationship acknowledgment
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const relationship = document.getElementById('wizard-relationship')?.value.trim() || 'loved one';
     const acknowledgmentEl = document.getElementById('step-4-acknowledgment');
     const questionEl = document.getElementById('step-4-question');
     
+    if (acknowledgmentEl) {
+      acknowledgmentEl.textContent = `I appreciate you sharing that. I know that losing a ${relationship} is a profound and unique kind of loss.`;
+      acknowledgmentEl.style.display = 'block';
+    }
     if (questionEl) {
       questionEl.textContent = `Would you feel comfortable telling me when ${firstName} passed away?`;
       questionEl.style.display = 'block';
-    }
-    
-    if (acknowledgmentEl) {
-      const datePassed = document.getElementById('wizard-date-passed')?.value.trim() || '';
-      
-      if (datePassed && isDateNearHolidays(datePassed)) {
-        acknowledgmentEl.textContent = "Thank you for sharing that. I know that must be very difficult being that it happened around the holidays.";
-      } else if (datePassed) {
-        acknowledgmentEl.textContent = "Thank you for sharing that. I know that specific dates can hold a lot of weight.";
-      } else {
-        acknowledgmentEl.style.display = 'none';
-      }
-      if (datePassed) {
-        acknowledgmentEl.style.display = 'block';
-      }
     }
   } else {
     // Update acknowledgment text for other steps

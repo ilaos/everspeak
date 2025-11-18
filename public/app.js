@@ -527,17 +527,6 @@ function setupEventListeners() {
     });
   }
   
-  // Skip final note button
-  const skipFinalNoteBtn = document.getElementById('skip-final-note');
-  if (skipFinalNoteBtn) {
-    skipFinalNoteBtn.addEventListener('click', () => {
-      // Clear the final note textarea
-      const finalNoteInput = document.getElementById('wizard-final-note');
-      if (finalNoteInput) {
-        finalNoteInput.value = '';
-      }
-    });
-  }
   if (wizardBeginConversation) {
     wizardBeginConversation.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -1480,16 +1469,14 @@ function updateWizardUI() {
     // Special handling for Step 10: Wrapping Up with name insertion
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'this person';
     const acknowledgmentEl = document.getElementById('step-10-acknowledgment');
-    const questionEl = document.getElementById('step-10-question');
     
     if (acknowledgmentEl) {
       acknowledgmentEl.textContent = `You opened up about moments and feelings that aren't easy to revisit. The picture you painted of ${firstName} is full of warmth and depth. It's okay to take a breath here — you've done something tender and important.`;
       acknowledgmentEl.style.display = 'block';
     }
-    if (questionEl) {
-      questionEl.textContent = `Is there anything you want ${firstName} to know before we begin?`;
-      questionEl.style.display = 'block';
-    }
+    
+    // Start the setup progress animation
+    startWizardSetupProgress(firstName);
   } else {
     // Update acknowledgment text for other steps
     const currentStep = document.getElementById(`wizard-step-${wizardCurrentStep}`);
@@ -1524,17 +1511,58 @@ function updateWizardUI() {
   
   // Update navigation buttons
   if (wizardPrev) {
-    wizardPrev.style.display = wizardCurrentStep > 1 ? 'inline-block' : 'none';
+    wizardPrev.style.display = wizardCurrentStep > 1 && wizardCurrentStep < WIZARD_TOTAL_STEPS ? 'inline-block' : 'none';
   }
   if (wizardNext) {
-    wizardNext.style.display = 'inline-block';
-    // Change button text for final step
+    // Hide Next button on Step 10 (final step shows custom "begin" button instead)
     if (wizardCurrentStep === WIZARD_TOTAL_STEPS) {
-      wizardNext.textContent = "I'm Ready to Begin";
+      wizardNext.style.display = 'none';
     } else {
+      wizardNext.style.display = 'inline-block';
       wizardNext.textContent = "Next";
     }
   }
+}
+
+// Start wizard setup progress animation
+function startWizardSetupProgress(firstName) {
+  const progressContainer = document.getElementById('wizard-progress-container');
+  const progressFill = document.getElementById('wizard-progress-fill');
+  const beginBtn = document.getElementById('wizard-begin-conversation');
+  const beginText = document.getElementById('wizard-begin-text');
+  
+  if (!progressContainer || !progressFill || !beginBtn) return;
+  
+  // Show progress container
+  progressContainer.style.display = 'block';
+  beginBtn.style.display = 'none';
+  
+  // Animate progress bar
+  let progress = 0;
+  const duration = 2500; // 2.5 seconds
+  const steps = 50;
+  const increment = 100 / steps;
+  const stepDuration = duration / steps;
+  
+  const interval = setInterval(() => {
+    progress += increment;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      
+      // Hide progress, show begin button
+      setTimeout(() => {
+        progressContainer.style.display = 'none';
+        beginBtn.style.display = 'block';
+        
+        // Update button text with name
+        if (beginText) {
+          beginText.textContent = `I'm ready to have my first conversation with ${firstName}`;
+        }
+      }, 300);
+    }
+    progressFill.style.width = `${progress}%`;
+  }, stepDuration);
 }
 
 // Handle wizard form submission
@@ -1560,18 +1588,10 @@ async function handleWizardSubmit(event) {
     relationship: document.getElementById('wizard-relationship').value.trim(),
     date_passed: document.getElementById('wizard-date-passed').value.trim(),
     humor: document.getElementById('wizard-humor').value.trim(),
-    final_note: document.getElementById('wizard-final-note')?.value.trim() || '',
     relationship_end: document.getElementById('wizard-relationship-end').value.trim(),
     circumstances: document.getElementById('wizard-circumstances').value.trim(),
     memories: document.getElementById('wizard-memories').value.trim(),
-    conversations: document.getElementById('wizard-conversations').value.trim(),
-    tone_preferences: {
-      humor_level: parseFloat(document.getElementById('wizard-humor-level').value),
-      honesty_level: parseFloat(document.getElementById('wizard-honesty-level').value),
-      sentimentality_level: parseFloat(document.getElementById('wizard-sentimentality-level').value),
-      energy_level: parseFloat(document.getElementById('wizard-energy-level').value),
-      advice_level: parseFloat(document.getElementById('wizard-advice-level').value)
-    }
+    conversations: document.getElementById('wizard-conversations').value.trim()
   };
   
   try {

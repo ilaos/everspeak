@@ -2756,7 +2756,7 @@ button[type="submit"]:active {
 }
 
 .wizard-transition-summary {
-  margin-top: 32px;
+  margin-top: 24px;
   padding: 20px;
   background: linear-gradient(135deg, #f9f6f3 0%, #f5f0eb 100%);
   border-radius: 8px;
@@ -2769,6 +2769,59 @@ button[type="submit"]:active {
   line-height: 1.6;
   margin: 0;
   font-style: italic;
+}
+
+.wizard-progress-container {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.wizard-progress-text {
+  font-size: 0.95rem;
+  color: #6b5d3f;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.wizard-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e8e4df;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wizard-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d4a574 0%, #c8956a 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.btn-wizard-begin {
+  margin-top: 28px;
+  width: 100%;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+}
+
+.btn-wizard-begin:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+}
+
+.btn-wizard-begin:active {
+  transform: translateY(0);
 }
 
 /* Transition Screen Styling */

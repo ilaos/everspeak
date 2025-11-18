@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   boostResults = document.getElementById('boost-results');
   
   // Conversation Room elements
-  conversationRoom = document.getElementById('conversation-room');
+  conversationRoom = document.getElementById('page-conversation');
   personaAvatar = document.getElementById('persona-avatar');
   avatarInitials = document.getElementById('avatar-initials');
   roomTitle = document.getElementById('room-title');
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Navigation elements
   const navLinks = document.querySelectorAll('.nav-link');
-  const conversationPage = document.getElementById('conversation-room');
+  const conversationPage = document.getElementById('page-conversation');
   const journalPage = document.getElementById('page-journal');
   const memoriesPage = document.getElementById('page-memories');
   const personasPage = document.getElementById('page-personas');
@@ -189,6 +189,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadJournalEntries();
   setupEventListeners();
   setupNavigation(navLinks);
+  
+  // Show default page (Speak Now / Conversation)
+  if (conversationPage) {
+    conversationPage.style.display = 'flex';
+  }
   
   // Initialize Conversation Room settings
   initializeConversationRoom();
@@ -296,7 +301,7 @@ async function handleBeginConversationFromBanner() {
 // Setup Navigation
 function setupNavigation(navLinks) {
   const allPages = [
-    document.getElementById('conversation-room'),
+    document.getElementById('page-conversation'),
     document.getElementById('page-journal'),
     document.getElementById('page-memories'),
     document.getElementById('page-personas'),
@@ -313,11 +318,14 @@ function setupNavigation(navLinks) {
       });
       
       // Show target page
-      if (targetPage === 'conversation') {
-        document.getElementById('conversation-room').style.display = 'flex';
-      } else {
-        const pageElement = document.getElementById(`page-${targetPage}`);
-        if (pageElement) pageElement.style.display = 'block';
+      const pageElement = document.getElementById(`page-${targetPage}`);
+      if (pageElement) {
+        // Use 'flex' for conversation room to maintain layout
+        if (targetPage === 'conversation') {
+          pageElement.style.display = 'flex';
+        } else {
+          pageElement.style.display = 'block';
+        }
       }
       
       // Update active state

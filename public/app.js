@@ -30,7 +30,7 @@ let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
 let sidebarPersonaName, sidebarPersonaCompletion;
-const WIZARD_TOTAL_STEPS = 6;
+const WIZARD_TOTAL_STEPS = 7;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -1292,7 +1292,8 @@ const wizardAcknowledgments = {
   3: "", // Set dynamically with name
   4: "", // Set dynamically based on relationship
   5: "", // Set dynamically based on date/holidays
-  6: "Thank you for trusting me with that. It holds a lot of weight. To help me understand more fully, let's move onto the next question. You are doing great, I want you to know."
+  6: "Thank you for trusting me with that. It holds a lot of weight. To help me understand more fully, let's move onto the next question. You are doing great, I want you to know.",
+  7: "Thank you for sharing that. That helps me understand the situation much more clearly."
 };
 
 // Update wizard UI
@@ -1304,7 +1305,8 @@ function getStepProgressText(step) {
     3: "Your Relationship...Next: Date of Passing",
     4: "Date of Passing...Next: Reason for Loss",
     5: "Reason for loss...Next: Relationship Dynamics",
-    6: "Relationship Dynamics...Next: Their Humor"
+    6: "Relationship Dynamics...Next: Their Humor",
+    7: "Their Humor...Next: Share a Memory"
   };
   
   return progressTexts[step] || '';
@@ -1404,6 +1406,26 @@ function updateWizardUI() {
     
     if (questionEl) {
       questionEl.textContent = `May I ask you, what was the nature of your relationship with ${firstName} like in the time leading up to ${pronoun} passing?`;
+      questionEl.style.display = 'block';
+    }
+  } else if (wizardCurrentStep === 7) {
+    // Special handling for Step 7: Humor with pronoun insertion
+    const relationship = document.getElementById('wizard-relationship')?.value.trim().toLowerCase() || '';
+    const questionEl = document.getElementById('step-7-question');
+    
+    // Determine pronoun based on relationship
+    let pronoun = 'their';
+    const maleRelationships = ['father', 'dad', 'grandfather', 'grandpa', 'brother', 'uncle', 'son', 'husband', 'boyfriend', 'he was', 'he is'];
+    const femaleRelationships = ['mother', 'mom', 'grandmother', 'grandma', 'sister', 'aunt', 'daughter', 'wife', 'girlfriend', 'she was', 'she is'];
+    
+    if (maleRelationships.some(rel => relationship.includes(rel))) {
+      pronoun = 'his';
+    } else if (femaleRelationships.some(rel => relationship.includes(rel))) {
+      pronoun = 'her';
+    }
+    
+    if (questionEl) {
+      questionEl.textContent = `One of the things that makes a person unique is their sense of humor. Would you be willing to share what ${pronoun} was like?`;
       questionEl.style.display = 'block';
     }
   } else {

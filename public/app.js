@@ -30,7 +30,7 @@ let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
 let sidebarPersonaName, sidebarPersonaCompletion;
-const WIZARD_TOTAL_STEPS = 7;
+const WIZARD_TOTAL_STEPS = 8;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -1293,7 +1293,8 @@ const wizardAcknowledgments = {
   4: "", // Set dynamically based on relationship
   5: "", // Set dynamically based on date/holidays
   6: "Thank you for trusting me with that. It holds a lot of weight. To help me understand more fully, let's move onto the next question. You are doing great, I want you to know.",
-  7: "Thank you for sharing that. That helps me understand the situation much more clearly."
+  7: "Thank you for sharing that. That helps me understand the situation much more clearly.",
+  8: "Thank you for sharing that. It's a beautiful thing to be able to still hear the echo of someone's laughter in your memory."
 };
 
 // Update wizard UI
@@ -1306,7 +1307,8 @@ function getStepProgressText(step) {
     4: "Date of Passing...Next: Reason for Loss",
     5: "Reason for loss...Next: Relationship Dynamics",
     6: "Relationship Dynamics...Next: Their Humor",
-    7: "Their Humor...Next: Share a Memory"
+    7: "Their Humor...Next: Share a Memory",
+    8: "Sharing a Memory...Next: Things Left Unsaid"
   };
   
   return progressTexts[step] || '';
@@ -1426,6 +1428,15 @@ function updateWizardUI() {
     
     if (questionEl) {
       questionEl.textContent = `One of the things that makes a person unique is their sense of humor. Would you be willing to share what ${pronoun} was like?`;
+      questionEl.style.display = 'block';
+    }
+  } else if (wizardCurrentStep === 8) {
+    // Special handling for Step 8: Share a Memory with name insertion
+    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const questionEl = document.getElementById('step-8-question');
+    
+    if (questionEl) {
+      questionEl.textContent = `If you feel comfortable, would you share a memory of ${firstName} that feels particularly significant to you? One that, for any reason, has stayed with you.`;
       questionEl.style.display = 'block';
     }
   } else {

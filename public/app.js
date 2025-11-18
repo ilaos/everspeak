@@ -1340,8 +1340,17 @@ function updateWizardUI() {
     
     if (acknowledgmentEl) {
       const relationshipLower = relationship.toLowerCase();
-      const article = /^[aeiou]/i.test(relationshipLower) ? 'an' : 'a';
-      acknowledgmentEl.textContent = `I appreciate you sharing that. I know that losing ${article} ${relationshipLower} is a profound and unique kind of loss.`;
+      const isPhrasePattern = /\b(my|was|is|he|she|they|the)\b/i.test(relationship);
+      
+      let acknowledgmentText;
+      if (isPhrasePattern) {
+        acknowledgmentText = `I appreciate you sharing that. I know that ${relationshipLower} and that this is a profound and unique kind of loss.`;
+      } else {
+        const article = /^[aeiou]/i.test(relationshipLower) ? 'an' : 'a';
+        acknowledgmentText = `I appreciate you sharing that. I know that losing ${article} ${relationshipLower} is a profound and unique kind of loss.`;
+      }
+      
+      acknowledgmentEl.textContent = acknowledgmentText;
       acknowledgmentEl.style.display = 'block';
     }
     if (questionEl) {

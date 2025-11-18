@@ -95,7 +95,13 @@ const publicPath =
     ? path.join(__dirname, 'public')
     : path.join(__dirname, '..', 'public');
 
+const assetsPath =
+  process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, 'attached_assets')
+    : path.join(__dirname, '..', 'attached_assets');
+
 app.use(express.static(publicPath));
+app.use('/attached_assets', express.static(assetsPath));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/api', router);

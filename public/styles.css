@@ -30,20 +30,12 @@ header {
   text-align: center;
   margin-bottom: 30px;
   padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: transparent;
 }
 
-header h1 {
-  color: #3498db;
-  font-size: 2rem;
-  margin-bottom: 8px;
-}
-
-header p {
-  color: #7f8c8d;
-  font-size: 1rem;
+.header-logo {
+  max-width: 300px;
+  height: auto;
 }
 
 /* Grounding Banner */
@@ -1420,9 +1412,9 @@ button[type="submit"]:active {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: white;
+  background: transparent;
   padding: 12px 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: none;
 }
 
 .hamburger-menu {
@@ -1440,13 +1432,13 @@ button[type="submit"]:active {
   display: block;
   width: 25px;
   height: 3px;
-  background: #2c3e50;
+  background: #EEEEEE;
   border-radius: 2px;
   transition: all 0.3s;
 }
 
 .hamburger-menu:hover span {
-  background: #d4a574;
+  background: #FFFFFF;
 }
 
 .hamburger-menu.active span:nth-child(1) {

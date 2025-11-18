@@ -1328,7 +1328,7 @@ function updateWizardUI() {
       acknowledgmentEl.style.display = 'block';
     }
     if (questionEl) {
-      questionEl.textContent = `What was your relationship to ${firstName}?`;
+      questionEl.textContent = `Could you tell me about your relationship with ${firstName}?`;
       questionEl.style.display = 'block';
     }
   } else if (wizardCurrentStep === 4) {

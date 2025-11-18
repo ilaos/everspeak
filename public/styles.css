@@ -746,6 +746,7 @@ button[type="submit"]:active {
   font-weight: 600;
   margin-bottom: 20px;
   color: white;
+  line-height: 1.2;
 }
 
 .room-welcome .room-subtitle {

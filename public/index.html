@@ -25,6 +25,60 @@
     </div>
     
     <div class="sidebar-content">
+      <!-- Add a New Memory Section -->
+      <div class="sidebar-section">
+        <div class="panel-header">
+          <h4>Add a New Memory</h4>
+          <button id="bulk-import-btn" data-testid="button-bulk-import" class="btn-secondary btn-sidebar-secondary" style="display: none;">Bulk Import</button>
+        </div>
+        <div class="sidebar-section-content">
+          <div id="memories-list" data-testid="list-memories">
+            <p class="placeholder">Select a persona to view memories</p>
+          </div>
+
+          <div class="memory-hint" id="memory-hint" style="display: none;">
+            <p><strong>💡 Helpful tip:</strong> Anytime a memory pops into your mind, you can add it here. Every memory you share helps our conversations feel more like them.</p>
+          </div>
+
+          <div class="add-memory-form">
+            <h3>Add Memory</h3>
+            <form id="memory-form">
+              <div class="form-group">
+                <label for="memory-category">Category *</label>
+                <select id="memory-category" data-testid="select-memory-category" required>
+                  <option value="">-- Choose category --</option>
+                  <option value="humor">Humor</option>
+                  <option value="regrets">Regrets</option>
+                  <option value="childhood">Childhood</option>
+                  <option value="advice">Advice</option>
+                  <option value="personality">Personality</option>
+                  <option value="misc">Misc</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="memory-text">Memory *</label>
+                <div class="memory-text-wrapper">
+                  <textarea id="memory-text" data-testid="input-memory-text" rows="3" required placeholder="Describe this memory..."></textarea>
+                  <button type="button" id="voice-record-btn" data-testid="button-voice-record" class="voice-btn" title="Record voice">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <line x1="12" y1="19" x2="12" y2="22"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div class="voice-status" id="voice-status" style="display: none;"></div>
+              </div>
+              <div class="form-group">
+                <label for="memory-weight">Weight (0.1 - 5.0)</label>
+                <input type="number" id="memory-weight" data-testid="input-memory-weight" min="0.1" max="5.0" step="0.1" value="1.0">
+              </div>
+              <button type="submit" data-testid="button-add-memory">Add Memory</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
       <!-- Persona Selection Section -->
       <div class="sidebar-section">
         <h4>Select Persona</h4>
@@ -199,59 +253,6 @@
               <textarea id="persona-description" data-testid="input-persona-description" rows="3" placeholder="Tell us about this person..."></textarea>
             </div>
             <button type="submit" data-testid="button-save-persona">Save Persona</button>
-          </form>
-        </div>
-      </section>
-
-      <!-- Memory Panel -->
-      <section class="panel memory-panel">
-        <div class="panel-header">
-          <h2>Memories</h2>
-          <button id="bulk-import-btn" data-testid="button-bulk-import" class="btn-secondary" style="display: none;">Bulk Import</button>
-        </div>
-        
-        <div id="memories-list" data-testid="list-memories">
-          <p class="placeholder">Select a persona to view memories</p>
-        </div>
-
-        <div class="memory-hint" id="memory-hint" style="display: none;">
-          <p><strong>💡 Helpful tip:</strong> Anytime a memory pops into your mind, you can add it here. Every memory you share helps our conversations feel more like them.</p>
-        </div>
-
-        <div class="add-memory-form">
-          <h3>Add Memory</h3>
-          <form id="memory-form">
-            <div class="form-group">
-              <label for="memory-category">Category *</label>
-              <select id="memory-category" data-testid="select-memory-category" required>
-                <option value="">-- Choose category --</option>
-                <option value="humor">Humor</option>
-                <option value="regrets">Regrets</option>
-                <option value="childhood">Childhood</option>
-                <option value="advice">Advice</option>
-                <option value="personality">Personality</option>
-                <option value="misc">Misc</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="memory-text">Memory *</label>
-              <div class="memory-text-wrapper">
-                <textarea id="memory-text" data-testid="input-memory-text" rows="3" required placeholder="Describe this memory..."></textarea>
-                <button type="button" id="voice-record-btn" data-testid="button-voice-record" class="voice-btn" title="Record voice">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="22"></line>
-                  </svg>
-                </button>
-              </div>
-              <div class="voice-status" id="voice-status" style="display: none;"></div>
-            </div>
-            <div class="form-group">
-              <label for="memory-weight">Weight (0.1 - 5.0)</label>
-              <input type="number" id="memory-weight" data-testid="input-memory-weight" min="0.1" max="5.0" step="0.1" value="1.0">
-            </div>
-            <button type="submit" data-testid="button-add-memory">Add Memory</button>
           </form>
         </div>
       </section>

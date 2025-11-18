@@ -1491,6 +1491,54 @@ button[type="submit"]:active {
   border-bottom: 2px solid #d4a574;
 }
 
+.sidebar-section .panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.sidebar-section .panel-header h4 {
+  margin: 0;
+  padding: 0;
+  border-bottom: none;
+}
+
+.btn-sidebar-secondary {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  background: white;
+  color: #3498db;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-sidebar-secondary:hover {
+  background: #3498db;
+  color: white;
+}
+
+.sidebar-section .add-memory-form h3 {
+  color: #2c3e50;
+  font-size: 1rem;
+  margin: 20px 0 15px 0;
+}
+
+.sidebar-section .memory-hint {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: #5a6c7d;
+}
+
+.sidebar-section .memory-hint p {
+  margin: 0;
+}
+
 .sidebar-section-content {
   padding: 10px 0;
 }

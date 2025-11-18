@@ -172,55 +172,10 @@
         </div>
       </div>
       
-      <!-- More sections will go here -->
-    </div>
-  </div>
-  
-  <!-- Sidebar Overlay (click to close) -->
-  <div class="sidebar-overlay" id="sidebar-overlay" data-testid="sidebar-overlay"></div>
-
-  <div class="container">
-    <!-- Top Bar with Hamburger -->
-    <div class="top-bar">
-      <button class="hamburger-menu" id="hamburger-menu" data-testid="button-hamburger-menu" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-
-    <header>
-      <h1>Everspeak</h1>
-      <p>Keep the conversation going with those you love</p>
-    </header>
-
-    <!-- Grounding Banner -->
-    <div class="grounding-banner" id="grounding-banner" data-testid="grounding-banner">
-      <p>
-        EverSpeak is a memory-based companion. It's not the real person, not a ghost, and not a therapist. 
-        It's here to help you reflect using your own memories.
-      </p>
-      <button class="banner-dismiss" id="banner-dismiss" data-testid="button-dismiss-banner">Got it</button>
-    </div>
-
-    <main class="panels">
-      <!-- Persona Panel -->
-      <section class="panel persona-panel">
-        <h2>Persona</h2>
-
-        <div class="persona-info" id="persona-info">
-          <p class="info-item"><strong>Name:</strong> <span id="info-name" data-testid="text-persona-name">-</span></p>
-          <p class="info-item"><strong>Relationship:</strong> <span id="info-relationship" data-testid="text-persona-relationship">-</span></p>
-          <p class="info-item"><strong>Description:</strong> <span id="info-description" data-testid="text-persona-description">-</span></p>
-        </div>
-
-        <div class="wizard-section" id="wizard-section" style="display: none;">
-          <button class="btn-setup-wizard" id="setup-wizard-btn" data-testid="button-setup-wizard">Setup Wizard</button>
-          <p class="wizard-hint">Use the wizard to quickly set up this persona with AI-guided questions</p>
-        </div>
-
-        <div class="settings-section" id="settings-section" style="display: none;">
-          <h3>Persona Settings</h3>
+      <!-- Persona Settings Section -->
+      <div class="sidebar-section" id="settings-section" style="display: none;">
+        <h4>Persona Settings</h4>
+        <div class="sidebar-section-content">
           <p class="settings-description">Calibrate communication style and boundaries</p>
           
           <div class="form-group">
@@ -287,14 +242,65 @@
             <p class="boost-hint">Get AI-powered recommendations to enhance this persona</p>
           </div>
         </div>
-
-        <div class="snapshots-section" id="snapshots-section" style="display: none;">
-          <h3>Snapshots</h3>
+      </div>
+      
+      <!-- Snapshots Section -->
+      <div class="sidebar-section" id="snapshots-section" style="display: none;">
+        <h4>Snapshots</h4>
+        <div class="sidebar-section-content">
           <p class="snapshots-description">Save versions of this persona to restore later</p>
           <button class="btn-create-snapshot" id="create-snapshot-btn" data-testid="button-create-snapshot">Create Snapshot</button>
           <div id="snapshots-list" data-testid="list-snapshots">
             <p class="placeholder">No snapshots yet</p>
           </div>
+        </div>
+      </div>
+      
+      <!-- More sections will go here -->
+    </div>
+  </div>
+  
+  <!-- Sidebar Overlay (click to close) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" data-testid="sidebar-overlay"></div>
+
+  <div class="container">
+    <!-- Top Bar with Hamburger -->
+    <div class="top-bar">
+      <button class="hamburger-menu" id="hamburger-menu" data-testid="button-hamburger-menu" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <header>
+      <h1>Everspeak</h1>
+      <p>Keep the conversation going with those you love</p>
+    </header>
+
+    <!-- Grounding Banner -->
+    <div class="grounding-banner" id="grounding-banner" data-testid="grounding-banner">
+      <p>
+        EverSpeak is a memory-based companion. It's not the real person, not a ghost, and not a therapist. 
+        It's here to help you reflect using your own memories.
+      </p>
+      <button class="banner-dismiss" id="banner-dismiss" data-testid="button-dismiss-banner">Got it</button>
+    </div>
+
+    <main class="panels">
+      <!-- Persona Panel -->
+      <section class="panel persona-panel">
+        <h2>Persona</h2>
+
+        <div class="persona-info" id="persona-info">
+          <p class="info-item"><strong>Name:</strong> <span id="info-name" data-testid="text-persona-name">-</span></p>
+          <p class="info-item"><strong>Relationship:</strong> <span id="info-relationship" data-testid="text-persona-relationship">-</span></p>
+          <p class="info-item"><strong>Description:</strong> <span id="info-description" data-testid="text-persona-description">-</span></p>
+        </div>
+
+        <div class="wizard-section" id="wizard-section" style="display: none;">
+          <button class="btn-setup-wizard" id="setup-wizard-btn" data-testid="button-setup-wizard">Setup Wizard</button>
+          <p class="wizard-hint">Use the wizard to quickly set up this persona with AI-guided questions</p>
         </div>
 
         <div class="create-persona-form">

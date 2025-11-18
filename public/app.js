@@ -30,7 +30,7 @@ let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
 let sidebarPersonaName, sidebarPersonaCompletion;
-const WIZARD_TOTAL_STEPS = 11;
+const WIZARD_TOTAL_STEPS = 4;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -1278,14 +1278,7 @@ function isDateNearHolidays(dateText) {
 const wizardAcknowledgments = {
   2: "",
   3: "", // Set dynamically with name
-  4: "", // Set dynamically based on date
-  5: "I hear you. That paints a more human picture of them.",
-  6: "Thank you. Those details matter, even if they're hard to put into words.",
-  7: "Thank you for sharing that. We'll keep moving gently.",
-  8: "Those memories are important. Thank you for trusting me with them.",
-  9: "I hear you. That tells me a lot about the emotional space you're coming from.",
-  10: "Thank you. You've shared a lot already, and you're doing more work than it might seem.",
-  11: "Everything you've shared so far will be held carefully here."
+  4: "" // Set dynamically based on relationship
 };
 
 // Update wizard UI
@@ -1295,14 +1288,7 @@ function getStepProgressText(step) {
     1: '', // Step 1 doesn't show progress text
     2: "Learning your lost one's name...Next: Your Relationship",
     3: "Your Relationship...Next: Date of Passing",
-    4: "Date of Passing...Next: Reason for Loss",
-    5: "Their Humor...Next: Relationship Dynamics",
-    6: "Relationship Dynamics...Next: Circumstances",
-    7: "Circumstances...Next: Memories",
-    8: "Memories...Next: Conversations",
-    9: "Conversations...Next: Tone Settings",
-    10: "Tone Settings...Next: Boundaries",
-    11: "Setting Boundaries...Almost done"
+    4: "Date of Passing...Next: Reason for Loss"
   };
   
   return progressTexts[step] || '';

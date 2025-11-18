@@ -1540,12 +1540,12 @@ button[type="submit"]:active {
 }
 
 .nav-link.active {
-  background: linear-gradient(135deg, #3498db 0%, #5dade2 100%);
+  background: #948979;
   color: white;
 }
 
 .nav-link.active:hover {
-  background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+  background: #7d7464;
   transform: translateX(0);
 }
 

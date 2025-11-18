@@ -1,0 +1,109 @@
+  Update the .conversation-room background and animated fog effect with the following specifications:
+
+  Background Color Update:
+  .conversation-room {
+    position: relative;
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: #2c3e50; /* Dark blue-gray base */
+    overflow: hidden;
+  }
+
+  Enhanced Fog/Mist Animation:
+
+  Create multiple overlapping animated layers for a more profound, atmospheric fog effect:
+
+  Layer 1 - Large Slow-Moving Fog:
+  - Size: 300-400% of container
+  - Radial gradient: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(211,84,0,0.08) 30%,
+  transparent 60%)
+  - Animation: 40-second rotation, counterclockwise
+  - Position: Centered, extends beyond viewport
+
+  Layer 2 - Medium Ambient Glow:
+  - Size: 250% of container
+  - Radial gradient: radial-gradient(ellipse at 30% 40%, rgba(211,84,0,0.12) 0%, rgba(255,255,255,0.08) 40%,
+  transparent 70%)
+  - Animation: 50-second rotation, clockwise
+  - Creates orange accent glow
+
+  Layer 3 - Soft Diffused Light:
+  - Size: 200% of container
+  - Radial gradient: radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%)
+  - Animation: 35-second rotation, counterclockwise
+  - Adds depth variation
+
+  Technical Implementation:
+
+  Use pseudo-elements (::before, ::after) plus one additional positioned div for the three layers:
+
+  .conversation-room::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 400%;
+    height: 400%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(211,84,0,0.08) 30%, transparent
+  60%);
+    animation: rotate-slow 40s linear infinite;
+    pointer-events: none;
+  }
+
+  .conversation-room::after {
+    content: '';
+    position: absolute;
+    top: -75%;
+    left: -75%;
+    width: 250%;
+    height: 250%;
+    background: radial-gradient(ellipse at 30% 40%, rgba(211,84,0,0.12) 0%, rgba(255,255,255,0.08) 40%, transparent
+  70%);
+    animation: rotate-medium 50s linear infinite reverse;
+    pointer-events: none;
+  }
+
+  @keyframes rotate-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes rotate-medium {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  Add a third layer via a separate div element inside .conversation-room:
+
+  <div class="conversation-room">
+    <div class="fog-layer-3"></div>
+    <!-- rest of content -->
+  </div>
+
+  .fog-layer-3 {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    animation: rotate-fast 35s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes rotate-fast {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  Ensure content stays on top:
+  .conversation-room > *:not(.fog-layer-3) {
+    position: relative;
+    z-index: 1;
+  }
+
+  Result: Dark, atmospheric background with profound, multi-layered fog effect that creates depth, warmth (via
+  orange accents), and continuous gentle movement.

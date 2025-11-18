@@ -720,16 +720,16 @@ button[type="submit"]:active {
 /* ===================== */
 
 .conversation-room {
-  background: #2c3e50;
+  position: relative;
+  margin-left: -20px;
+  margin-right: -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  background-color: #2c3e50;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  position: relative;
-  isolation: isolate;
   min-height: calc(100vh - 200px);
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  padding: 0;
 }
 
 /* Room Welcome Header */
@@ -766,94 +766,65 @@ button[type="submit"]:active {
   margin-top: 12px;
 }
 
-/* Animated fog background - Layer 1 (slowest, largest) */
+/* Animated fog background - Layer 1 (Large Slow-Moving Fog) */
 .conversation-room::before {
   content: '';
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 200vmax;
-  height: 200vmax;
-  margin-left: -100vmax;
-  margin-top: -100vmax;
-  background: 
-    radial-gradient(ellipse at 20% 30%, rgba(211, 84, 0, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 40% 80%, rgba(100, 100, 100, 0.10) 0%, transparent 55%);
-  animation: fog-drift-1 10s linear infinite;
-  z-index: -1;
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 400%;
+  height: 400%;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(211,84,0,0.08) 30%, transparent 60%);
+  animation: rotate-slow 40s linear infinite;
   pointer-events: none;
-  will-change: transform;
 }
 
-/* Animated fog background - Layer 2 (medium speed, medium size) */
+/* Animated fog background - Layer 2 (Medium Ambient Glow) */
 .conversation-room::after {
   content: '';
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 200vmax;
-  height: 200vmax;
-  margin-left: -100vmax;
-  margin-top: -100vmax;
-  background: 
-    radial-gradient(ellipse at 60% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 30% 60%, rgba(211, 84, 0, 0.10) 0%, transparent 55%),
-    radial-gradient(ellipse at 70% 20%, rgba(120, 120, 120, 0.08) 0%, transparent 50%);
-  animation: fog-drift-2 8s linear infinite reverse;
-  z-index: -2;
+  position: absolute;
+  top: -75%;
+  left: -75%;
+  width: 250%;
+  height: 250%;
+  background: radial-gradient(ellipse at 30% 40%, rgba(211,84,0,0.12) 0%, rgba(255,255,255,0.08) 40%, transparent 70%);
+  animation: rotate-medium 50s linear infinite reverse;
   pointer-events: none;
-  will-change: transform;
 }
 
-/* Animated fog background - Layer 3 (fastest, smaller gradients) */
+/* Animated fog background - Layer 3 (Soft Diffused Light) */
 .fog-layer-3 {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 200vmax;
-  height: 200vmax;
-  margin-left: -100vmax;
-  margin-top: -100vmax;
-  background: 
-    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.06) 0%, transparent 45%),
-    radial-gradient(ellipse at 15% 85%, rgba(211, 84, 0, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 85% 15%, rgba(140, 140, 140, 0.08) 0%, transparent 48%);
-  animation: fog-drift-3 6s linear infinite;
-  z-index: -3;
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  animation: rotate-fast 35s linear infinite;
   pointer-events: none;
-  will-change: transform;
+  z-index: 0;
+}
+
+/* Ensure content stays on top */
+.conversation-room > *:not(.fog-layer-3) {
+  position: relative;
+  z-index: 1;
 }
 
 /* Keyframes for fog animation */
-@keyframes fog-drift-1 {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  100% {
-    transform: rotate(360deg) scale(1);
-  }
+@keyframes rotate-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@keyframes fog-drift-2 {
-  0% {
-    transform: rotate(0deg) scale(1.1);
-  }
-  100% {
-    transform: rotate(360deg) scale(1.1);
-  }
+@keyframes rotate-medium {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@keyframes fog-drift-3 {
-  0% {
-    transform: rotate(0deg) scale(0.95) translate(0, 0);
-  }
-  50% {
-    transform: rotate(180deg) scale(1.05) translate(2%, 2%);
-  }
-  100% {
-    transform: rotate(360deg) scale(0.95) translate(0, 0);
-  }
+@keyframes rotate-fast {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Room Header */

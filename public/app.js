@@ -466,11 +466,21 @@ function hideIncompleteSetupState() {
 
 // Setup event listeners
 function setupEventListeners() {
-  personaDropdown.addEventListener('change', handlePersonaChange);
-  personaForm.addEventListener('submit', handleCreatePersona);
-  memoryForm.addEventListener('submit', handleAddMemory);
-  chatForm.addEventListener('submit', handleSendMessage);
-  bannerDismissBtn.addEventListener('click', handleBannerDismiss);
+  if (personaDropdown) {
+    personaDropdown.addEventListener('change', handlePersonaChange);
+  }
+  if (personaForm) {
+    personaForm.addEventListener('submit', handleCreatePersona);
+  }
+  if (memoryForm) {
+    memoryForm.addEventListener('submit', handleAddMemory);
+  }
+  if (chatForm) {
+    chatForm.addEventListener('submit', handleSendMessage);
+  }
+  if (bannerDismissBtn) {
+    bannerDismissBtn.addEventListener('click', handleBannerDismiss);
+  }
   
   if (strictModeTurnOff) {
     strictModeTurnOff.addEventListener('click', handleStrictModeTurnOff);

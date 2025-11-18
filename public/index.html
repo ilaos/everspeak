@@ -82,6 +82,25 @@
           <p class="room-subtitle">This is a safe space to honor <span id="persona-name-display">[Name]</span>, process your thoughts, and hold onto what matters.</p>
           <p class="room-instruction">Begin when it feels right</p>
         </div>
+
+        <!-- Chat Messages Area -->
+        <div class="chat-messages" id="chat-messages" data-testid="chat-messages">
+          <!-- Messages will appear here -->
+        </div>
+
+        <!-- Chat Input Area -->
+        <div class="chat-input-container">
+          <form id="chat-form" data-testid="form-chat">
+            <input 
+              type="text" 
+              id="chat-input" 
+              data-testid="input-chat-message"
+              placeholder="Type your message here..."
+              autocomplete="off"
+            />
+            <button type="submit" data-testid="button-send-message">Send</button>
+          </form>
+        </div>
       </section>
 
       <!-- Journal Page -->

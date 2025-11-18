@@ -977,7 +977,7 @@ button[type="submit"]:active {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-  background: #393E46;
+  background: transparent;
   min-height: 400px;
   max-height: 500px;
 }

@@ -25,6 +25,66 @@
     </div>
     
     <div class="sidebar-content">
+      <!-- Add a Journal Entry Section -->
+      <div class="sidebar-section">
+        <h4>Add a Journal Entry</h4>
+        <div class="sidebar-section-content">
+          <div class="feature-explanation">
+            <p><strong>What is this?</strong> The Journal is your private reflection space for processing emotions and memories — separate from conversations with personas.</p>
+            <p><strong>How it works:</strong></p>
+            <ul>
+              <li>Write your thoughts and feelings for yourself (not talking to the persona)</li>
+              <li>Optionally request an AI-generated gentle reflection on your entry</li>
+              <li>Link entries to personas for personalized context in reflections</li>
+              <li>Track moods and organize by tags to see your journey over time</li>
+            </ul>
+          </div>
+          
+          <div id="journal-entries-list" data-testid="list-journal-entries">
+            <p class="placeholder">No journal entries yet</p>
+          </div>
+
+          <div class="add-journal-form">
+            <h3>New Journal Entry</h3>
+            <form id="journal-form">
+              <div class="form-group">
+                <label for="journal-text">Entry *</label>
+                <textarea id="journal-text" data-testid="input-journal-text" rows="4" required placeholder="What's on your mind?"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="journal-mood">Mood (optional)</label>
+                <select id="journal-mood" data-testid="select-journal-mood">
+                  <option value="">-- Select mood --</option>
+                  <option value="calm">Calm</option>
+                  <option value="sad">Sad</option>
+                  <option value="reflective">Reflective</option>
+                  <option value="angry">Angry</option>
+                  <option value="hopeful">Hopeful</option>
+                  <option value="grateful">Grateful</option>
+                  <option value="anxious">Anxious</option>
+                  <option value="peaceful">Peaceful</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="journal-persona">Link to Persona (optional)</label>
+                <select id="journal-persona" data-testid="select-journal-persona">
+                  <option value="">-- None --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="journal-tags">Tags (optional, comma-separated)</label>
+                <input type="text" id="journal-tags" data-testid="input-journal-tags" placeholder="e.g., grief, memory, reflection">
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="generate-reflection" data-testid="checkbox-generate-reflection">
+                <label for="generate-reflection">Generate AI reflection</label>
+              </div>
+              <button type="submit" data-testid="button-save-journal">Save Journal Entry</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
       <!-- Add a New Memory Section -->
       <div class="sidebar-section">
         <div class="panel-header">
@@ -253,54 +313,6 @@
               <textarea id="persona-description" data-testid="input-persona-description" rows="3" placeholder="Tell us about this person..."></textarea>
             </div>
             <button type="submit" data-testid="button-save-persona">Save Persona</button>
-          </form>
-        </div>
-      </section>
-
-      <!-- Journal Panel -->
-      <section class="panel journal-panel">
-        <h2>Journal</h2>
-        
-        <div id="journal-entries-list" data-testid="list-journal-entries">
-          <p class="placeholder">No journal entries yet</p>
-        </div>
-
-        <div class="add-journal-form">
-          <h3>New Journal Entry</h3>
-          <form id="journal-form">
-            <div class="form-group">
-              <label for="journal-text">Entry *</label>
-              <textarea id="journal-text" data-testid="input-journal-text" rows="4" required placeholder="What's on your mind?"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="journal-mood">Mood (optional)</label>
-              <select id="journal-mood" data-testid="select-journal-mood">
-                <option value="">-- Select mood --</option>
-                <option value="calm">Calm</option>
-                <option value="sad">Sad</option>
-                <option value="reflective">Reflective</option>
-                <option value="angry">Angry</option>
-                <option value="hopeful">Hopeful</option>
-                <option value="grateful">Grateful</option>
-                <option value="anxious">Anxious</option>
-                <option value="peaceful">Peaceful</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="journal-persona">Link to Persona (optional)</label>
-              <select id="journal-persona" data-testid="select-journal-persona">
-                <option value="">-- None --</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="journal-tags">Tags (optional, comma-separated)</label>
-              <input type="text" id="journal-tags" data-testid="input-journal-tags" placeholder="e.g., grief, memory, reflection">
-            </div>
-            <div class="checkbox-item">
-              <input type="checkbox" id="generate-reflection" data-testid="checkbox-generate-reflection">
-              <label for="generate-reflection">Generate AI reflection</label>
-            </div>
-            <button type="submit" data-testid="button-save-journal">Save Journal Entry</button>
           </form>
         </div>
       </section>

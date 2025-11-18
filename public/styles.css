@@ -1539,6 +1539,40 @@ button[type="submit"]:active {
   margin: 0;
 }
 
+.sidebar-section .feature-explanation {
+  background: linear-gradient(135deg, #f0f4f8 0%, #e8f0f7 100%);
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 3px solid #3498db;
+  font-size: 0.9rem;
+  color: #34495e;
+  line-height: 1.6;
+}
+
+.sidebar-section .feature-explanation p {
+  margin: 0 0 10px 0;
+}
+
+.sidebar-section .feature-explanation p:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar-section .feature-explanation ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.sidebar-section .feature-explanation li {
+  margin-bottom: 6px;
+}
+
+.sidebar-section .add-journal-form h3 {
+  color: #2c3e50;
+  font-size: 1rem;
+  margin: 20px 0 15px 0;
+}
+
 .sidebar-section-content {
   padding: 10px 0;
 }

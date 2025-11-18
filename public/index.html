@@ -17,280 +17,42 @@
     <button class="btn-close-conversation-banner" id="btn-close-conversation-banner" data-testid="button-close-conversation-banner">×</button>
   </div>
 
-  <!-- Sidebar -->
+  <!-- Sidebar Navigation -->
   <div class="sidebar" id="sidebar" data-testid="sidebar">
     <div class="sidebar-header">
-      <h3>Settings</h3>
+      <h3>Menu</h3>
       <button class="sidebar-close" id="sidebar-close" data-testid="button-sidebar-close">&times;</button>
     </div>
     
     <div class="sidebar-content">
-      <!-- Add a Journal Entry Section -->
-      <div class="sidebar-section">
-        <h4>Add a Journal Entry</h4>
-        <div class="sidebar-section-content">
-          <div class="feature-explanation">
-            <p><strong>What is this?</strong> The Journal is your private reflection space for processing emotions and memories — separate from conversations with personas.</p>
-            <p><strong>How it works:</strong></p>
-            <ul>
-              <li>Write your thoughts and feelings for yourself (not talking to the persona)</li>
-              <li>Optionally request an AI-generated gentle reflection on your entry</li>
-              <li>Link entries to personas for personalized context in reflections</li>
-              <li>Track moods and organize by tags to see your journey over time</li>
-            </ul>
-          </div>
-          
-          <div id="journal-entries-list" data-testid="list-journal-entries">
-            <p class="placeholder">No journal entries yet</p>
-          </div>
-
-          <div class="add-journal-form">
-            <h3>New Journal Entry</h3>
-            <form id="journal-form">
-              <div class="form-group">
-                <label for="journal-text">Entry *</label>
-                <textarea id="journal-text" data-testid="input-journal-text" rows="4" required placeholder="What's on your mind?"></textarea>
-              </div>
-              <div class="form-group">
-                <label for="journal-mood">Mood (optional)</label>
-                <select id="journal-mood" data-testid="select-journal-mood">
-                  <option value="">-- Select mood --</option>
-                  <option value="calm">Calm</option>
-                  <option value="sad">Sad</option>
-                  <option value="reflective">Reflective</option>
-                  <option value="angry">Angry</option>
-                  <option value="hopeful">Hopeful</option>
-                  <option value="grateful">Grateful</option>
-                  <option value="anxious">Anxious</option>
-                  <option value="peaceful">Peaceful</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="journal-persona">Link to Persona (optional)</label>
-                <select id="journal-persona" data-testid="select-journal-persona">
-                  <option value="">-- None --</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="journal-tags">Tags (optional, comma-separated)</label>
-                <input type="text" id="journal-tags" data-testid="input-journal-tags" placeholder="e.g., grief, memory, reflection">
-              </div>
-              <div class="checkbox-item">
-                <input type="checkbox" id="generate-reflection" data-testid="checkbox-generate-reflection">
-                <label for="generate-reflection">Generate AI reflection</label>
-              </div>
-              <button type="submit" data-testid="button-save-journal">Save Journal Entry</button>
-            </form>
-          </div>
-        </div>
-      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-link active" data-page="conversation" data-testid="nav-conversation">
+          <span>Conversation</span>
+        </button>
+        <button class="nav-link" data-page="journal" data-testid="nav-journal">
+          <span>Journal</span>
+        </button>
+        <button class="nav-link" data-page="memories" data-testid="nav-memories">
+          <span>Memories</span>
+        </button>
+        <button class="nav-link" data-page="personas" data-testid="nav-personas">
+          <span>Personas</span>
+        </button>
+        <button class="nav-link" data-page="settings" data-testid="nav-settings">
+          <span>Settings</span>
+        </button>
+      </nav>
       
-      <!-- Add a New Memory Section -->
+      <!-- Quick Persona Status -->
       <div class="sidebar-section">
-        <div class="panel-header">
-          <h4>Add a New Memory</h4>
-          <button id="bulk-import-btn" data-testid="button-bulk-import" class="btn-secondary btn-sidebar-secondary" style="display: none;">Bulk Import</button>
-        </div>
+        <h4>Current Persona</h4>
         <div class="sidebar-section-content">
-          <div id="memories-list" data-testid="list-memories">
-            <p class="placeholder">Select a persona to view memories</p>
-          </div>
-
-          <div class="memory-hint" id="memory-hint" style="display: none;">
-            <p><strong>💡 Helpful tip:</strong> Anytime a memory pops into your mind, you can add it here. Every memory you share helps our conversations feel more like them.</p>
-          </div>
-
-          <div class="add-memory-form">
-            <h3>Add Memory</h3>
-            <form id="memory-form">
-              <div class="form-group">
-                <label for="memory-category">Category *</label>
-                <select id="memory-category" data-testid="select-memory-category" required>
-                  <option value="">-- Choose category --</option>
-                  <option value="humor">Humor</option>
-                  <option value="regrets">Regrets</option>
-                  <option value="childhood">Childhood</option>
-                  <option value="advice">Advice</option>
-                  <option value="personality">Personality</option>
-                  <option value="misc">Misc</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="memory-text">Memory *</label>
-                <div class="memory-text-wrapper">
-                  <textarea id="memory-text" data-testid="input-memory-text" rows="3" required placeholder="Describe this memory..."></textarea>
-                  <button type="button" id="voice-record-btn" data-testid="button-voice-record" class="voice-btn" title="Record voice">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                      <line x1="12" y1="19" x2="12" y2="22"></line>
-                    </svg>
-                  </button>
-                </div>
-                <div class="voice-status" id="voice-status" style="display: none;"></div>
-              </div>
-              <div class="form-group">
-                <label for="memory-weight">Weight (0.1 - 5.0)</label>
-                <input type="number" id="memory-weight" data-testid="input-memory-weight" min="0.1" max="5.0" step="0.1" value="1.0">
-              </div>
-              <button type="submit" data-testid="button-add-memory">Add Memory</button>
-            </form>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Persona Selection Section -->
-      <div class="sidebar-section">
-        <h4>Select Persona</h4>
-        <div class="sidebar-section-content">
-          <div class="persona-selector">
-            <select id="persona-dropdown" data-testid="select-persona">
-              <option value="">-- Choose a persona --</option>
-            </select>
-          </div>
-          <div class="continue-setup-container" id="continue-setup-container" style="display: none;">
-            <button class="btn-continue-setup" id="continue-setup-btn" data-testid="button-continue-setup">
-              Continue Setup
-            </button>
-            <p class="setup-hint">Complete the wizard to start your first conversation</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Persona Setup Section -->
-      <div class="sidebar-section">
-        <h4>Persona Setup</h4>
-        <div class="sidebar-section-content">
+          <select id="persona-dropdown" data-testid="select-persona">
+            <option value="">-- Choose a persona --</option>
+          </select>
           <div class="persona-status" id="sidebar-persona-status">
-            <p class="status-label">Current persona:</p>
             <p class="status-value" id="sidebar-persona-name">None selected</p>
             <p class="status-completion" id="sidebar-persona-completion">Setup not started</p>
-          </div>
-          <button class="btn-sidebar-action" id="sidebar-restart-wizard" data-testid="button-sidebar-restart-wizard">
-            Restart Wizard
-          </button>
-        </div>
-      </div>
-      
-      <!-- Persona Settings Section -->
-      <div class="sidebar-section" id="settings-section" style="display: none;">
-        <h4>Persona Settings</h4>
-        <div class="sidebar-section-content">
-          <p class="settings-description">Calibrate communication style and boundaries</p>
-          
-          <div class="form-group">
-            <label for="tone-mode-select">Default Tone Mode</label>
-            <select id="tone-mode-select" class="settings-select" data-testid="select-tone-mode">
-              <option value="auto">Auto</option>
-              <option value="comforting">Comforting</option>
-              <option value="honest">Honest</option>
-              <option value="playful">Playful</option>
-              <option value="balanced">Balanced</option>
-            </select>
-          </div>
-
-          <div class="slider-group">
-            <label for="humor-slider">Humor <span id="humor-value" class="slider-value">3</span></label>
-            <input type="range" id="humor-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-humor">
-          </div>
-
-          <div class="slider-group">
-            <label for="honesty-slider">Honesty <span id="honesty-value" class="slider-value">3</span></label>
-            <input type="range" id="honesty-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-honesty">
-          </div>
-
-          <div class="slider-group">
-            <label for="sentimentality-slider">Sentimentality <span id="sentimentality-value" class="slider-value">3</span></label>
-            <input type="range" id="sentimentality-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-sentimentality">
-          </div>
-
-          <div class="slider-group">
-            <label for="energy-slider">Energy <span id="energy-value" class="slider-value">3</span></label>
-            <input type="range" id="energy-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-energy">
-          </div>
-
-          <div class="slider-group">
-            <label for="advice-slider">Advice-giving <span id="advice-value" class="slider-value">2</span></label>
-            <input type="range" id="advice-slider" min="0" max="5" step="0.5" value="2" class="calibration-slider" data-testid="slider-advice">
-          </div>
-
-          <div class="boundaries-group">
-            <label class="boundary-label">Boundaries</label>
-            <div class="checkbox-item">
-              <input type="checkbox" id="avoid-regret-spirals" checked data-testid="checkbox-avoid-regret">
-              <label for="avoid-regret-spirals">Avoid regret spirals</label>
-            </div>
-            <div class="checkbox-item">
-              <input type="checkbox" id="no-paranormal-language" checked data-testid="checkbox-no-paranormal">
-              <label for="no-paranormal-language">No paranormal language</label>
-            </div>
-            <div class="checkbox-item">
-              <input type="checkbox" id="soften-sensitive-topics" checked data-testid="checkbox-soften-sensitive">
-              <label for="soften-sensitive-topics">Soften sensitive topics</label>
-            </div>
-            <div class="checkbox-item">
-              <input type="checkbox" id="prefer-reassurance" checked data-testid="checkbox-prefer-reassurance">
-              <label for="prefer-reassurance">Prefer reassurance</label>
-            </div>
-          </div>
-
-          <button class="btn-save-settings" id="save-settings-btn" data-testid="button-save-settings">Save Settings</button>
-          <div class="settings-feedback" id="settings-feedback" style="display: none;"></div>
-          
-          <div class="boost-section">
-            <button class="btn-boost-persona" id="boost-persona-btn" data-testid="button-boost-persona">✨ Improve Persona Accuracy</button>
-            <p class="boost-hint">Get AI-powered recommendations to enhance this persona</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Snapshots Section -->
-      <div class="sidebar-section" id="snapshots-section" style="display: none;">
-        <h4>Snapshots</h4>
-        <div class="sidebar-section-content">
-          <p class="snapshots-description">Save versions of this persona to restore later</p>
-          <button class="btn-create-snapshot" id="create-snapshot-btn" data-testid="button-create-snapshot">Create Snapshot</button>
-          <div id="snapshots-list" data-testid="list-snapshots">
-            <p class="placeholder">No snapshots yet</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Create New Persona Section -->
-      <div class="sidebar-section">
-        <h4>Create New Persona</h4>
-        <div class="sidebar-section-content">
-          <form id="persona-form">
-            <div class="form-group">
-              <label for="persona-name">Name *</label>
-              <input type="text" id="persona-name" data-testid="input-persona-name" required>
-            </div>
-            <div class="form-group">
-              <label for="persona-relationship">Relationship</label>
-              <input type="text" id="persona-relationship" data-testid="input-persona-relationship" placeholder="e.g., Brother, Mother, Friend">
-            </div>
-            <div class="form-group">
-              <label for="persona-description">Description</label>
-              <textarea id="persona-description" data-testid="input-persona-description" rows="3" placeholder="Tell us about this person..."></textarea>
-            </div>
-            <button type="submit" data-testid="button-save-persona">Save Persona</button>
-          </form>
-        </div>
-      </div>
-      
-      <!-- Persona Info Section -->
-      <div class="sidebar-section">
-        <h4>Persona Info</h4>
-        <div class="sidebar-section-content">
-          <div class="persona-info" id="persona-info">
-            <p class="info-item"><strong>Name:</strong> <span id="info-name" data-testid="text-persona-name">-</span></p>
-            <p class="info-item"><strong>Relationship:</strong> <span id="info-relationship" data-testid="text-persona-relationship">-</span></p>
-            <p class="info-item"><strong>Description:</strong> <span id="info-description" data-testid="text-persona-description">-</span></p>
-          </div>
-          
-          <div class="wizard-section" id="wizard-section" style="display: none;">
-            <button class="btn-setup-wizard" id="setup-wizard-btn" data-testid="button-setup-wizard">Setup Wizard</button>
-            <p class="wizard-hint">Use the wizard to quickly set up this persona with AI-guided questions</p>
           </div>
         </div>
       </div>
@@ -417,6 +179,251 @@
               <button type="submit" class="send-btn" data-testid="button-send-message">Send</button>
             </div>
           </form>
+        </div>
+      </section>
+
+      <!-- Journal Page -->
+      <section class="page-view" id="page-journal" data-page="journal" style="display: none;">
+        <div class="page-header">
+          <h2>Journal</h2>
+          <p class="page-description">Your private reflection space for processing emotions and memories — separate from conversations with personas.</p>
+        </div>
+        <div class="page-content">
+          <div class="feature-explanation">
+            <p><strong>How it works:</strong></p>
+            <ul>
+              <li>Write your thoughts and feelings for yourself (not talking to the persona)</li>
+              <li>Optionally request an AI-generated gentle reflection on your entry</li>
+              <li>Link entries to personas for personalized context in reflections</li>
+              <li>Track moods and organize by tags to see your journey over time</li>
+            </ul>
+          </div>
+          
+          <div id="journal-entries-list" data-testid="list-journal-entries">
+            <p class="placeholder">No journal entries yet</p>
+          </div>
+
+          <div class="add-journal-form">
+            <h3>New Journal Entry</h3>
+            <form id="journal-form">
+              <div class="form-group">
+                <label for="journal-text">Entry *</label>
+                <textarea id="journal-text" data-testid="input-journal-text" rows="4" required placeholder="What's on your mind?"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="journal-mood">Mood (optional)</label>
+                <select id="journal-mood" data-testid="select-journal-mood">
+                  <option value="">-- Select mood --</option>
+                  <option value="calm">Calm</option>
+                  <option value="sad">Sad</option>
+                  <option value="reflective">Reflective</option>
+                  <option value="angry">Angry</option>
+                  <option value="hopeful">Hopeful</option>
+                  <option value="grateful">Grateful</option>
+                  <option value="anxious">Anxious</option>
+                  <option value="peaceful">Peaceful</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="journal-persona">Link to Persona (optional)</label>
+                <select id="journal-persona" data-testid="select-journal-persona">
+                  <option value="">-- None --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="journal-tags">Tags (optional, comma-separated)</label>
+                <input type="text" id="journal-tags" data-testid="input-journal-tags" placeholder="e.g., grief, memory, reflection">
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="generate-reflection" data-testid="checkbox-generate-reflection">
+                <label for="generate-reflection">Generate AI reflection</label>
+              </div>
+              <button type="submit" data-testid="button-save-journal">Save Journal Entry</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Memories Page -->
+      <section class="page-view" id="page-memories" data-page="memories" style="display: none;">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h2>Memories</h2>
+            <p class="page-description">Share memories to help conversations feel more like them</p>
+          </div>
+          <button id="bulk-import-btn" data-testid="button-bulk-import" class="btn-secondary">Bulk Import</button>
+        </div>
+        <div class="page-content">
+          <div id="memories-list" data-testid="list-memories">
+            <p class="placeholder">Select a persona to view memories</p>
+          </div>
+
+          <div class="memory-hint" id="memory-hint" style="display: none;">
+            <p><strong>Helpful tip:</strong> Anytime a memory pops into your mind, you can add it here. Every memory you share helps our conversations feel more like them.</p>
+          </div>
+
+          <div class="add-memory-form">
+            <h3>Add Memory</h3>
+            <form id="memory-form">
+              <div class="form-group">
+                <label for="memory-category">Category *</label>
+                <select id="memory-category" data-testid="select-memory-category" required>
+                  <option value="">-- Choose category --</option>
+                  <option value="humor">Humor</option>
+                  <option value="regrets">Regrets</option>
+                  <option value="childhood">Childhood</option>
+                  <option value="advice">Advice</option>
+                  <option value="personality">Personality</option>
+                  <option value="misc">Misc</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="memory-text">Memory *</label>
+                <div class="memory-text-wrapper">
+                  <textarea id="memory-text" data-testid="input-memory-text" rows="3" required placeholder="Describe this memory..."></textarea>
+                  <button type="button" id="voice-record-btn" data-testid="button-voice-record" class="voice-btn" title="Record voice">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <line x1="12" y1="19" x2="12" y2="22"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div class="voice-status" id="voice-status" style="display: none;"></div>
+              </div>
+              <div class="form-group">
+                <label for="memory-weight">Weight (0.1 - 5.0)</label>
+                <input type="number" id="memory-weight" data-testid="input-memory-weight" min="0.1" max="5.0" step="0.1" value="1.0">
+              </div>
+              <button type="submit" data-testid="button-add-memory">Add Memory</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Personas Page -->
+      <section class="page-view" id="page-personas" data-page="personas" style="display: none;">
+        <div class="page-header">
+          <h2>Manage Personas</h2>
+          <p class="page-description">Create and manage the people you'd like to talk to</p>
+        </div>
+        <div class="page-content">
+          <div class="persona-info-section">
+            <h3>Current Persona Info</h3>
+            <div class="persona-info" id="persona-info">
+              <p class="info-item"><strong>Name:</strong> <span id="info-name" data-testid="text-persona-name">-</span></p>
+              <p class="info-item"><strong>Relationship:</strong> <span id="info-relationship" data-testid="text-persona-relationship">-</span></p>
+              <p class="info-item"><strong>Description:</strong> <span id="info-description" data-testid="text-persona-description">-</span></p>
+            </div>
+            
+            <div class="wizard-section" id="wizard-section" style="display: none;">
+              <button class="btn-setup-wizard" id="setup-wizard-btn" data-testid="button-setup-wizard">Setup Wizard</button>
+              <p class="wizard-hint">Use the wizard to quickly set up this persona with AI-guided questions</p>
+            </div>
+          </div>
+
+          <div class="create-persona-section">
+            <h3>Create New Persona</h3>
+            <form id="persona-form">
+              <div class="form-group">
+                <label for="persona-name">Name *</label>
+                <input type="text" id="persona-name" data-testid="input-persona-name" required>
+              </div>
+              <div class="form-group">
+                <label for="persona-relationship">Relationship</label>
+                <input type="text" id="persona-relationship" data-testid="input-persona-relationship" placeholder="e.g., Brother, Mother, Friend">
+              </div>
+              <div class="form-group">
+                <label for="persona-description">Description</label>
+                <textarea id="persona-description" data-testid="input-persona-description" rows="3" placeholder="Tell us about this person..."></textarea>
+              </div>
+              <button type="submit" data-testid="button-save-persona">Save Persona</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Page -->
+      <section class="page-view" id="page-settings" data-page="settings" style="display: none;">
+        <div class="page-header">
+          <h2>Persona Settings</h2>
+          <p class="page-description">Calibrate communication style and boundaries</p>
+        </div>
+        <div class="page-content">
+          <div class="settings-container" id="settings-section">
+            <div class="form-group">
+              <label for="tone-mode-select">Default Tone Mode</label>
+              <select id="tone-mode-select" class="settings-select" data-testid="select-tone-mode">
+                <option value="auto">Auto</option>
+                <option value="comforting">Comforting</option>
+                <option value="honest">Honest</option>
+                <option value="playful">Playful</option>
+                <option value="balanced">Balanced</option>
+              </select>
+            </div>
+
+            <div class="slider-group">
+              <label for="humor-slider">Humor <span id="humor-value" class="slider-value">3</span></label>
+              <input type="range" id="humor-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-humor">
+            </div>
+
+            <div class="slider-group">
+              <label for="honesty-slider">Honesty <span id="honesty-value" class="slider-value">3</span></label>
+              <input type="range" id="honesty-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-honesty">
+            </div>
+
+            <div class="slider-group">
+              <label for="sentimentality-slider">Sentimentality <span id="sentimentality-value" class="slider-value">3</span></label>
+              <input type="range" id="sentimentality-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-sentimentality">
+            </div>
+
+            <div class="slider-group">
+              <label for="energy-slider">Energy <span id="energy-value" class="slider-value">3</span></label>
+              <input type="range" id="energy-slider" min="0" max="5" step="0.5" value="3" class="calibration-slider" data-testid="slider-energy">
+            </div>
+
+            <div class="slider-group">
+              <label for="advice-slider">Advice-giving <span id="advice-value" class="slider-value">2</span></label>
+              <input type="range" id="advice-slider" min="0" max="5" step="0.5" value="2" class="calibration-slider" data-testid="slider-advice">
+            </div>
+
+            <div class="boundaries-group">
+              <label class="boundary-label">Boundaries</label>
+              <div class="checkbox-item">
+                <input type="checkbox" id="avoid-regret-spirals" checked data-testid="checkbox-avoid-regret">
+                <label for="avoid-regret-spirals">Avoid regret spirals</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="no-paranormal-language" checked data-testid="checkbox-no-paranormal">
+                <label for="no-paranormal-language">No paranormal language</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="soften-sensitive-topics" checked data-testid="checkbox-soften-sensitive">
+                <label for="soften-sensitive-topics">Soften sensitive topics</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="prefer-reassurance" checked data-testid="checkbox-prefer-reassurance">
+                <label for="prefer-reassurance">Prefer reassurance</label>
+              </div>
+            </div>
+
+            <button class="btn-save-settings" id="save-settings-btn" data-testid="button-save-settings">Save Settings</button>
+            <div class="settings-feedback" id="settings-feedback" style="display: none;"></div>
+            
+            <div class="boost-section">
+              <button class="btn-boost-persona" id="boost-persona-btn" data-testid="button-boost-persona">Improve Persona Accuracy</button>
+              <p class="boost-hint">Get AI-powered recommendations to enhance this persona</p>
+            </div>
+
+            <div class="snapshots-container" id="snapshots-section">
+              <h3>Snapshots</h3>
+              <p class="snapshots-description">Save versions of this persona to restore later</p>
+              <button class="btn-create-snapshot" id="create-snapshot-btn" data-testid="button-create-snapshot">Create Snapshot</button>
+              <div id="snapshots-list" data-testid="list-snapshots">
+                <p class="placeholder">No snapshots yet</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>

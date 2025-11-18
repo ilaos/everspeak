@@ -1225,6 +1225,9 @@ button[type="submit"]:active {
   line-height: 1.5;
   transition: border-color 0.2s, box-shadow 0.2s;
   overflow-y: hidden;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .main-input-area textarea:focus {

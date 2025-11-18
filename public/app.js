@@ -223,9 +223,9 @@ function updateContinueSetupButton() {
   }
 }
 
-// Auto-open wizard if incomplete and not snoozed
+// Auto-open wizard if incomplete (NO EXCEPTIONS)
 function checkAndAutoOpenWizard() {
-  if (isWizardIncomplete() && !isWizardSnoozed()) {
+  if (isWizardIncomplete()) {
     // Small delay to let UI settle
     setTimeout(() => {
       openWizardModal();

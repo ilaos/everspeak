@@ -30,7 +30,7 @@ let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
 let sidebarPersonaName, sidebarPersonaCompletion;
-const WIZARD_TOTAL_STEPS = 5;
+const WIZARD_TOTAL_STEPS = 6;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -1291,7 +1291,8 @@ const wizardAcknowledgments = {
   2: "",
   3: "", // Set dynamically with name
   4: "", // Set dynamically based on relationship
-  5: "" // Set dynamically based on date/holidays
+  5: "", // Set dynamically based on date/holidays
+  6: "Thank you for trusting me with that. It holds a lot of weight. To help me understand more fully, let's move onto the next question. You are doing great, I want you to know."
 };
 
 // Update wizard UI
@@ -1302,7 +1303,8 @@ function getStepProgressText(step) {
     2: "Learning your lost one's name...Next: Your Relationship",
     3: "Your Relationship...Next: Date of Passing",
     4: "Date of Passing...Next: Reason for Loss",
-    5: "Reason for loss...Next: Relationship Dynamics"
+    5: "Reason for loss...Next: Relationship Dynamics",
+    6: "Relationship Dynamics...Next: Their Humor"
   };
   
   return progressTexts[step] || '';
@@ -1382,6 +1384,27 @@ function updateWizardUI() {
     }
     if (skipNamePlaceholder) {
       skipNamePlaceholder.textContent = firstName;
+    }
+  } else if (wizardCurrentStep === 6) {
+    // Special handling for Step 6: Relationship Dynamics with name and pronoun insertion
+    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const relationship = document.getElementById('wizard-relationship')?.value.trim().toLowerCase() || '';
+    const questionEl = document.getElementById('step-6-question');
+    
+    // Determine pronoun based on relationship
+    let pronoun = 'their';
+    const maleRelationships = ['father', 'dad', 'grandfather', 'grandpa', 'brother', 'uncle', 'son', 'husband', 'boyfriend', 'he was', 'he is'];
+    const femaleRelationships = ['mother', 'mom', 'grandmother', 'grandma', 'sister', 'aunt', 'daughter', 'wife', 'girlfriend', 'she was', 'she is'];
+    
+    if (maleRelationships.some(rel => relationship.includes(rel))) {
+      pronoun = 'his';
+    } else if (femaleRelationships.some(rel => relationship.includes(rel))) {
+      pronoun = 'her';
+    }
+    
+    if (questionEl) {
+      questionEl.textContent = `May I ask you, what was the nature of your relationship with ${firstName} like in the time leading up to ${pronoun} passing?`;
+      questionEl.style.display = 'block';
     }
   } else {
     // Update acknowledgment text for other steps

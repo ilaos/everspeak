@@ -38,6 +38,14 @@ header {
   height: auto;
 }
 
+.header-tagline {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  margin-top: 12px;
+}
+
 /* Grounding Banner */
 .grounding-banner {
   background: #fff9e6;

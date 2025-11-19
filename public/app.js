@@ -30,7 +30,8 @@ let continueSetupContainer, continueSetupBtn;
 let firstConversationBanner, btnBeginConversationBanner, btnCloseConversationBanner;
 let sidebar, sidebarClose, sidebarOverlay, hamburgerMenu, sidebarRestartWizard;
 let sidebarPersonaName, sidebarPersonaCompletion;
-const WIZARD_TOTAL_STEPS = 10;
+let btnSettingsMobile, btnBackFromSettings;
+const WIZARD_TOTAL_STEPS = 11;
 let voiceRecordBtn, voiceStatus, memoryTextInput;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -54,6 +55,8 @@ let isFirstConversation = false;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 App initializing...');
+
   // Clear wizard snooze from previous session
   localStorage.removeItem('wizardSnoozed');
   
@@ -176,6 +179,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   sidebarRestartWizard = document.getElementById('sidebar-restart-wizard');
   sidebarPersonaName = document.getElementById('sidebar-persona-name');
   sidebarPersonaCompletion = document.getElementById('sidebar-persona-completion');
+
+  // Mobile navigation elements
+  btnSettingsMobile = document.getElementById('btn-settings-mobile');
+  btnBackFromSettings = document.getElementById('btn-back-from-settings');
   
   // Navigation elements
   const navLinks = document.querySelectorAll('.nav-link');
@@ -189,9 +196,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadJournalEntries();
   setupEventListeners();
   setupNavigation(navLinks);
-  
+
+  // Setup Bottom Tab Bar (mobile navigation)
+  const bottomTabItems = document.querySelectorAll('.tab-item');
+  if (bottomTabItems.length > 0) {
+    setupBottomTabBar(bottomTabItems);
+    setupBottomTabBarAutoHide();
+  }
+
   // Initialize Conversation Room settings
   initializeConversationRoom();
+
+  // Ensure only Home page is visible on load
+  console.log('Setting initial page to Home...');
+  const allPages = document.querySelectorAll('.page-view, .conversation-room');
+  allPages.forEach(page => {
+    if (page && page.id !== 'page-home') {
+      page.style.display = 'none';
+    }
+  });
+  const homePage = document.getElementById('page-home');
+  if (homePage) {
+    homePage.style.display = 'block';
+    console.log('Home page set to visible');
+  }
 });
 
 // Check if wizard is incomplete for current persona
@@ -322,16 +350,16 @@ function setupNavigation(navLinks) {
     document.getElementById('page-personas'),
     document.getElementById('page-settings')
   ];
-  
+
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
       const targetPage = link.dataset.page;
-      
+
       // Hide all pages
       allPages.forEach(page => {
         if (page) page.style.display = 'none';
       });
-      
+
       // Show target page
       const pageElement = document.getElementById(`page-${targetPage}`);
       if (pageElement) {
@@ -342,20 +370,103 @@ function setupNavigation(navLinks) {
           pageElement.style.display = 'block';
         }
       }
-      
+
       // Update active state
       navLinks.forEach(l => l.classList.remove('active'));
       link.classList.add('active');
-      
-      // Close sidebar after selection
-      if (sidebar) {
-        sidebar.classList.remove('open');
-      }
-      if (sidebarOverlay) {
-        sidebarOverlay.classList.remove('active');
-      }
+
+      // Close sidebar after selection (properly handles hamburger icon too)
+      closeSidebar();
     });
   });
+}
+
+// Setup Bottom Tab Bar (Mobile Navigation)
+function setupBottomTabBar(tabItems) {
+  const allPages = [
+    document.getElementById('page-home'),
+    document.getElementById('page-conversation'),
+    document.getElementById('page-journal'),
+    document.getElementById('page-memories'),
+    document.getElementById('page-personas'),
+    document.getElementById('page-settings')
+  ];
+
+  tabItems.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetPage = tab.dataset.page;
+
+      // Hide all pages
+      allPages.forEach(page => {
+        if (page) page.style.display = 'none';
+      });
+
+      // Show target page
+      const pageElement = document.getElementById(`page-${targetPage}`);
+      if (pageElement) {
+        // Use 'flex' for conversation room to maintain layout
+        if (targetPage === 'conversation') {
+          pageElement.style.display = 'flex';
+        } else {
+          pageElement.style.display = 'block';
+        }
+      }
+
+      // Update active state for tabs
+      tabItems.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      // Scroll to top when switching pages
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Set initial active tab (home by default)
+  const homeTab = document.querySelector('.tab-item[data-page="home"]');
+  if (homeTab) {
+    homeTab.classList.add('active');
+  }
+}
+
+// Setup Bottom Tab Bar Auto-Hide on Scroll
+function setupBottomTabBarAutoHide() {
+  const bottomTabBar = document.getElementById('bottom-tab-bar');
+  if (!bottomTabBar) return;
+
+  let lastScrollTop = 0;
+  let scrollTimeout;
+  let isHidden = false;
+
+  window.addEventListener('scroll', () => {
+    const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Clear previous timeout
+    clearTimeout(scrollTimeout);
+
+    // Debounce scroll events (wait 100ms after user stops scrolling)
+    scrollTimeout = setTimeout(() => {
+      // Scrolling down - hide tab bar
+      if (currentScrollTop > lastScrollTop && currentScrollTop > 50 && !isHidden) {
+        bottomTabBar.classList.add('hidden');
+        isHidden = true;
+      }
+      // Scrolling up - show tab bar
+      else if (currentScrollTop < lastScrollTop && isHidden) {
+        bottomTabBar.classList.remove('hidden');
+        isHidden = false;
+      }
+
+      lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
+    }, 100);
+  }, { passive: true });
+
+  // Show tab bar when user taps anywhere (in case they need it)
+  document.addEventListener('touchstart', () => {
+    if (isHidden) {
+      bottomTabBar.classList.remove('hidden');
+      isHidden = false;
+    }
+  }, { passive: true });
 }
 
 // Initialize Conversation Room
@@ -453,7 +564,63 @@ function setupEventListeners() {
   if (saveSettingsBtn) {
     saveSettingsBtn.addEventListener('click', handleSaveSettings);
   }
-  
+
+  // Mobile settings button (navigates to Settings page on mobile)
+  if (btnSettingsMobile) {
+    btnSettingsMobile.addEventListener('click', () => {
+      // Navigate to Settings page
+      const settingsPage = document.getElementById('page-settings');
+      const allPages = document.querySelectorAll('.page-view, .conversation-room');
+
+      // Hide all pages
+      allPages.forEach(page => {
+        if (page) page.style.display = 'none';
+      });
+
+      // Show Settings page
+      if (settingsPage) {
+        settingsPage.style.display = 'block';
+      }
+
+      // Update bottom tab bar active state (no settings tab, so remove all active)
+      const tabItems = document.querySelectorAll('.tab-item');
+      tabItems.forEach(tab => tab.classList.remove('active'));
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // Back button from Settings (returns to Personas page on mobile)
+  if (btnBackFromSettings) {
+    btnBackFromSettings.addEventListener('click', () => {
+      // Navigate back to Personas page
+      const personasPage = document.getElementById('page-personas');
+      const allPages = document.querySelectorAll('.page-view, .conversation-room');
+
+      // Hide all pages
+      allPages.forEach(page => {
+        if (page) page.style.display = 'none';
+      });
+
+      // Show Personas page
+      if (personasPage) {
+        personasPage.style.display = 'block';
+      }
+
+      // Update bottom tab bar active state to Personas
+      const tabItems = document.querySelectorAll('.tab-item');
+      tabItems.forEach(tab => tab.classList.remove('active'));
+      const personasTab = document.querySelector('.tab-item[data-page="personas"]');
+      if (personasTab) {
+        personasTab.classList.add('active');
+      }
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
   // Slider value updates
   if (humorSlider) {
     humorSlider.addEventListener('input', (e) => {
@@ -504,6 +671,66 @@ function setupEventListeners() {
     });
   }
   
+  // Home page wizard button
+  const btnHomeSetupWizard = document.getElementById('btn-home-setup-wizard');
+  if (btnHomeSetupWizard) {
+    btnHomeSetupWizard.addEventListener('click', async () => {
+      console.log('Home wizard button clicked - creating persona and opening wizard');
+
+      try {
+        // Create a placeholder persona
+        const response = await fetch('/api/personas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'New Persona',
+            relationship: '',
+            description: ''
+          })
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          const newPersona = responseData.data; // Extract persona from response
+          console.log('Persona created:', newPersona.id);
+
+          // Reload personas list
+          await loadPersonas();
+
+          // Select the new persona
+          selectedPersonaId = newPersona.id;
+          selectedPersona = newPersona;
+
+          // Update dropdown if it exists
+          if (personaDropdown) {
+            personaDropdown.value = newPersona.id;
+          }
+
+          // Open wizard modal directly
+          console.log('Opening wizard modal...');
+          wizardCurrentStep = 1;
+          updateWizardUI();
+
+          const wizardModalElement = document.getElementById('wizard-modal');
+          if (wizardModalElement) {
+            wizardModalElement.style.display = 'flex';
+            console.log('Wizard opened successfully!');
+          } else {
+            console.error('Wizard modal not found');
+          }
+        } else {
+          console.error('Failed to create persona:', response.status);
+          alert('Unable to start wizard. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Unable to start wizard. Please try again.');
+      }
+    });
+  } else {
+    console.warn('Home wizard button not found in DOM');
+  }
+
   // Wizard modal handlers
   if (setupWizardBtn) {
     setupWizardBtn.addEventListener('click', openWizardModal);
@@ -691,7 +918,10 @@ function openSidebar() {
   if (hamburgerMenu) {
     hamburgerMenu.classList.add('active');
   }
-  
+
+  // Prevent body scroll when sidebar is open (better mobile experience)
+  document.body.style.overflow = 'hidden';
+
   // Update sidebar content
   updateSidebarContent();
 }
@@ -707,6 +937,9 @@ function closeSidebar() {
   if (hamburgerMenu) {
     hamburgerMenu.classList.remove('active');
   }
+
+  // Restore body scroll
+  document.body.style.overflow = '';
 }
 
 // Update sidebar content based on current persona
@@ -917,9 +1150,9 @@ async function loadPersonaDetails(personaId) {
     // Update UI after all data is loaded
     updateContinueSetupButton();
     updateSidebarContent();
-    
-    // Auto-open wizard if incomplete and not snoozed
-    checkAndAutoOpenWizard();
+
+    // Auto-open wizard disabled - wizard now only opens when user clicks button
+    // checkAndAutoOpenWizard();
   } catch (error) {
     console.error('Failed to load persona details:', error);
     showError('Failed to load persona details');
@@ -1276,7 +1509,199 @@ function closeWizardModal() {
 }
 
 // Wizard next step
-function wizardNextStep() {
+// ========================================
+// BREATHING EXERCISE & ACKNOWLEDGMENT FLOW
+// ========================================
+
+// Typing animation for acknowledgment text
+function typeText(element, text, speed = 30) {
+  return new Promise((resolve) => {
+    element.textContent = '';
+    element.style.whiteSpace = 'normal';
+    element.style.borderRight = 'none';
+
+    let index = 0;
+
+    function typeChar() {
+      if (index < text.length) {
+        element.textContent += text.charAt(index);
+        index++;
+        setTimeout(typeChar, speed);
+      } else {
+        resolve();
+      }
+    }
+
+    typeChar();
+  });
+}
+
+// Run breathing exercise with animations
+async function runBreathingExercise() {
+  return new Promise((resolve) => {
+    const breathingScreen = document.getElementById('wizard-breathing-screen');
+    const breathingCircle = document.getElementById('breathing-circle');
+    const breathingInstruction = document.getElementById('breathing-instruction');
+
+    if (!breathingScreen || !breathingCircle || !breathingInstruction) {
+      resolve();
+      return;
+    }
+
+    // Show breathing screen
+    breathingScreen.style.display = 'flex';
+
+    // Breathing cycle: Inhale (4s) → Hold (2s) → Exhale (6s) = 12s total
+    const timeline = [
+      { text: 'Breathe in...', className: 'inhale', duration: 4000 },
+      { text: 'Hold...', className: 'hold', duration: 2000 },
+      { text: 'Breathe out...', className: 'exhale', duration: 6000 }
+    ];
+
+    let currentPhase = 0;
+
+    function runPhase() {
+      if (currentPhase >= timeline.length) {
+        // Breathing complete
+        breathingScreen.style.display = 'none';
+        breathingCircle.className = 'breathing-circle';
+        resolve();
+        return;
+      }
+
+      const phase = timeline[currentPhase];
+      breathingInstruction.textContent = phase.text;
+      breathingCircle.className = 'breathing-circle ' + phase.className;
+
+      setTimeout(() => {
+        currentPhase++;
+        runPhase();
+      }, phase.duration);
+    }
+
+    runPhase();
+  });
+}
+
+// Generate and show AI acknowledgment
+async function showAcknowledgment(question, answer, personaName) {
+  const acknowledgmentScreen = document.getElementById('wizard-acknowledgment-screen');
+  const acknowledgmentText = document.getElementById('acknowledgment-text');
+
+  if (!acknowledgmentScreen || !acknowledgmentText) {
+    return;
+  }
+
+  try {
+    // Call API to generate personalized acknowledgment
+    const response = await fetch('/api/wizard/acknowledgment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: question,
+        answer: answer,
+        personaName: personaName
+      })
+    });
+
+    const data = await response.json();
+    const acknowledgment = data.acknowledgment || 'I hear you. What you\'ve shared holds a lot of meaning.';
+
+    // Show acknowledgment screen
+    acknowledgmentScreen.style.display = 'flex';
+
+    // Type out the acknowledgment text
+    await typeText(acknowledgmentText, acknowledgment, 25);
+
+    // Pause for reading (4 seconds - give them time to absorb it)
+    await new Promise(resolve => setTimeout(resolve, 4000));
+
+    // Hide acknowledgment screen
+    acknowledgmentScreen.style.display = 'none';
+
+  } catch (error) {
+    console.error('Error generating acknowledgment:', error);
+    // Show fallback acknowledgment
+    acknowledgmentScreen.style.display = 'flex';
+    await typeText(acknowledgmentText, 'I hear you. What you\'ve shared holds a lot of meaning.', 25);
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    acknowledgmentScreen.style.display = 'none';
+  }
+}
+
+// Get question text for current step
+function getQuestionForStep(step) {
+  const questionMap = {
+    2: "What's your first name?",
+    3: "Would you mind sharing their first name with me?",
+    4: "Could you tell me about your relationship?",
+    5: "When did they pass away?",
+    6: "If you feel comfortable sharing, how did they pass?",
+    7: "How would you describe your relationship at the time?",
+    8: "What was their sense of humor like?",
+    9: "Can you share a memory that has stayed with you?",
+    10: "Is there anything left unsaid between you?"
+  };
+
+  return questionMap[step] || "";
+}
+
+// Get answer value for current step
+function getAnswerForStep(step) {
+  const answerMap = {
+    2: () => document.getElementById('wizard-user-name')?.value.trim() || '',
+    3: () => document.getElementById('wizard-first-name')?.value.trim() || '',
+    4: () => document.getElementById('wizard-relationship')?.value.trim() || '',
+    5: () => document.getElementById('wizard-date-passed')?.value.trim() || '',
+    6: () => document.getElementById('wizard-circumstances')?.value.trim() || '',
+    7: () => document.getElementById('wizard-relationship-end')?.value.trim() || '',
+    8: () => document.getElementById('wizard-humor')?.value.trim() || '',
+    9: () => document.getElementById('wizard-memories')?.value.trim() || '',
+    10: () => document.getElementById('wizard-conversations')?.value.trim() || ''
+  };
+
+  const getAnswer = answerMap[step];
+  return getAnswer ? getAnswer() : '';
+}
+
+// Modified wizard next step with breathing + acknowledgment flow
+async function wizardNextStep() {
+  // Steps that should get breathing + acknowledgment (skip step 1 welcome, skip step 11 final)
+  const shouldShowBreathingAndAcknowledgment = wizardCurrentStep >= 2 && wizardCurrentStep <= 10;
+
+  if (shouldShowBreathingAndAcknowledgment) {
+    const currentAnswer = getAnswerForStep(wizardCurrentStep);
+    const currentQuestion = getQuestionForStep(wizardCurrentStep);
+    const firstName = document.getElementById('wizard-first-name')?.value.trim() || '';
+
+    // Only show breathing + acknowledgment if user actually answered something
+    if (currentAnswer && currentAnswer.length > 0) {
+      // Hide current step
+      const currentStepEl = document.getElementById(`wizard-step-${wizardCurrentStep}`);
+      if (currentStepEl) {
+        currentStepEl.style.display = 'none';
+      }
+
+      // Hide navigation buttons during transition
+      const wizardNav = document.querySelector('.wizard-navigation');
+      if (wizardNav) {
+        wizardNav.style.display = 'none';
+      }
+
+      // Run breathing exercise
+      await runBreathingExercise();
+
+      // Show acknowledgment (calls API in background)
+      await showAcknowledgment(currentQuestion, currentAnswer, firstName);
+
+      // Show navigation buttons again
+      if (wizardNav) {
+        wizardNav.style.display = 'flex';
+      }
+    }
+  }
+
+  // Advance to next step
   if (wizardCurrentStep < WIZARD_TOTAL_STEPS) {
     wizardCurrentStep++;
     updateWizardUI();
@@ -1324,17 +1749,18 @@ const wizardAcknowledgments = {
 function getStepProgressText(step) {
   const progressTexts = {
     1: '', // Step 1 doesn't show progress text
-    2: "Learning your lost one's name...Next: Your Relationship",
-    3: "Your Relationship...Next: Date of Passing",
-    4: "Date of Passing...Next: Reason for Loss",
-    5: "Reason for loss...Next: Relationship Dynamics",
-    6: "Relationship Dynamics...Next: Their Humor",
-    7: "Their Humor...Next: Share a Memory",
-    8: "Sharing a Memory...Next: Things Left Unsaid",
-    9: "Things Left Unsaid...Next: Wrapping Up",
-    10: "Almost there..."
+    2: "Getting to know you...Next: Their Name",
+    3: "Learning their name...Next: Your Relationship",
+    4: "Your Relationship...Next: Date of Passing",
+    5: "Date of Passing...Next: Reason for Loss",
+    6: "Reason for loss...Next: Relationship Dynamics",
+    7: "Relationship Dynamics...Next: Their Humor",
+    8: "Their Humor...Next: Share a Memory",
+    9: "Sharing a Memory...Next: Things Left Unsaid",
+    10: "Things Left Unsaid...Next: Wrapping Up",
+    11: "Almost there..."
   };
-  
+
   return progressTexts[step] || '';
 }
 
@@ -1347,12 +1773,21 @@ function updateWizardUI() {
     }
   }
   
-  // Special handling for Step 3: Relationship with name insertion
+  // Special handling for Step 3: Ask for loved one's name (use user's name in acknowledgment)
   if (wizardCurrentStep === 3) {
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const userName = document.getElementById('wizard-user-name')?.value.trim() || '';
     const acknowledgmentEl = document.getElementById('step-3-acknowledgment');
-    const questionEl = document.getElementById('step-3-question');
-    
+
+    if (acknowledgmentEl && userName) {
+      acknowledgmentEl.textContent = `Thank you, ${userName}. I appreciate you being here and sharing this with me.`;
+      acknowledgmentEl.style.display = 'block';
+    }
+  } else if (wizardCurrentStep === 4) {
+    // Special handling for Step 4: Relationship with name insertion
+    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const acknowledgmentEl = document.getElementById('step-4-acknowledgment');
+    const questionEl = document.getElementById('step-4-question');
+
     if (acknowledgmentEl) {
       acknowledgmentEl.textContent = `Thank you for sharing that with me. ${firstName}.`;
       acknowledgmentEl.style.display = 'block';
@@ -1361,17 +1796,17 @@ function updateWizardUI() {
       questionEl.textContent = `Could you tell me about your relationship with ${firstName}?`;
       questionEl.style.display = 'block';
     }
-  } else if (wizardCurrentStep === 4) {
-    // Special handling for Step 4: Date of Passing with name insertion and relationship acknowledgment
+  } else if (wizardCurrentStep === 5) {
+    // Special handling for Step 5: Date of Passing with name insertion and relationship acknowledgment
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
     const relationship = document.getElementById('wizard-relationship')?.value.trim() || 'loved one';
-    const acknowledgmentEl = document.getElementById('step-4-acknowledgment');
-    const questionEl = document.getElementById('step-4-question');
-    
+    const acknowledgmentEl = document.getElementById('step-5-acknowledgment');
+    const questionEl = document.getElementById('step-5-question');
+
     if (acknowledgmentEl) {
       const relationshipLower = relationship.toLowerCase();
       const isPhrasePattern = /\b(my|was|is|he|she|they|the)\b/i.test(relationship);
-      
+
       let acknowledgmentText;
       if (isPhrasePattern) {
         acknowledgmentText = `I appreciate you sharing that. I know that this is a profound and unique kind of loss.`;
@@ -1379,7 +1814,7 @@ function updateWizardUI() {
         const article = /^[aeiou]/i.test(relationshipLower) ? 'an' : 'a';
         acknowledgmentText = `I appreciate you sharing that. I know that losing ${article} ${relationshipLower} is a profound and unique kind of loss.`;
       }
-      
+
       acknowledgmentEl.textContent = acknowledgmentText;
       acknowledgmentEl.style.display = 'block';
     }
@@ -1387,22 +1822,22 @@ function updateWizardUI() {
       questionEl.textContent = `Would you feel comfortable telling me when ${firstName} passed away?`;
       questionEl.style.display = 'block';
     }
-  } else if (wizardCurrentStep === 5) {
-    // Special handling for Step 5: Circumstances with name insertion and date acknowledgment
+  } else if (wizardCurrentStep === 6) {
+    // Special handling for Step 6: Circumstances with name insertion and date acknowledgment
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
     const datePassed = document.getElementById('wizard-date-passed')?.value.trim() || '';
-    const acknowledgmentEl = document.getElementById('step-5-acknowledgment');
-    const questionEl = document.getElementById('step-5-question');
+    const acknowledgmentEl = document.getElementById('step-6-acknowledgment');
+    const questionEl = document.getElementById('step-6-question');
     const skipNamePlaceholder = document.getElementById('skip-name-placeholder');
-    
+
     if (acknowledgmentEl) {
       const isNearHolidays = isDateNearHolidays(datePassed);
       let acknowledgmentText = 'Thank you for sharing that. I realize that specific date can hold a significant weight.';
-      
+
       if (isNearHolidays) {
         acknowledgmentText = 'Thank you for sharing that. I realize that specific date can hold a significant weight, especially during the holidays.';
       }
-      
+
       acknowledgmentEl.textContent = acknowledgmentText;
       acknowledgmentEl.style.display = 'block';
     }
@@ -1413,82 +1848,82 @@ function updateWizardUI() {
     if (skipNamePlaceholder) {
       skipNamePlaceholder.textContent = firstName;
     }
-  } else if (wizardCurrentStep === 6) {
-    // Special handling for Step 6: Relationship Dynamics with name and pronoun insertion
+  } else if (wizardCurrentStep === 7) {
+    // Special handling for Step 7: Relationship Dynamics with name and pronoun insertion
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
     const relationship = document.getElementById('wizard-relationship')?.value.trim().toLowerCase() || '';
-    const questionEl = document.getElementById('step-6-question');
-    
+    const questionEl = document.getElementById('step-7-question');
+
     // Determine pronoun based on relationship
     let pronoun = 'their';
     const maleRelationships = ['father', 'dad', 'grandfather', 'grandpa', 'brother', 'uncle', 'son', 'husband', 'boyfriend', 'he was', 'he is'];
     const femaleRelationships = ['mother', 'mom', 'grandmother', 'grandma', 'sister', 'aunt', 'daughter', 'wife', 'girlfriend', 'she was', 'she is'];
-    
+
     if (maleRelationships.some(rel => relationship.includes(rel))) {
       pronoun = 'his';
     } else if (femaleRelationships.some(rel => relationship.includes(rel))) {
       pronoun = 'her';
     }
-    
+
     if (questionEl) {
       questionEl.textContent = `May I ask you, what was the nature of your relationship with ${firstName} like in the time leading up to ${pronoun} passing?`;
       questionEl.style.display = 'block';
     }
-  } else if (wizardCurrentStep === 7) {
-    // Special handling for Step 7: Humor with pronoun insertion
+  } else if (wizardCurrentStep === 8) {
+    // Special handling for Step 8: Humor with pronoun insertion
     const relationship = document.getElementById('wizard-relationship')?.value.trim().toLowerCase() || '';
-    const questionEl = document.getElementById('step-7-question');
-    
+    const questionEl = document.getElementById('step-8-question');
+
     // Determine pronoun based on relationship
     let pronoun = 'their';
     const maleRelationships = ['father', 'dad', 'grandfather', 'grandpa', 'brother', 'uncle', 'son', 'husband', 'boyfriend', 'he was', 'he is'];
     const femaleRelationships = ['mother', 'mom', 'grandmother', 'grandma', 'sister', 'aunt', 'daughter', 'wife', 'girlfriend', 'she was', 'she is'];
-    
+
     if (maleRelationships.some(rel => relationship.includes(rel))) {
       pronoun = 'his';
     } else if (femaleRelationships.some(rel => relationship.includes(rel))) {
       pronoun = 'her';
     }
-    
+
     if (questionEl) {
       questionEl.textContent = `One of the things that makes a person unique is their sense of humor. Would you be willing to share what ${pronoun} was like?`;
       questionEl.style.display = 'block';
     }
-  } else if (wizardCurrentStep === 8) {
-    // Special handling for Step 8: Share a Memory with name insertion
+  } else if (wizardCurrentStep === 9) {
+    // Special handling for Step 9: Share a Memory with name insertion
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
-    const questionEl = document.getElementById('step-8-question');
-    
+    const questionEl = document.getElementById('step-9-question');
+
     if (questionEl) {
       questionEl.textContent = `If you feel comfortable, would you share a memory of ${firstName} that feels particularly significant to you? One that, for any reason, has stayed with you.`;
       questionEl.style.display = 'block';
     }
-  } else if (wizardCurrentStep === 9) {
-    // Special handling for Step 9: Things Left Unsaid with name and pronoun insertion
+  } else if (wizardCurrentStep === 10) {
+    // Special handling for Step 10: Things Left Unsaid with name and pronoun insertion
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
     const relationship = document.getElementById('wizard-relationship')?.value.trim().toLowerCase() || '';
-    const questionEl = document.getElementById('step-9-question');
-    
+    const questionEl = document.getElementById('step-10-question');
+
     // Determine pronoun based on relationship (object form: him/her/them)
     let pronoun = 'them';
     const maleRelationships = ['father', 'dad', 'grandfather', 'grandpa', 'brother', 'uncle', 'son', 'husband', 'boyfriend', 'he was', 'he is'];
     const femaleRelationships = ['mother', 'mom', 'grandmother', 'grandma', 'sister', 'aunt', 'daughter', 'wife', 'girlfriend', 'she was', 'she is'];
-    
+
     if (maleRelationships.some(rel => relationship.includes(rel))) {
       pronoun = 'him';
     } else if (femaleRelationships.some(rel => relationship.includes(rel))) {
       pronoun = 'her';
     }
-    
+
     if (questionEl) {
       questionEl.textContent = `As you hold ${firstName} in your thoughts, do any feelings surface about things left unsaid — anything you wish you could have expressed to ${pronoun} or perhaps heard from ${pronoun}?`;
       questionEl.style.display = 'block';
     }
-  } else if (wizardCurrentStep === 10) {
-    // Special handling for Step 10: Wrapping Up with name insertion
+  } else if (wizardCurrentStep === 11) {
+    // Special handling for Step 11: Wrapping Up with name insertion
     const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'this person';
-    const acknowledgmentEl = document.getElementById('step-10-acknowledgment');
-    
+    const acknowledgmentEl = document.getElementById('step-11-acknowledgment');
+
     if (acknowledgmentEl) {
       acknowledgmentEl.textContent = `You opened up about moments and feelings that aren't easy to revisit. The picture you painted of ${firstName} is full of warmth and depth. It's okay to take a breath here — you've done something tender and important.`;
       acknowledgmentEl.style.display = 'block';
@@ -1603,6 +2038,7 @@ async function handleWizardSubmit(event) {
   
   // Collect wizard inputs
   const wizardInputs = {
+    user_name: document.getElementById('wizard-user-name').value.trim(),
     first_name: document.getElementById('wizard-first-name').value.trim(),
     relationship: document.getElementById('wizard-relationship').value.trim(),
     date_passed: document.getElementById('wizard-date-passed').value.trim(),

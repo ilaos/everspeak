@@ -58,7 +58,13 @@ const corsOptions = {
       /\.replit\.app$/,
       /\.replit\.dev$/,
       /^https:\/\/.*\.replit\.app$/,
-      /^https:\/\/.*\.replit\.dev$/
+      /^https:\/\/.*\.replit\.dev$/,
+      /\.ngrok-free\.app$/,
+      /\.ngrok-free\.dev$/,
+      /\.ngrok\.io$/,
+      /^https:\/\/.*\.ngrok-free\.app$/,
+      /^https:\/\/.*\.ngrok-free\.dev$/,
+      /^https:\/\/.*\.ngrok\.io$/
     ];
 
     const isAllowed = allowed.some(rule =>

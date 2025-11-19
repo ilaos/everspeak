@@ -815,6 +815,81 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
     }
   },
 
+  // POST /api/wizard/acknowledgment - Generate personalized acknowledgment
+  async generateAcknowledgment(req, res, next) {
+    try {
+      const { question, answer, personaName } = req.body;
+
+      // Validate required fields
+      if (!question || typeof question !== 'string' || question.trim().length === 0) {
+        throw new ValidationError('Validation failed', [{
+          field: 'question',
+          message: 'Question is required and must be a non-empty string'
+        }]);
+      }
+
+      if (!answer || typeof answer !== 'string' || answer.trim().length === 0) {
+        throw new ValidationError('Validation failed', [{
+          field: 'answer',
+          message: 'Answer is required and must be a non-empty string'
+        }]);
+      }
+
+      // Generate personalized acknowledgment using OpenAI
+      const prompt = `You are a compassionate grief therapist helping someone process the loss of a loved one. They just answered a question about their loved one during an onboarding process.
+
+Question they were asked: "${question}"
+Their answer: "${answer}"
+${personaName ? `Their loved one's name: ${personaName}` : ''}
+
+Generate a warm, genuine, therapeutic acknowledgment of their answer. The acknowledgment should:
+- Be 1-3 sentences long
+- Feel personal and empathetic, not generic
+- Acknowledge the emotional weight of what they shared
+- Reference specific details from their answer when appropriate
+- Use their loved one's name naturally if provided
+- Feel like it's from a caring human therapist, not a robot
+- Be gentle, honoring the sacred nature of grief
+
+DO NOT:
+- Say "thank you for sharing" (too formal/clinical)
+- Use overly flowery or poetic language
+- Make assumptions beyond what they said
+- Give advice or try to fix anything
+- Use generic therapy-speak
+
+Just acknowledge what they shared with warmth and presence.`;
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 150
+      });
+
+      const acknowledgment = completion.choices[0].message.content.trim();
+
+      res.status(200).json({
+        success: true,
+        acknowledgment: acknowledgment,
+        message: 'Acknowledgment generated successfully'
+      });
+    } catch (error) {
+      // If OpenAI fails, provide a graceful fallback
+      if (error.name === 'ValidationError') {
+        next(error);
+      } else {
+        console.error('AI acknowledgment generation failed:', error);
+        // Return a gentle generic acknowledgment as fallback
+        res.status(200).json({
+          success: true,
+          acknowledgment: 'I hear you. What you\'ve shared holds a lot of meaning.',
+          message: 'Acknowledgment generated (fallback)'
+        });
+      }
+    }
+  },
+
   // POST /api/personas/:id/boost - Analyze persona and get improvement recommendations
   async boostPersona(req, res, next) {
     try {

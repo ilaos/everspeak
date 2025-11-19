@@ -674,6 +674,53 @@ router.post('/personas/:id/wizard', personaController.processWizard);
 
 /**
  * @swagger
+ * /api/wizard/acknowledgment:
+ *   post:
+ *     summary: Generate personalized acknowledgment
+ *     description: Generate AI-powered acknowledgment based on user's wizard answer
+ *     tags: [Wizard]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - question
+ *               - answer
+ *             properties:
+ *               question:
+ *                 type: string
+ *                 description: The wizard question that was asked
+ *                 example: "What was their sense of humor like?"
+ *               answer:
+ *                 type: string
+ *                 description: The user's answer to the question
+ *                 example: "He always told dad jokes and loved making people laugh"
+ *               personaName:
+ *                 type: string
+ *                 description: Optional name of the persona
+ *                 example: "Jimmy"
+ *     responses:
+ *       200:
+ *         description: Acknowledgment generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 acknowledgment:
+ *                   type: string
+ *                   example: "That's beautiful. Dad jokes have a way of sticking with us - they're simple, but they carry so much warmth. It sounds like Jimmy knew how to bring lightness into a room."
+ *       400:
+ *         description: Validation error
+ */
+router.post('/wizard/acknowledgment', personaController.generateAcknowledgment);
+
+/**
+ * @swagger
  * /api/personas/{id}/boost:
  *   post:
  *     summary: Analyze persona and get improvement recommendations

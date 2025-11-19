@@ -77,6 +77,44 @@ A comprehensive 7-component system designed to help users quickly create accurat
    - Gentle, grounding, non-prescriptive tone
    - Full CRUD operations for entries
 
+### Therapeutic Wizard Experience
+A compassionate 11-step guided wizard that transforms persona creation into a therapeutic grief processing experience:
+
+**Therapeutic Elements:**
+- **User Personalization** - Collects user's first name early in the process for personalized interactions throughout the app
+- **Guided Breathing Exercises** - Calming breathing prompts between emotionally challenging questions
+  - 4-second inhale → 2-second hold → 6-second exhale rhythm
+  - Animated breathing circle with visual guidance
+  - Timed pauses to create space for emotional processing
+- **AI-Powered Acknowledgments** - Personalized, empathetic responses after each answer using OpenAI
+  - Context-aware acknowledgments based on user's actual responses
+  - Smooth typing animation for natural, therapeutic pacing
+  - 4-second reading pause to allow emotional absorption
+  - Replaces generic acknowledgments with truly personalized validation
+- **Mobile-Optimized UX**
+  - Auto-hiding bottom tab bar on scroll for distraction-free experience
+  - Proper spacing to prevent UI elements from blocking content
+  - Smooth transitions and animations for calming user experience
+  - Responsive design for mobile grief processing on-the-go
+
+**Wizard Steps:**
+1. Welcome and introduction to the process
+2. User's first name (for personalization)
+3. Loved one's first name
+4. Relationship to loved one
+5. Date of passing
+6. Favorite memory (with breathing exercise + AI acknowledgment)
+7. How they made you feel (with breathing exercise + AI acknowledgment)
+8. Physical characteristics (with breathing exercise + AI acknowledgment)
+9. Something they taught you (with breathing exercise + AI acknowledgment)
+10. What you miss most (with breathing exercise + AI acknowledgment)
+11. Final message to them (with breathing exercise + AI acknowledgment)
+
+**Backend Support:**
+- `POST /api/wizard/acknowledgment` - Generates personalized AI acknowledgments
+- OpenAI integration for context-aware empathetic responses
+- Stores user's name in wizard inputs for future personalization
+
 - **Organized Folder Structure**:
   ```
   /src

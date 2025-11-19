@@ -1,3 +1,629 @@
 {
-  "personas": []
+  "personas": [
+    {
+      "id": "ac17bea1-6be9-4f88-bd6d-9bc6c26b12a8",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:04:59.580Z",
+      "updated_at": "2025-11-19T04:04:59.580Z"
+    },
+    {
+      "id": "9af80ad7-2ab0-4deb-9433-c1cbc51eac8e",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:06:08.110Z",
+      "updated_at": "2025-11-19T04:06:08.110Z"
+    },
+    {
+      "id": "a7204949-0c23-4880-8aa4-be83845cd1f9",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:06:50.622Z",
+      "updated_at": "2025-11-19T04:06:50.622Z"
+    },
+    {
+      "id": "afd04b5e-e02b-4981-8787-9cc891149d15",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:10:44.748Z",
+      "updated_at": "2025-11-19T04:10:44.748Z"
+    },
+    {
+      "id": "1d4f1ed5-92fa-45e1-9d43-b0fcabb0c433",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:30:44.366Z",
+      "updated_at": "2025-11-19T04:30:44.366Z"
+    },
+    {
+      "id": "92bbdede-8497-4dd2-ad5f-c639d524dd23",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:40:15.907Z",
+      "updated_at": "2025-11-19T04:40:15.907Z"
+    },
+    {
+      "id": "bdc88f7e-7569-4cdd-b25d-8e4f35b5169f",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:46:56.552Z",
+      "updated_at": "2025-11-19T04:46:56.552Z"
+    },
+    {
+      "id": "4a1852ad-617d-46b4-9946-8cb23df8b796",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:51:23.089Z",
+      "updated_at": "2025-11-19T04:51:23.089Z"
+    },
+    {
+      "id": "b032a612-90a3-49bf-b8bf-2307b87fdba9",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T04:55:10.393Z",
+      "updated_at": "2025-11-19T04:55:10.393Z"
+    },
+    {
+      "id": "9c85e179-d61e-4c33-8aab-a2b403c4c221",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T19:47:36.298Z",
+      "updated_at": "2025-11-19T19:47:36.298Z"
+    },
+    {
+      "id": "fde09db1-0b9b-47b5-b2ec-7b51636cd6fe",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T19:48:25.631Z",
+      "updated_at": "2025-11-19T19:48:25.631Z"
+    },
+    {
+      "id": "6ae1ceb5-d68f-4b87-944f-8f04dfc05a64",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T20:16:41.814Z",
+      "updated_at": "2025-11-19T20:16:41.814Z"
+    },
+    {
+      "id": "b533b621-0b94-47dd-a39a-3d68680f925b",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T20:22:29.516Z",
+      "updated_at": "2025-11-19T20:22:29.516Z"
+    },
+    {
+      "id": "d231c954-8b09-4fec-ad51-ec216cd7cf4c",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T20:38:59.313Z",
+      "updated_at": "2025-11-19T20:38:59.313Z"
+    },
+    {
+      "id": "75aeadc6-d15f-4d11-989f-20fbbb641ac4",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T20:42:05.792Z",
+      "updated_at": "2025-11-19T20:42:05.792Z"
+    },
+    {
+      "id": "89ee4df2-01d0-4b7e-8974-41f6698a7bba",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T20:44:05.539Z",
+      "updated_at": "2025-11-19T20:44:05.539Z"
+    },
+    {
+      "id": "d39e9287-7215-44ad-b891-c95f84324178",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T20:48:53.224Z",
+      "updated_at": "2025-11-19T20:48:53.224Z"
+    },
+    {
+      "id": "fb710a82-3fe0-4650-8bf1-5a3a6ebdd2f7",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T20:53:22.236Z",
+      "updated_at": "2025-11-19T20:53:22.236Z"
+    },
+    {
+      "id": "d3154f43-d5e0-4f6d-b83c-2ebc58b5699a",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T20:58:17.686Z",
+      "updated_at": "2025-11-19T20:58:17.686Z"
+    },
+    {
+      "id": "57d3af9a-7bb5-4840-9455-ef66eeb6da89",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T21:00:31.855Z",
+      "updated_at": "2025-11-19T21:00:31.855Z"
+    },
+    {
+      "id": "629265ee-33e5-4e39-8ec0-c4a18a1ee252",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T21:04:32.871Z",
+      "updated_at": "2025-11-19T21:04:32.871Z"
+    },
+    {
+      "id": "3a1367eb-9caf-482a-acef-dfad307cfcee",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T21:06:50.935Z",
+      "updated_at": "2025-11-19T21:06:50.935Z"
+    },
+    {
+      "id": "71e1e989-2efe-4091-b544-4237fb3f7418",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T21:10:09.856Z",
+      "updated_at": "2025-11-19T21:10:09.856Z"
+    },
+    {
+      "id": "1431bcd9-5cf8-4c11-9c20-ed87ed78b9ea",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T21:18:44.491Z",
+      "updated_at": "2025-11-19T21:18:44.491Z"
+    },
+    {
+      "id": "a5dfd003-46a9-4857-a433-1df488656a62",
+      "name": "New Persona",
+      "relationship": "",
+      "description": "",
+      "memories": [],
+      "settings": {
+        "default_tone_mode": "auto",
+        "humor_level": 3,
+        "honesty_level": 3,
+        "sentimentality_level": 3,
+        "energy_level": 3,
+        "advice_level": 2,
+        "boundaries": {
+          "avoid_regret_spirals": true,
+          "no_paranormal_language": true,
+          "soften_sensitive_topics": true,
+          "prefer_reassurance": true
+        }
+      },
+      "snapshots": [],
+      "onboarding_context": null,
+      "created_at": "2025-11-19T21:23:22.153Z",
+      "updated_at": "2025-11-19T21:23:22.153Z"
+    }
+  ]
 }

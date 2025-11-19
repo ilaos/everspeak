@@ -836,25 +836,28 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
       }
 
       // Generate personalized acknowledgment using OpenAI
-      const prompt = `You are a compassionate grief therapist helping someone process the loss of a loved one. They just answered a question about their loved one during an onboarding process.
+      const prompt = `You are a compassionate grief therapist helping someone through an onboarding process. They just answered a question.
 
 Question they were asked: "${question}"
 Their answer: "${answer}"
 ${personaName ? `Their loved one's name: ${personaName}` : ''}
 
+Context: Pay attention to what the question is asking. Some questions are about the user themselves (like their name), and some are about their loved one. Respond appropriately based on what they actually shared.
+
 Generate a warm, genuine, therapeutic acknowledgment of their answer. The acknowledgment should:
 - Be 1-3 sentences long
 - Feel personal and empathetic, not generic
-- Acknowledge the emotional weight of what they shared
+- Acknowledge what they actually shared (about themselves OR about their loved one, based on the question)
 - Reference specific details from their answer when appropriate
-- Use their loved one's name naturally if provided
+- Use their loved one's name naturally if provided and relevant
 - Feel like it's from a caring human therapist, not a robot
-- Be gentle, honoring the sacred nature of grief
+- Be gentle and warm
 
 DO NOT:
 - Say "thank you for sharing" (too formal/clinical)
 - Use overly flowery or poetic language
 - Make assumptions beyond what they said
+- Confuse the user's information with their loved one's information
 - Give advice or try to fix anything
 - Use generic therapy-speak
 

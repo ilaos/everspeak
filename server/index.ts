@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
@@ -12,6 +13,16 @@ import { errorHandler } from '../src/utils/errorHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Ensure upload directories exist
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+const onboardingUploadsDir = path.join(uploadsDir, 'onboarding');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+if (!fs.existsSync(onboardingUploadsDir)) {
+  fs.mkdirSync(onboardingUploadsDir, { recursive: true });
+}
 
 const app = express();
 
@@ -49,12 +60,17 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 // --- FIXED CORS SECTION ---
 const corsOptions = {
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
 
     const allowed = [
       'http://localhost:3000',
       'http://localhost:5000',
+      'http://localhost:8081',
+      'http://localhost:19006',
+      'http://165.22.44.109:3000',
+      'http://165.22.44.109',
       /\.replit\.app$/,
       /\.replit\.dev$/,
       /^https:\/\/.*\.replit\.app$/,
@@ -64,7 +80,10 @@ const corsOptions = {
       /\.ngrok\.io$/,
       /^https:\/\/.*\.ngrok-free\.app$/,
       /^https:\/\/.*\.ngrok-free\.dev$/,
-      /^https:\/\/.*\.ngrok\.io$/
+      /^https:\/\/.*\.ngrok\.io$/,
+      /^exp:\/\/.*$/,  // Expo development
+      /\.expo\.dev$/,
+      /^https:\/\/.*\.expo\.dev$/,
     ];
 
     const isAllowed = allowed.some(rule =>
@@ -79,15 +98,16 @@ const corsOptions = {
   credentials: true,
 };
 
-// Rate limiter
+// Needed for reverse proxy (DigitalOcean, Replit, etc.)
+app.set('trust proxy', 1);
+
+// Rate limiter - disable all validation to avoid ERR_ERL_PERMISSIVE_TRUST_PROXY
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 100,
   message: 'Too many requests, please try again later.',
+  validate: false, // Disable all validation
 });
-
-// Needed for Replit's reverse proxy
-app.set('trust proxy', true);
 
 app.use(morgan('dev'));
 app.use(cors(corsOptions));

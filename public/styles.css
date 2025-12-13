@@ -3717,6 +3717,7 @@ button[type="submit"]:active {
   color: #FFFFFF;
   margin-bottom: 12px;
   font-family: 'Outfit', sans-serif;
+  line-height: 1.1;
 }
 
 .home-subtitle {

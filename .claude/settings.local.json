@@ -7,7 +7,12 @@
       "Bash(git restore:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(.gitignore)"
+      "Bash(.gitignore)",
+      "Bash(git push)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(curl:*)",
+      "Bash(where:*)"
     ],
     "deny": [],
     "ask": []

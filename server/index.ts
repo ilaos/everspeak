@@ -71,6 +71,7 @@ const corsOptions = {
       'http://localhost:19006',
       'http://165.22.44.109:3000',
       'http://165.22.44.109',
+      'https://everspeak.almaseo.com',
       /\.replit\.app$/,
       /\.replit\.dev$/,
       /^https:\/\/.*\.replit\.app$/,

@@ -2255,33 +2255,62 @@ async function handleVoiceRecording() {
 
 // Start voice recording
 async function startVoiceRecording() {
+  // Check if mediaDevices is available
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showVoiceStatus('Voice recording is not supported in this browser.', 'error');
+    return;
+  }
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    
+
     mediaRecorder = new MediaRecorder(stream);
     audioChunks = [];
-    
+
     mediaRecorder.addEventListener('dataavailable', (event) => {
       audioChunks.push(event.data);
     });
-    
+
     mediaRecorder.addEventListener('stop', async () => {
       const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
       await transcribeAudio(audioBlob);
-      
+
       // Stop all tracks
       stream.getTracks().forEach(track => track.stop());
     });
-    
+
     mediaRecorder.start();
     isRecording = true;
-    
+
     // Update UI
     voiceRecordBtn.classList.add('recording');
     showVoiceStatus('Recording... Click again to stop', 'info');
   } catch (error) {
     console.error('Failed to start recording:', error);
-    showVoiceStatus('Could not access microphone. Please check permissions.', 'error');
+
+    // Provide specific error messages based on error type
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+      if (isMobile) {
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isIOS) {
+          showVoiceStatus('Microphone access denied. Go to Settings > Safari > Microphone to enable.', 'error');
+        } else {
+          showVoiceStatus('Microphone access denied. Tap the lock icon in the address bar to enable.', 'error');
+        }
+      } else {
+        showVoiceStatus('Microphone access denied. Click the camera icon in your address bar to enable.', 'error');
+      }
+    } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+      showVoiceStatus('No microphone found.', 'error');
+    } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+      showVoiceStatus('Microphone is in use by another app.', 'error');
+    } else if (error.name === 'SecurityError') {
+      showVoiceStatus('Microphone requires HTTPS connection.', 'error');
+    } else {
+      showVoiceStatus('Could not access microphone: ' + error.message, 'error');
+    }
   }
 }
 
@@ -2369,33 +2398,63 @@ async function handleWizardVoiceRecording() {
 
 // Start wizard voice recording
 async function startWizardVoiceRecording() {
+  // Check if mediaDevices is available
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showError('Voice recording is not supported in this browser. Please try Chrome or Safari.');
+    return;
+  }
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    
+
     wizardMediaRecorder = new MediaRecorder(stream);
     wizardAudioChunks = [];
-    
+
     wizardMediaRecorder.addEventListener('dataavailable', (event) => {
       wizardAudioChunks.push(event.data);
     });
-    
+
     wizardMediaRecorder.addEventListener('stop', async () => {
       const audioBlob = new Blob(wizardAudioChunks, { type: 'audio/webm' });
       await transcribeWizardAudio(audioBlob);
-      
+
       // Stop all tracks
       stream.getTracks().forEach(track => track.stop());
     });
-    
+
     wizardMediaRecorder.start();
     isWizardRecording = true;
-    
+
     // Update UI
     wizardVoiceBtn.classList.add('recording');
     wizardVoiceBtn.title = 'Recording... Click to stop';
   } catch (error) {
     console.error('Failed to start wizard recording:', error);
-    showError('Could not access microphone. Please check permissions.');
+
+    // Provide specific error messages based on error type
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+      if (isMobile) {
+        // Mobile-specific instructions
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isIOS) {
+          showError('Microphone access denied. Please go to Settings > Safari > Microphone, and allow access for this site. Then refresh the page.');
+        } else {
+          showError('Microphone access denied. Please tap the lock icon in your browser\'s address bar, enable Microphone, and refresh the page.');
+        }
+      } else {
+        showError('Microphone access denied. Please click the camera/microphone icon in your browser\'s address bar to enable access.');
+      }
+    } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+      showError('No microphone found. Please connect a microphone and try again.');
+    } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+      showError('Microphone is in use by another application. Please close other apps using the microphone and try again.');
+    } else if (error.name === 'SecurityError') {
+      showError('Microphone access requires a secure connection (HTTPS). Please make sure you\'re accessing this site via HTTPS.');
+    } else {
+      showError('Could not access microphone: ' + error.message);
+    }
   }
 }
 

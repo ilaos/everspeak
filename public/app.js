@@ -1777,7 +1777,13 @@ function updateWizardUI() {
   for (let i = 1; i <= WIZARD_TOTAL_STEPS; i++) {
     const step = document.getElementById(`wizard-step-${i}`);
     if (step) {
-      step.style.display = i === wizardCurrentStep ? 'block' : 'none';
+      if (i === wizardCurrentStep) {
+        step.style.display = 'block';
+        step.classList.add('active');
+      } else {
+        step.style.display = 'none';
+        step.classList.remove('active');
+      }
     }
   }
   

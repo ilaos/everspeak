@@ -714,6 +714,8 @@ function setupEventListeners() {
           const wizardModalElement = document.getElementById('wizard-modal');
           if (wizardModalElement) {
             wizardModalElement.style.display = 'flex';
+            // Add visible class after a brief delay for CSS transition
+            setTimeout(() => wizardModalElement.classList.add('visible'), 10);
             console.log('Wizard opened successfully!');
           } else {
             console.error('Wizard modal not found');
@@ -1485,6 +1487,8 @@ function openWizardModal() {
   updateWizardUI();
   if (wizardModal) {
     wizardModal.style.display = 'flex';
+    // Add visible class after a brief delay for CSS transition
+    setTimeout(() => wizardModal.classList.add('visible'), 10);
   }
 }
 
@@ -1497,9 +1501,13 @@ function closeWizardModal() {
       timestamp: Date.now()
     }));
   }
-  
+
   if (wizardModal) {
-    wizardModal.style.display = 'none';
+    wizardModal.classList.remove('visible');
+    // Wait for fade out transition before hiding
+    setTimeout(() => {
+      wizardModal.style.display = 'none';
+    }, 300);
   }
   if (wizardForm) {
     wizardForm.reset();

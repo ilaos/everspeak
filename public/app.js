@@ -385,7 +385,7 @@ function restoreWizardInputs(progress) {
       if (el.type === 'hidden') {
         const container = el.closest('.voice-recorder-container');
         if (container) {
-          const defaultState = container.querySelector('.voice-recorder-default');
+          const defaultState = container.querySelector('.voice-recorder-ready');
           const completeState = container.querySelector('.voice-recorder-complete');
           const transcriptionText = container.querySelector('.transcription-text');
 
@@ -3136,7 +3136,7 @@ function formatTime(seconds) {
 
 // Show preview state with audio
 function showPreviewState(container, audioBlob) {
-  const defaultState = container.querySelector('.voice-recorder-default');
+  const defaultState = container.querySelector('.voice-recorder-ready');
   const recordingState = container.querySelector('.voice-recorder-recording');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
@@ -3260,7 +3260,7 @@ async function startVoiceRecording(container) {
 
 // Show "Get ready" state while waiting for permission
 function showGetReadyState(container) {
-  const defaultState = container.querySelector('.voice-recorder-default');
+  const defaultState = container.querySelector('.voice-recorder-ready');
   const recordingState = container.querySelector('.voice-recorder-recording');
   const timerEl = container.querySelector('.recording-timer');
 
@@ -3351,7 +3351,7 @@ async function processVoiceRecording(container, audioBlob) {
 
 // Show recording state UI
 function showRecordingState(container) {
-  const defaultState = container.querySelector('.voice-recorder-default');
+  const defaultState = container.querySelector('.voice-recorder-ready');
   const recordingState = container.querySelector('.voice-recorder-recording');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
@@ -3366,7 +3366,7 @@ function showRecordingState(container) {
 
 // Show processing state UI
 function showProcessingState(container) {
-  const defaultState = container.querySelector('.voice-recorder-default');
+  const defaultState = container.querySelector('.voice-recorder-ready');
   const recordingState = container.querySelector('.voice-recorder-recording');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
@@ -3379,7 +3379,7 @@ function showProcessingState(container) {
 
 // Show complete state UI with transcription
 function showCompleteState(container, transcription) {
-  const defaultState = container.querySelector('.voice-recorder-default');
+  const defaultState = container.querySelector('.voice-recorder-ready');
   const recordingState = container.querySelector('.voice-recorder-recording');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
@@ -3396,7 +3396,7 @@ function showCompleteState(container, transcription) {
 
 // Reset to default state
 function resetVoiceRecorder(container) {
-  const defaultState = container.querySelector('.voice-recorder-default');
+  const defaultState = container.querySelector('.voice-recorder-ready');
   const recordingState = container.querySelector('.voice-recorder-recording');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
@@ -3444,7 +3444,7 @@ function updateRecordingTimer(container) {
 
 // Show text fallback input
 function showTextFallback(container) {
-  const defaultState = container.querySelector('.voice-recorder-default');
+  const defaultState = container.querySelector('.voice-recorder-ready');
   const completeState = container.querySelector('.voice-recorder-complete');
   const textFallback = container.querySelector('.text-input-fallback');
   const typeFallbackBtn = container.querySelector('.type-fallback');
@@ -3457,7 +3457,7 @@ function showTextFallback(container) {
 
 // Hide text fallback, show voice recorder
 function hideTextFallback(container) {
-  const defaultState = container.querySelector('.voice-recorder-default');
+  const defaultState = container.querySelector('.voice-recorder-ready');
   const textFallback = container.querySelector('.text-input-fallback');
   const typeFallbackBtn = container.querySelector('.type-fallback');
 

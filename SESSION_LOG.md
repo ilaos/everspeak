@@ -296,3 +296,198 @@ if (bottomTabBar) bottomTabBar.style.display = 'flex';
 2. **CSS transitions require state change** - Can't transition from `display: none`
 3. **Mobile touch events can interfere** - Auto-hide features can steal first tap
 4. **Always add debug logging** - Console logs reveal exactly where flow breaks
+
+---
+
+## Session: December 29, 2025
+
+### Summary
+This session focused on implementing an **audio preview feature** for voice recordings, fixing the **breathing animation**, and debugging **voice recorder issues**.
+
+---
+
+## Features Implemented
+
+### 1. Audio Preview Before Transcription
+**Request:** User wanted to hear their recording before it gets transcribed, with options to re-record or confirm.
+
+**Implementation:**
+- Added new UI state: `.voice-recorder-preview` between recording and processing states
+- Play/pause button with progress bar showing playback position
+- "Re-record" button to discard and start over
+- "Use this recording" button to proceed with transcription
+- WhatsApp-style UI matching existing voice recorder design
+
+**Key Files Modified:**
+- `public/app.js` - Added functions:
+  - `injectPreviewState()` - Dynamically injects preview HTML into voice recorders
+  - `setupPreviewButtons()` - Sets up event listeners for preview controls
+  - `showPreviewState()` - Displays preview with audio blob
+  - `toggleAudioPlayback()` - Play/pause control
+  - `updateAudioProgress()` - Progress bar updates during playback
+  - `resetAudioPlayback()` - Resets player when audio ends
+  - `formatTime()` - Formats seconds as M:SS
+  - `showGetReadyState()` - Shows "Get ready..." before recording starts
+
+- `public/styles.css` - Added styles (lines 3125-3230):
+  - `.voice-recorder-preview` - Container for preview state
+  - `.audio-preview-container` - Holds player controls
+  - `.btn-play-preview` - Play/pause button (circular, brand color)
+  - `.audio-progress-bar` / `.audio-progress-fill` - Progress indicator
+  - `.audio-duration` - Time display
+  - `.btn-re-record-preview` - Secondary action button
+  - `.btn-use-recording` - Primary action button
+
+**Commits:**
+- `812feff` - Add audio preview feature before transcription
+- `b934c26` - Fix voice recorder preview issues
+- `e89a775` - Fix audio preview duration showing 0:00
+
+---
+
+## Fixes Implemented
+
+### 2. Choppy Breathing Animation Fix
+**Problem:** Breathing exercise ball animation became choppy - growing/shrinking in jerky motions instead of smooth transitions.
+
+**Root Cause:** Duplicate CSS animation definitions at the end of `styles.css` (lines 4889-4910) were overriding the original smooth animations:
+- Original: `breathe-in` with scale(0.7→1) and opacity transitions, 4s inhale / 6s exhale
+- Duplicate: `breatheIn` with scale(1→1.4), no opacity, same duration for both
+
+**Solution:** Removed the duplicate animation definitions at lines 4889-4910.
+
+**Commit:** `61daaa0` - Fix choppy breathing animation - remove duplicate CSS
+
+---
+
+### 3. Re-record Button Not Working
+**Problem:** Clicking "Re-record" in preview state didn't show the recorder again.
+
+**Root Cause:** `resetVoiceRecorder()` function didn't include the preview state in its list of elements to hide.
+
+**Solution:** Updated `resetVoiceRecorder()` to:
+- Hide `.voice-recorder-preview` state
+- Clear stored audio blob (`container._audioBlob = null`)
+- Reset audio player (pause and clear source)
+
+**File:** `public/app.js` lines 3348-3383
+
+---
+
+### 4. Recording Starts Immediately After Permission
+**Problem:** As soon as user grants microphone permission, recording starts immediately - user wasn't ready.
+
+**Solution:**
+1. Show "Get ready..." in timer display while requesting permission
+2. Add 800ms delay after permission granted before starting recording
+3. New function `showGetReadyState()` updates UI during this waiting period
+
+**File:** `public/app.js` lines 3180-3187, 3241-3253
+
+---
+
+### 5. Audio Duration Showing 0:00
+**Problem:** Preview player showed 0:00 instead of actual recording duration.
+
+**Root Cause:** `loadedmetadata` event doesn't reliably fire for blob URLs in all browsers.
+
+**Solution:**
+- Immediately show `voiceRecorderSeconds` (the timer value we tracked during recording)
+- Force `audio.load()` to initialize playback
+- Add `canplaythrough` listener as backup for metadata
+- Clean up previous blob URLs to prevent memory leaks
+
+**File:** `public/app.js` lines 3151-3181
+
+---
+
+### 6. Improved Audio Recording Format
+**Problem:** Audio might not play back properly in some browsers.
+
+**Solution:** Added MIME type detection for best compatibility:
+```javascript
+const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+  ? 'audio/webm;codecs=opus'
+  : MediaRecorder.isTypeSupported('audio/webm')
+    ? 'audio/webm'
+    : 'audio/mp4';
+```
+
+Also added `timeslice: 100` to `mediaRecorder.start()` to ensure data chunks are captured.
+
+---
+
+## CRITICAL: Pending Issue - OpenAI API Key Invalid
+
+### Transcription Error: "Error: AppError"
+**Problem:** When user clicks "Use this recording", transcription fails with generic error.
+
+**Server Log Error:**
+```
+'Incorrect API key provided: sk-proj-...JikA. You can find your API key at https://platform.openai.com/account/api-keys.'
+type: 'invalid_request_error'
+code: 'invalid_api_key'
+```
+
+**Root Cause:** The OpenAI API key on the production server is invalid or expired.
+
+**File Affected:** Server reads from `process.env.OPENAI_API_KEY`
+
+**REQUIRED ACTION:**
+1. SSH into server: `ssh everspeak`
+2. Edit .env file: `nano /var/www/everspeak/.env`
+3. Update `OPENAI_API_KEY` with valid key from https://platform.openai.com/api-keys
+4. Restart app: `pm2 restart everspeak`
+
+**Note:** This is NOT a code bug. The transcription controller (`src/controllers/transcriptionController.js`) has the correct polyfill for Node.js 18's File global. The issue is purely the API key.
+
+---
+
+## Audio Playback Status (Needs Testing)
+
+After the latest fix (`e89a775`), the preview should:
+1. Show recorded duration immediately (e.g., "0:06" for 6 seconds)
+2. Allow clicking play button to hear the recording
+3. Show progress bar filling as audio plays
+4. "Re-record" should reset to default state
+5. "Use this recording" will fail until API key is fixed
+
+**To Test:** Refresh the page, record audio, check if duration shows correctly and playback works.
+
+---
+
+## Git Commits This Session
+
+```
+e89a775 Fix audio preview duration showing 0:00
+b934c26 Fix voice recorder preview issues
+61daaa0 Fix choppy breathing animation - remove duplicate CSS
+812feff Add audio preview feature before transcription
+```
+
+---
+
+## Current Production State
+
+- **URL:** https://everspeak.almaseo.com
+- **Audio Preview UI:** Implemented and deployed ✓
+- **Breathing Animation:** Fixed ✓
+- **Voice Transcription:** BLOCKED - waiting for API key fix
+
+---
+
+## Files Changed This Session
+
+| File | Changes |
+|------|---------|
+| `public/app.js` | Added audio preview functions, fixed resetVoiceRecorder, added recording delay |
+| `public/styles.css` | Added .voice-recorder-preview styles, removed duplicate breathing animations |
+
+---
+
+## Next Steps When Resuming
+
+1. **Fix OpenAI API Key** - SSH to server, update `.env`, restart PM2
+2. **Test full voice flow** - Record → Preview → Playback → Transcribe
+3. **Test re-record flow** - Record → Preview → Re-record → Record again
+4. **Continue with any remaining wizard/onboarding work**

@@ -2770,6 +2770,24 @@ button[type="submit"]:active {
   font-style: italic;
 }
 
+.btn-skip-breathing {
+  margin-top: 40px;
+  background: transparent;
+  border: 1px solid #C9BCA8;
+  color: #8b7d6f;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-skip-breathing:hover {
+  background: #f5f0ea;
+  border-color: #a89a8a;
+  color: #5a4f42;
+}
+
 /* Breathing animations - controlled by JavaScript */
 @keyframes breathe-in {
   from {

@@ -1,5 +1,5 @@
 // Everspeak App - Version 2024.12.28.1 (with wizard persistence)
-console.log('📦 App.js loaded - VERSION 2024.12.28.4 - If you see this, cache is cleared!');
+console.log('📦 App.js loaded - VERSION 2024.12.28.6 - If you see this, cache is cleared!');
 
 // State
 let personas = [];
@@ -1741,16 +1741,41 @@ function typeText(element, text, speed = 30) {
   });
 }
 
-// Run breathing exercise with animations
+// Run breathing exercise with animations (skippable)
 async function runBreathingExercise() {
   return new Promise((resolve) => {
     const breathingScreen = document.getElementById('wizard-breathing-screen');
     const breathingCircle = document.getElementById('breathing-circle');
     const breathingInstruction = document.getElementById('breathing-instruction');
+    const skipButton = document.getElementById('btn-skip-breathing');
 
     if (!breathingScreen || !breathingCircle || !breathingInstruction) {
       resolve();
       return;
+    }
+
+    let isSkipped = false;
+    let timeoutId = null;
+
+    // Skip button handler
+    function handleSkip() {
+      isSkipped = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      cleanup();
+      resolve();
+    }
+
+    function cleanup() {
+      breathingScreen.style.display = 'none';
+      breathingCircle.className = 'breathing-circle';
+      if (skipButton) {
+        skipButton.removeEventListener('click', handleSkip);
+      }
+    }
+
+    // Add skip button listener
+    if (skipButton) {
+      skipButton.addEventListener('click', handleSkip);
     }
 
     // Show breathing screen
@@ -1766,10 +1791,10 @@ async function runBreathingExercise() {
     let currentPhase = 0;
 
     function runPhase() {
+      if (isSkipped) return;
+
       if (currentPhase >= timeline.length) {
-        // Breathing complete
-        breathingScreen.style.display = 'none';
-        breathingCircle.className = 'breathing-circle';
+        cleanup();
         resolve();
         return;
       }
@@ -1778,7 +1803,7 @@ async function runBreathingExercise() {
       breathingInstruction.textContent = phase.text;
       breathingCircle.className = 'breathing-circle ' + phase.className;
 
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         currentPhase++;
         runPhase();
       }, phase.duration);
@@ -1869,17 +1894,15 @@ function getAnswerForStep(step) {
   return getAnswer ? getAnswer() : '';
 }
 
-// Modified wizard next step with breathing + acknowledgment flow
+// Modified wizard next step with breathing exercise (skippable)
 async function wizardNextStep() {
-  // Steps that should get breathing + acknowledgment (skip step 1 welcome, skip step 11 final)
-  const shouldShowBreathingAndAcknowledgment = wizardCurrentStep >= 2 && wizardCurrentStep <= 10;
+  // Steps that should get breathing exercise (skip step 1 welcome, skip step 11 final)
+  const shouldShowBreathing = wizardCurrentStep >= 2 && wizardCurrentStep <= 10;
 
-  if (shouldShowBreathingAndAcknowledgment) {
+  if (shouldShowBreathing) {
     const currentAnswer = getAnswerForStep(wizardCurrentStep);
-    const currentQuestion = getQuestionForStep(wizardCurrentStep);
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || '';
 
-    // Only show breathing + acknowledgment if user actually answered something
+    // Only show breathing if user actually answered something
     if (currentAnswer && currentAnswer.length > 0) {
       // Hide current step
       const currentStepEl = document.getElementById(`wizard-step-${wizardCurrentStep}`);
@@ -1887,17 +1910,14 @@ async function wizardNextStep() {
         currentStepEl.style.display = 'none';
       }
 
-      // Hide navigation buttons during transition
+      // Hide navigation buttons during breathing
       const wizardNav = document.querySelector('.wizard-navigation');
       if (wizardNav) {
         wizardNav.style.display = 'none';
       }
 
-      // Run breathing exercise
+      // Run breathing exercise (user can skip)
       await runBreathingExercise();
-
-      // Show acknowledgment (calls API in background)
-      await showAcknowledgment(currentQuestion, currentAnswer, firstName);
 
       // Show navigation buttons again
       if (wizardNav) {

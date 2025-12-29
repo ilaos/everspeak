@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20241228-9">
+  <link rel="stylesheet" href="/styles.css?v=20241229-1">
 </head>
 <body>
   <!-- "First Conversation Reminder" Banner -->
@@ -524,6 +524,29 @@
                 </button>
               </div>
 
+              <!-- Preview state: listen before transcribing -->
+              <div class="voice-recorder-preview" style="display: none;">
+                <div class="audio-preview-container">
+                  <audio class="audio-preview-player"></audio>
+                  <button type="button" class="btn-play-preview">
+                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                  </button>
+                  <div class="audio-progress-bar">
+                    <div class="audio-progress-fill"></div>
+                  </div>
+                  <span class="audio-duration">0:00</span>
+                </div>
+                <div class="preview-actions">
+                  <button type="button" class="btn-re-record-preview">Re-record</button>
+                  <button type="button" class="btn-use-recording">Use this recording</button>
+                </div>
+              </div>
+
               <!-- Processing state -->
               <div class="voice-recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
@@ -594,6 +617,29 @@
                 </button>
               </div>
 
+              <!-- Preview state: listen before transcribing -->
+              <div class="voice-recorder-preview" style="display: none;">
+                <div class="audio-preview-container">
+                  <audio class="audio-preview-player"></audio>
+                  <button type="button" class="btn-play-preview">
+                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                  </button>
+                  <div class="audio-progress-bar">
+                    <div class="audio-progress-fill"></div>
+                  </div>
+                  <span class="audio-duration">0:00</span>
+                </div>
+                <div class="preview-actions">
+                  <button type="button" class="btn-re-record-preview">Re-record</button>
+                  <button type="button" class="btn-use-recording">Use this recording</button>
+                </div>
+              </div>
+
               <div class="voice-recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
                 <p class="processing-text">Transcribing...</p>
@@ -659,6 +705,29 @@
                 </button>
               </div>
 
+              <!-- Preview state: listen before transcribing -->
+              <div class="voice-recorder-preview" style="display: none;">
+                <div class="audio-preview-container">
+                  <audio class="audio-preview-player"></audio>
+                  <button type="button" class="btn-play-preview">
+                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                  </button>
+                  <div class="audio-progress-bar">
+                    <div class="audio-progress-fill"></div>
+                  </div>
+                  <span class="audio-duration">0:00</span>
+                </div>
+                <div class="preview-actions">
+                  <button type="button" class="btn-re-record-preview">Re-record</button>
+                  <button type="button" class="btn-use-recording">Use this recording</button>
+                </div>
+              </div>
+
               <div class="voice-recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
                 <p class="processing-text">Transcribing...</p>
@@ -722,6 +791,23 @@
                     <rect x="6" y="6" width="12" height="12" rx="2"/>
                   </svg>
                 </button>
+              </div>
+
+              <!-- Preview state: listen before transcribing -->
+              <div class="voice-recorder-preview" style="display: none;">
+                <div class="audio-preview-container">
+                  <audio class="audio-preview-player"></audio>
+                  <button type="button" class="btn-play-preview">
+                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                  </button>
+                  <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
+                  <span class="audio-duration">0:00</span>
+                </div>
+                <div class="preview-actions">
+                  <button type="button" class="btn-re-record-preview">Re-record</button>
+                  <button type="button" class="btn-use-recording">Use this recording</button>
+                </div>
               </div>
 
               <div class="voice-recorder-processing" style="display: none;">
@@ -804,6 +890,23 @@
                       <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
                     </svg>
                   </button>
+                </div>
+              </div>
+
+              <!-- Preview state -->
+              <div class="voice-recorder-preview" style="display: none;">
+                <div class="audio-preview-container">
+                  <audio class="audio-preview-player"></audio>
+                  <button type="button" class="btn-play-preview">
+                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                  </button>
+                  <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
+                  <span class="audio-duration">0:00</span>
+                </div>
+                <div class="preview-actions">
+                  <button type="button" class="btn-re-record-preview">Re-record</button>
+                  <button type="button" class="btn-use-recording">Use this recording</button>
                 </div>
               </div>
 
@@ -1166,7 +1269,7 @@
     </button>
   </nav>
 
-  <script src="/wizardEngine.js?v=20241228-1"></script>
-<script src="/app.js?v=20241228-15"></script>
+  <script src="/wizardEngine.js?v=20241229-1"></script>
+<script src="/app.js?v=20241229-1"></script>
 </body>
 </html>

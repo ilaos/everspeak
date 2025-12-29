@@ -1,5 +1,5 @@
 // Everspeak App - Version 2024.12.28.1 (with wizard persistence)
-console.log('📦 App.js loaded - VERSION 2024.12.28.7 - If you see this, cache is cleared!');
+console.log('📦 App.js loaded - VERSION 2024.12.28.8 - If you see this, cache is cleared!');
 
 // State
 let personas = [];
@@ -1766,6 +1766,7 @@ async function runBreathingExercise() {
     }
 
     function cleanup() {
+      breathingScreen.classList.remove('visible');
       breathingScreen.style.display = 'none';
       breathingCircle.className = 'breathing-circle';
       if (skipButton) {
@@ -1780,6 +1781,8 @@ async function runBreathingExercise() {
 
     // Show breathing screen
     breathingScreen.style.display = 'flex';
+    // Must add visible class for opacity transition
+    setTimeout(() => breathingScreen.classList.add('visible'), 10);
 
     // Breathing cycle: Inhale (4s) → Hold (2s) → Exhale (6s) = 12s total
     const timeline = [

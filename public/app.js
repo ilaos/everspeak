@@ -285,6 +285,19 @@ function saveWizardProgress() {
     return;
   }
 
+  // Helper to get value from voice recorder (hidden input) OR text fallback
+  const getFieldValue = (fieldId) => {
+    // First check hidden input (voice recording)
+    const hiddenInput = document.getElementById(fieldId);
+    if (hiddenInput?.value) return hiddenInput.value;
+
+    // Then check text fallback
+    const textFallback = document.querySelector(`[data-testid="input-${fieldId}-text"]`);
+    if (textFallback?.value) return textFallback.value;
+
+    return '';
+  };
+
   const progressData = {
     personaId: selectedPersonaId,
     personaName: selectedPersona?.name || '',
@@ -292,14 +305,14 @@ function saveWizardProgress() {
     timestamp: Date.now(),
     inputs: {
       userName: document.getElementById('wizard-user-name')?.value || '',
-      firstName: document.getElementById('wizard-first-name')?.value || '',
-      relationship: document.getElementById('wizard-relationship')?.value || '',
-      datePassed: document.getElementById('wizard-date-passed')?.value || '',
-      circumstances: document.getElementById('wizard-circumstances')?.value || '',
-      relationshipEnd: document.getElementById('wizard-relationship-end')?.value || '',
-      humor: document.getElementById('wizard-humor')?.value || '',
-      memories: document.getElementById('wizard-memories')?.value || '',
-      conversations: document.getElementById('wizard-conversations')?.value || '',
+      firstName: getFieldValue('wizard-first-name'),
+      relationship: getFieldValue('wizard-relationship'),
+      datePassed: getFieldValue('wizard-date-passed'),
+      circumstances: getFieldValue('wizard-circumstances'),
+      relationshipEnd: getFieldValue('wizard-relationship-end'),
+      humor: getFieldValue('wizard-humor'),
+      memories: getFieldValue('wizard-memories'),
+      conversations: getFieldValue('wizard-conversations'),
     }
   };
 
@@ -358,9 +371,25 @@ function restoreWizardInputs(progress) {
   };
 
   for (const [id, value] of Object.entries(fieldMap)) {
+    if (!value) continue;
+
     const el = document.getElementById(id);
-    if (el && value) {
+    if (el) {
       el.value = value;
+
+      // If it's a hidden input in a voice recorder, show complete state
+      if (el.type === 'hidden') {
+        const container = el.closest('.voice-recorder-container');
+        if (container) {
+          const defaultState = container.querySelector('.voice-recorder-default');
+          const completeState = container.querySelector('.voice-recorder-complete');
+          const transcriptionText = container.querySelector('.transcription-text');
+
+          if (defaultState) defaultState.style.display = 'none';
+          if (completeState) completeState.style.display = 'flex';
+          if (transcriptionText) transcriptionText.textContent = value;
+        }
+      }
     }
   }
 
@@ -1017,7 +1046,10 @@ function setupEventListeners() {
   if (btnUseCorrection) {
     btnUseCorrection.addEventListener('click', useNameCorrection);
   }
-  
+
+  // Initialize WhatsApp-style voice recorders for wizard
+  initializeVoiceRecorders();
+
   // Wizard slider value updates
   const wizardSliders = [
     { slider: 'wizard-humor-level', value: 'wizard-humor-value' },
@@ -2826,6 +2858,351 @@ function hideVoiceNameConfirmation() {
     voiceNameCorrection.value = '';
   }
   detectedNameFromVoice = '';
+}
+
+// ========================================
+// WHATSAPP-STYLE VOICE RECORDER
+// ========================================
+
+// Track active recording per container
+let activeVoiceRecorder = null;
+let voiceRecorderTimer = null;
+let voiceRecorderSeconds = 0;
+let voiceRecorderStream = null;
+
+// Initialize all voice recorders in the wizard
+function initializeVoiceRecorders() {
+  const recorderContainers = document.querySelectorAll('.voice-recorder-container');
+  console.log('[Voice Recorder] Found', recorderContainers.length, 'recorder containers');
+
+  recorderContainers.forEach(container => {
+    const fieldId = container.dataset.field;
+    const startBtn = container.querySelector('.btn-start-recording');
+    const stopBtn = container.querySelector('.btn-stop-recording');
+    const reRecordBtn = container.querySelector('.btn-re-record');
+    const typeInsteadBtn = container.querySelector('.btn-type-instead');
+    const useVoiceBtn = container.querySelector('.btn-use-voice');
+
+    // Start recording
+    if (startBtn) {
+      startBtn.addEventListener('click', () => startVoiceRecording(container));
+    }
+
+    // Stop recording
+    if (stopBtn) {
+      stopBtn.addEventListener('click', () => stopVoiceRecording(container));
+    }
+
+    // Re-record
+    if (reRecordBtn) {
+      reRecordBtn.addEventListener('click', () => resetVoiceRecorder(container));
+    }
+
+    // Type instead (show text input)
+    if (typeInsteadBtn) {
+      typeInsteadBtn.addEventListener('click', () => showTextFallback(container));
+    }
+
+    // Use voice instead (hide text input)
+    if (useVoiceBtn) {
+      useVoiceBtn.addEventListener('click', () => hideTextFallback(container));
+    }
+
+    // Slide to cancel (touch events)
+    setupSlideToCancel(container);
+  });
+}
+
+// Start voice recording
+async function startVoiceRecording(container) {
+  // Check if mediaDevices is available
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showError('Voice recording is not supported in this browser. Please try Chrome or Safari.');
+    return;
+  }
+
+  try {
+    voiceRecorderStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    activeVoiceRecorder = {
+      container,
+      mediaRecorder: new MediaRecorder(voiceRecorderStream),
+      audioChunks: []
+    };
+
+    activeVoiceRecorder.mediaRecorder.addEventListener('dataavailable', (event) => {
+      activeVoiceRecorder.audioChunks.push(event.data);
+    });
+
+    activeVoiceRecorder.mediaRecorder.addEventListener('stop', async () => {
+      const audioBlob = new Blob(activeVoiceRecorder.audioChunks, { type: 'audio/webm' });
+      await processVoiceRecording(container, audioBlob);
+
+      // Stop all tracks
+      voiceRecorderStream.getTracks().forEach(track => track.stop());
+      voiceRecorderStream = null;
+    });
+
+    activeVoiceRecorder.mediaRecorder.start();
+
+    // Update UI to recording state
+    showRecordingState(container);
+
+    // Start timer
+    voiceRecorderSeconds = 0;
+    updateRecordingTimer(container);
+    voiceRecorderTimer = setInterval(() => {
+      voiceRecorderSeconds++;
+      updateRecordingTimer(container);
+    }, 1000);
+
+    console.log('[Voice Recorder] Recording started for', container.dataset.field);
+
+  } catch (error) {
+    console.error('[Voice Recorder] Failed to start recording:', error);
+    handleRecordingError(error);
+  }
+}
+
+// Stop voice recording
+function stopVoiceRecording(container) {
+  if (activeVoiceRecorder && activeVoiceRecorder.mediaRecorder) {
+    activeVoiceRecorder.mediaRecorder.stop();
+
+    // Stop timer
+    if (voiceRecorderTimer) {
+      clearInterval(voiceRecorderTimer);
+      voiceRecorderTimer = null;
+    }
+
+    // Show processing state
+    showProcessingState(container);
+
+    console.log('[Voice Recorder] Recording stopped for', container.dataset.field);
+  }
+}
+
+// Cancel voice recording (slide to cancel)
+function cancelVoiceRecording(container) {
+  if (activeVoiceRecorder && activeVoiceRecorder.mediaRecorder) {
+    // Stop the recorder without processing
+    activeVoiceRecorder.mediaRecorder.stop();
+    activeVoiceRecorder.audioChunks = []; // Clear audio
+
+    // Stop stream
+    if (voiceRecorderStream) {
+      voiceRecorderStream.getTracks().forEach(track => track.stop());
+      voiceRecorderStream = null;
+    }
+
+    // Stop timer
+    if (voiceRecorderTimer) {
+      clearInterval(voiceRecorderTimer);
+      voiceRecorderTimer = null;
+    }
+
+    // Reset to default state
+    resetVoiceRecorder(container);
+    console.log('[Voice Recorder] Recording cancelled');
+  }
+}
+
+// Process the recorded audio
+async function processVoiceRecording(container, audioBlob) {
+  const fieldId = container.dataset.field;
+
+  try {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'wizard-recording.webm');
+
+    const response = await fetch('/api/transcribe', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success && result.text) {
+      // Store the transcription in the hidden input
+      const hiddenInput = container.querySelector('input[type="hidden"]');
+      if (hiddenInput) {
+        hiddenInput.value = result.text;
+      }
+
+      // Show the transcription in the complete state
+      showCompleteState(container, result.text);
+      console.log('[Voice Recorder] Transcription successful:', result.text.substring(0, 50) + '...');
+    } else {
+      showError(result.error || 'Could not transcribe audio. Please try again.');
+      resetVoiceRecorder(container);
+    }
+  } catch (error) {
+    console.error('[Voice Recorder] Transcription error:', error);
+    showError('Could not transcribe audio. Please try again.');
+    resetVoiceRecorder(container);
+  }
+}
+
+// Show recording state UI
+function showRecordingState(container) {
+  const defaultState = container.querySelector('.voice-recorder-default');
+  const recordingState = container.querySelector('.voice-recorder-recording');
+  const processingState = container.querySelector('.voice-recorder-processing');
+  const completeState = container.querySelector('.voice-recorder-complete');
+  const typeFallback = container.querySelector('.type-fallback');
+
+  if (defaultState) defaultState.style.display = 'none';
+  if (recordingState) recordingState.style.display = 'flex';
+  if (processingState) processingState.style.display = 'none';
+  if (completeState) completeState.style.display = 'none';
+  if (typeFallback) typeFallback.style.display = 'none';
+}
+
+// Show processing state UI
+function showProcessingState(container) {
+  const defaultState = container.querySelector('.voice-recorder-default');
+  const recordingState = container.querySelector('.voice-recorder-recording');
+  const processingState = container.querySelector('.voice-recorder-processing');
+  const completeState = container.querySelector('.voice-recorder-complete');
+
+  if (defaultState) defaultState.style.display = 'none';
+  if (recordingState) recordingState.style.display = 'none';
+  if (processingState) processingState.style.display = 'flex';
+  if (completeState) completeState.style.display = 'none';
+}
+
+// Show complete state UI with transcription
+function showCompleteState(container, transcription) {
+  const defaultState = container.querySelector('.voice-recorder-default');
+  const recordingState = container.querySelector('.voice-recorder-recording');
+  const processingState = container.querySelector('.voice-recorder-processing');
+  const completeState = container.querySelector('.voice-recorder-complete');
+  const transcriptionText = container.querySelector('.transcription-text');
+  const typeFallback = container.querySelector('.type-fallback');
+
+  if (defaultState) defaultState.style.display = 'none';
+  if (recordingState) recordingState.style.display = 'none';
+  if (processingState) processingState.style.display = 'none';
+  if (completeState) completeState.style.display = 'flex';
+  if (transcriptionText) transcriptionText.textContent = transcription;
+  if (typeFallback) typeFallback.style.display = 'block';
+}
+
+// Reset to default state
+function resetVoiceRecorder(container) {
+  const defaultState = container.querySelector('.voice-recorder-default');
+  const recordingState = container.querySelector('.voice-recorder-recording');
+  const processingState = container.querySelector('.voice-recorder-processing');
+  const completeState = container.querySelector('.voice-recorder-complete');
+  const typeFallback = container.querySelector('.type-fallback');
+  const timerEl = container.querySelector('.recording-timer');
+
+  if (defaultState) defaultState.style.display = 'flex';
+  if (recordingState) recordingState.style.display = 'none';
+  if (processingState) processingState.style.display = 'none';
+  if (completeState) completeState.style.display = 'none';
+  if (typeFallback) typeFallback.style.display = 'block';
+  if (timerEl) timerEl.textContent = '0:00';
+
+  // Clear the hidden input
+  const hiddenInput = container.querySelector('input[type="hidden"]');
+  if (hiddenInput) {
+    hiddenInput.value = '';
+  }
+
+  activeVoiceRecorder = null;
+  voiceRecorderSeconds = 0;
+}
+
+// Update recording timer display
+function updateRecordingTimer(container) {
+  const timerEl = container.querySelector('.recording-timer');
+  if (timerEl) {
+    const minutes = Math.floor(voiceRecorderSeconds / 60);
+    const seconds = voiceRecorderSeconds % 60;
+    timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
+
+// Show text fallback input
+function showTextFallback(container) {
+  const defaultState = container.querySelector('.voice-recorder-default');
+  const completeState = container.querySelector('.voice-recorder-complete');
+  const textFallback = container.querySelector('.text-input-fallback');
+  const typeFallbackBtn = container.querySelector('.type-fallback');
+
+  if (defaultState) defaultState.style.display = 'none';
+  if (completeState) completeState.style.display = 'none';
+  if (textFallback) textFallback.style.display = 'block';
+  if (typeFallbackBtn) typeFallbackBtn.style.display = 'none';
+}
+
+// Hide text fallback, show voice recorder
+function hideTextFallback(container) {
+  const defaultState = container.querySelector('.voice-recorder-default');
+  const textFallback = container.querySelector('.text-input-fallback');
+  const typeFallbackBtn = container.querySelector('.type-fallback');
+
+  if (defaultState) defaultState.style.display = 'flex';
+  if (textFallback) textFallback.style.display = 'none';
+  if (typeFallbackBtn) typeFallbackBtn.style.display = 'block';
+}
+
+// Setup slide to cancel gesture
+function setupSlideToCancel(container) {
+  const recordingState = container.querySelector('.voice-recorder-recording');
+  if (!recordingState) return;
+
+  let startX = 0;
+  let isSwiping = false;
+
+  recordingState.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isSwiping = true;
+  }, { passive: true });
+
+  recordingState.addEventListener('touchmove', (e) => {
+    if (!isSwiping) return;
+
+    const currentX = e.touches[0].clientX;
+    const diff = startX - currentX;
+
+    // If swiped left more than 100px, cancel
+    if (diff > 100) {
+      isSwiping = false;
+      cancelVoiceRecording(container);
+    }
+  }, { passive: true });
+
+  recordingState.addEventListener('touchend', () => {
+    isSwiping = false;
+  }, { passive: true });
+}
+
+// Handle recording errors
+function handleRecordingError(error) {
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+    if (isMobile) {
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isIOS) {
+        showError('Microphone access denied. Please go to Settings > Safari > Microphone, and allow access for this site.');
+      } else {
+        showError('Microphone access denied. Please tap the lock icon in your browser\'s address bar, enable Microphone, and refresh.');
+      }
+    } else {
+      showError('Microphone access denied. Please click the camera/microphone icon in your browser\'s address bar to enable access.');
+    }
+  } else if (error.name === 'NotFoundError') {
+    showError('No microphone found. Please connect a microphone and try again.');
+  } else if (error.name === 'NotReadableError') {
+    showError('Microphone is in use by another application. Please close other apps using the microphone.');
+  } else if (error.name === 'SecurityError') {
+    showError('Microphone access requires a secure connection (HTTPS).');
+  } else {
+    showError('Could not access microphone: ' + error.message);
+  }
 }
 
 // Get the current wizard step's input field

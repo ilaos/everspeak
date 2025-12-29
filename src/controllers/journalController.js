@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ValidationError, AppError } from '../utils/errorHandler.js';
 import {
   getAllEntries,
@@ -10,9 +10,7 @@ import {
 } from '../journal/utils.js';
 import { loadPersonas, findPersonaById } from '../personas/utils.js';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function generateReflection(text, mood, personaMemories) {
   let systemPrompt = `You are EverSpeak's Reflection Layer.
@@ -34,22 +32,27 @@ Simply reflect back a gentle, grounding observation.`;
     systemPrompt += `\n\nPersona memories for context:\n${personaMemories}`;
   }
 
-  const userPrompt = mood 
+  const userPrompt = mood
     ? `Journal entry (mood: ${mood}):\n${text}`
     : `Journal entry:\n${text}`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
+        }
       ],
-      temperature: 0.7,
-      max_tokens: 200
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 200
+      }
     });
 
-    return completion.choices[0].message.content;
+    return result.response.text();
   } catch (error) {
     console.error('Error generating reflection:', error);
     return null;

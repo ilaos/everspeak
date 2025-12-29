@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ValidationError, AppError } from '../utils/errorHandler.js';
 import {
   loadPersonas,
@@ -17,9 +17,7 @@ import {
   validateSettings
 } from '../personas/utils.js';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const personaController = {
   // GET /api/personas - List all personas
@@ -125,7 +123,7 @@ export const personaController = {
 
       const errors = [];
       const updates = {};
-      
+
       if (name !== undefined) {
         if (typeof name !== 'string' || name.trim().length === 0) {
           errors.push({
@@ -136,7 +134,7 @@ export const personaController = {
           updates.name = name.trim();
         }
       }
-      
+
       if (relationship !== undefined) {
         if (typeof relationship !== 'string') {
           errors.push({
@@ -147,7 +145,7 @@ export const personaController = {
           updates.relationship = relationship.trim();
         }
       }
-      
+
       if (description !== undefined) {
         if (typeof description !== 'string') {
           errors.push({
@@ -604,6 +602,7 @@ export const personaController = {
       }
 
       const importedMemories = [];
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
       // Process each segment with AI categorization and weighting
       for (const segment of rawSegments) {
@@ -625,22 +624,24 @@ Memory: "${segment}"
 
 Respond ONLY with JSON in this format: {"category": "...", "weight": ...}`;
 
-            const completion = await openai.chat.completions.create({
-              model: 'gpt-4o-mini',
-              messages: [{ role: 'user', content: prompt }],
-              temperature: 0.3,
-              max_tokens: 100
+            const result = await model.generateContent({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.3, maxOutputTokens: 100 }
             });
 
-            const responseText = completion.choices[0].message.content.trim();
-            const parsed = JSON.parse(responseText);
-            
-            if (parsed.category && ['humor', 'regrets', 'childhood', 'advice', 'personality', 'misc'].includes(parsed.category)) {
-              category = parsed.category;
-            }
-            
-            if (parsed.weight && !isNaN(parseFloat(parsed.weight))) {
-              weight = Math.max(0.5, Math.min(5.0, parseFloat(parsed.weight)));
+            const responseText = result.response.text().trim();
+            // Extract JSON from response (handle potential markdown)
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[0]);
+
+              if (parsed.category && ['humor', 'regrets', 'childhood', 'advice', 'personality', 'misc'].includes(parsed.category)) {
+                category = parsed.category;
+              }
+
+              if (parsed.weight && !isNaN(parseFloat(parsed.weight))) {
+                weight = Math.max(0.5, Math.min(5.0, parseFloat(parsed.weight)));
+              }
             }
           }
 
@@ -751,14 +752,14 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
       let extractedMemories = [];
 
       try {
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.5,
-          max_tokens: 1500
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+        const result = await model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.5, maxOutputTokens: 1500 }
         });
 
-        const responseText = completion.choices[0].message.content.trim();
+        const responseText = result.response.text().trim();
         // Extract JSON array from response (handle markdown code blocks)
         const jsonMatch = responseText.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
@@ -900,7 +901,7 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
         }]);
       }
 
-      // Generate personalized acknowledgment using OpenAI
+      // Generate personalized acknowledgment using Gemini
       const prompt = `You are a compassionate grief therapist helping someone through an onboarding process. They just answered a question.
 
 Question they were asked: "${question}"
@@ -928,14 +929,14 @@ DO NOT:
 
 Just acknowledge what they shared with warmth and presence.`;
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 150
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 150 }
       });
 
-      const acknowledgment = completion.choices[0].message.content.trim();
+      const acknowledgment = result.response.text().trim();
 
       res.status(200).json({
         success: true,
@@ -943,7 +944,7 @@ Just acknowledge what they shared with warmth and presence.`;
         message: 'Acknowledgment generated successfully'
       });
     } catch (error) {
-      // If OpenAI fails, provide a graceful fallback
+      // If Gemini fails, provide a graceful fallback
       if (error.name === 'ValidationError') {
         next(error);
       } else {
@@ -1040,27 +1041,24 @@ BOUNDARY FLAGS:
 
 Return ONLY the JSON object, nothing else.`;
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a persona analysis expert. You provide structured recommendations in JSON format only.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        response_format: { type: 'json_object' }
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1500 }
       });
 
-      const responseText = completion.choices[0].message.content;
+      const responseText = result.response.text();
       let recommendations;
 
       try {
-        recommendations = JSON.parse(responseText);
+        // Extract JSON from response (handle potential markdown)
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          recommendations = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
       } catch (parseError) {
         console.error('Failed to parse AI response:', responseText);
         throw new AppError('Failed to generate recommendations. Please try again.', 500);

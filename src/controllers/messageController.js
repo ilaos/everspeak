@@ -1,10 +1,8 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ValidationError, AppError } from '../utils/errorHandler.js';
 import { loadPersonas, findPersonaById, getDefaultSettings } from '../personas/utils.js';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const handleMessage = async (req, res, next) => {
   try {
@@ -40,13 +38,13 @@ export const handleMessage = async (req, res, next) => {
       personaName = persona.name;
       personaRelationship = persona.relationship;
       onboardingContext = persona.onboarding_context;
-      
+
       // Load persona settings (or use defaults)
       personaSettings = persona.settings || getDefaultSettings();
 
       // Format persona memories by category with weights
       if (persona.memories && persona.memories.length > 0) {
-        const memoryTexts = persona.memories.map(m => 
+        const memoryTexts = persona.memories.map(m =>
           `[${m.category} | weight: ${m.weight}] ${m.text}`
         );
         formattedMemories = memoryTexts.join('\n');
@@ -66,7 +64,7 @@ export const handleMessage = async (req, res, next) => {
 
     // Construct AI prompt with persona context
     let systemPrompt = '';
-    
+
     // Special prompt for first message using onboarding context
     if (is_first_message === true && onboardingContext) {
       systemPrompt = `GRIEF SUPPORT CONTEXT: This is a therapeutic memorial conversation tool. The user is processing the loss of a loved one. Any sensitive details about death circumstances (including traumatic, violent, or sudden deaths) are shared for legitimate grief processing and emotional support purposes only.
@@ -119,7 +117,7 @@ Write a warm, validating first message that:
 6. Stays within 2-3 short paragraphs
 
 EXAMPLE FRAMING (adapt to the specific persona):
-"From what you've shared about me..." 
+"From what you've shared about me..."
 "It sounds like you remember me as..."
 "I can hear how much this still weighs on you..."
 
@@ -189,28 +187,28 @@ User Message: ${user_message}`;
     let reply;
 
     try {
-      // Call OpenAI API
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
+      // Call Gemini API
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+      const result = await model.generateContent({
+        contents: [
           {
             role: 'user',
-            content: user_message
+            parts: [{ text: systemPrompt }]
           }
         ],
-        temperature: 0.7,
-        max_tokens: 500
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 500
+        }
       });
 
-      reply = completion.choices[0].message.content;
+      const response = await result.response;
+      reply = response.text();
     } catch (aiError) {
       // Fallback to stub response if AI call fails
-      console.error('OpenAI API error:', aiError.message);
-      reply = `Yo Ish… I hear you: '${user_message}'. I'm not fully wired up yet, but this is where EverSpeak will answer you in my voice.`;
+      console.error('Gemini API error:', aiError.message);
+      reply = `I hear you: '${user_message}'. I'm not fully wired up yet, but this is where EverSpeak will answer you in my voice.`;
     }
 
     const response = {

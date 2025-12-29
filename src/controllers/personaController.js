@@ -698,12 +698,35 @@ Respond ONLY with JSON in this format: {"category": "...", "weight": ...}`;
 
       const persona = data.personas[personaIndex];
 
-      // Combine all wizard inputs into text for processing
+      // Combine all wizard inputs into text for processing (enhanced 28-question system)
       const wizardText = `
+User's Name: ${wizard_inputs.user_name || ''}
+Loved One's Name: ${wizard_inputs.first_name || ''}
+Relationship: ${wizard_inputs.relationship || ''}
+When They Passed: ${wizard_inputs.date_passed || ''}
+How They Passed: ${wizard_inputs.circumstances || ''}
+Persona For: ${wizard_inputs.relationship_end || ''}
 Personality: ${wizard_inputs.personality || ''}
-Humor: ${wizard_inputs.humor || ''}
-Important Memories: ${wizard_inputs.memories || ''}
-Unfinished Conversations: ${wizard_inputs.conversations || ''}
+At Their Best: ${wizard_inputs.at_their_best || ''}
+Quirks and Habits: ${wizard_inputs.quirks_habits || ''}
+Their Laugh: ${wizard_inputs.their_laugh || ''}
+Daily Rituals: ${wizard_inputs.daily_rituals || ''}
+How They Spoke: ${wizard_inputs.how_they_spoke || ''}
+How They Comforted: ${wizard_inputs.how_they_comforted || ''}
+Phrases and Sayings: ${wizard_inputs.phrases_sayings || ''}
+How They Showed Love: ${wizard_inputs.showing_love || ''}
+What Mattered Most: ${wizard_inputs.what_mattered || ''}
+Hard Times Beliefs: ${wizard_inputs.hard_times_belief || ''}
+What They'd Want Remembered: ${wizard_inputs.want_to_remember || ''}
+Flaws and Frustrations: ${wizard_inputs.flaws_frustrations || ''}
+Important Memory: ${wizard_inputs.important_memory || wizard_inputs.memories || ''}
+Moments Shared Often: ${wizard_inputs.moments_shared || ''}
+If They Walked In: ${wizard_inputs.if_walked_in || ''}
+Topics to Avoid: ${wizard_inputs.topics_avoid || ''}
+Would Feel Wrong: ${wizard_inputs.would_feel_wrong || ''}
+Awareness Level: ${wizard_inputs.awareness_level || ''}
+Talk About Presence: ${wizard_inputs.talk_about_presence || ''}
+Anything Else: ${wizard_inputs.anything_else || wizard_inputs.conversations || ''}
       `.trim();
 
       // Use AI to extract and categorize memories from wizard inputs
@@ -781,16 +804,58 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
         if (tp.advice_level !== undefined) persona.settings.advice_level = parseFloat(tp.advice_level);
       }
 
-      // Save onboarding context for use in first message and future features
+      // Save onboarding context for use in first message and future features (enhanced 28-question system)
       persona.onboarding_context = {
+        // User and loved one basics
+        user_name: wizard_inputs.user_name || null,
         first_name: wizard_inputs.first_name || null,
         relationship: wizard_inputs.relationship || null,
         date_passed: wizard_inputs.date_passed || null,
-        humor: wizard_inputs.humor || null,
-        relationship_end: wizard_inputs.relationship_end || null,
         circumstances: wizard_inputs.circumstances || null,
-        memories: wizard_inputs.memories || null,
-        conversations: wizard_inputs.conversations || null,
+        persona_for: wizard_inputs.relationship_end || null,
+
+        // Core personality
+        personality: wizard_inputs.personality || null,
+        at_their_best: wizard_inputs.at_their_best || null,
+        quirks_habits: wizard_inputs.quirks_habits || null,
+        their_laugh: wizard_inputs.their_laugh || null,
+        daily_rituals: wizard_inputs.daily_rituals || null,
+
+        // Communication style
+        how_they_spoke: wizard_inputs.how_they_spoke || null,
+        how_they_comforted: wizard_inputs.how_they_comforted || null,
+        phrases_sayings: wizard_inputs.phrases_sayings || null,
+        showing_love: wizard_inputs.showing_love || null,
+
+        // Values and beliefs
+        what_mattered: wizard_inputs.what_mattered || null,
+        hard_times_belief: wizard_inputs.hard_times_belief || null,
+        want_to_remember: wizard_inputs.want_to_remember || null,
+        flaws_frustrations: wizard_inputs.flaws_frustrations || null,
+
+        // Shared memories
+        important_memory: wizard_inputs.important_memory || wizard_inputs.memories || null,
+        moments_shared: wizard_inputs.moments_shared || null,
+        if_walked_in: wizard_inputs.if_walked_in || null,
+        photos_videos: wizard_inputs.photos_videos || null,
+
+        // Boundaries and safety
+        topics_avoid: wizard_inputs.topics_avoid || null,
+        would_feel_wrong: wizard_inputs.would_feel_wrong || null,
+
+        // Present-day awareness
+        awareness_level: wizard_inputs.awareness_level || null,
+        talk_about_presence: wizard_inputs.talk_about_presence || null,
+
+        // Final tuning
+        anything_else: wizard_inputs.anything_else || wizard_inputs.conversations || null,
+
+        // Legacy fields for backwards compatibility
+        humor: wizard_inputs.their_laugh || wizard_inputs.humor || null,
+        memories: wizard_inputs.important_memory || wizard_inputs.memories || null,
+        conversations: wizard_inputs.anything_else || wizard_inputs.conversations || null,
+        relationship_end: wizard_inputs.relationship_end || null,
+
         completed_at: new Date().toISOString()
       };
 

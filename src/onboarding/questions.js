@@ -1,267 +1,419 @@
 // Onboarding Questions - Voice-First Persona Creation
-// 21 questions across 8 sections
+// Enhanced 28-question system with example answers to encourage richer responses
 
 export const ONBOARDING_SECTIONS = [
   {
+    id: 'getting_started',
+    title: 'Getting Started',
+    description: 'A few things before we begin'
+  },
+  {
     id: 'relationship_context',
-    title: 'Relationship Context',
-    description: 'Help us understand who this persona represents'
+    title: 'Your Relationship',
+    description: 'Help us understand who this person was to you'
   },
   {
     id: 'core_personality',
-    title: 'Core Personality',
-    description: 'What made them who they were'
+    title: 'Who They Were',
+    description: 'The essence of their personality'
   },
   {
     id: 'communication_style',
-    title: 'Communication Style',
-    description: 'How they spoke and connected'
+    title: 'How They Connected',
+    description: 'The way they spoke and showed love'
   },
   {
     id: 'values_beliefs',
-    title: 'Values & Beliefs',
-    description: 'What mattered most to them'
+    title: 'What Mattered',
+    description: 'Their values, wisdom, and imperfections'
   },
   {
     id: 'shared_memories',
-    title: 'Shared Memories',
-    description: 'Moments you want to preserve'
+    title: 'Moments Together',
+    description: 'The memories you want to preserve'
   },
   {
     id: 'boundaries_safety',
-    title: 'Boundaries & Safety',
+    title: 'Boundaries',
     description: 'What the persona should avoid'
   },
   {
     id: 'present_awareness',
-    title: 'Present-Day Awareness',
+    title: 'Presence',
     description: 'How the persona understands their situation'
   },
   {
     id: 'final_tuning',
-    title: 'Final Tuning',
+    title: 'Finishing Touches',
     description: 'Anything else we should know'
   }
 ];
 
 export const ONBOARDING_QUESTIONS = [
-  // SECTION 1 - Relationship Context
+  // SECTION 0 - Getting Started (NEW)
   {
     id: 'q1',
-    sectionId: 'relationship_context',
+    sectionId: 'getting_started',
     questionNumber: 1,
-    prompt: 'Who are you creating this persona for, and who were they to you?',
+    prompt: 'First, what\'s your name?',
+    subtext: 'This helps the persona know who they\'re speaking with.',
+    example: null,
     inputType: 'voice_primary',
+    fieldId: 'user_name',
     mediaHint: null,
     options: null
   },
   {
     id: 'q2',
-    sectionId: 'relationship_context',
+    sectionId: 'getting_started',
     questionNumber: 2,
-    prompt: 'Who is this persona meant to be for?',
-    inputType: 'select',
-    mediaHint: null,
-    options: [
-      { value: 'yourself', label: 'Yourself' },
-      { value: 'child', label: 'A child' },
-      { value: 'partner', label: 'Partner' },
-      { value: 'family_member', label: 'Family member' },
-      { value: 'multiple', label: 'Multiple people' }
-    ]
-  },
-  {
-    id: 'q3',
-    sectionId: 'relationship_context',
-    questionNumber: 3,
-    prompt: 'How would you describe your relationship with them in one sentence?',
+    prompt: 'What was their name?',
+    subtext: 'Feel free to include any nicknames or what you called them.',
+    example: 'For example: "His name was James, but I always called him Jimmy. Sometimes I\'d call him Pop when I was being silly."',
     inputType: 'voice_primary',
+    fieldId: 'loved_one_name',
     mediaHint: null,
     options: null
   },
 
-  // SECTION 2 - Core Personality
+  // SECTION 1 - Relationship Context
+  {
+    id: 'q3',
+    sectionId: 'relationship_context',
+    questionNumber: 3,
+    prompt: 'Who were they to you?',
+    subtext: 'Tell me about your relationship with them.',
+    example: 'For example: "She was my grandmother, but she practically raised me. She was more like a mother to me than anyone else. We talked every single day until the end."',
+    inputType: 'voice_primary',
+    fieldId: 'relationship_to_user',
+    mediaHint: null,
+    options: null
+  },
   {
     id: 'q4',
-    sectionId: 'core_personality',
+    sectionId: 'relationship_context',
     questionNumber: 4,
-    prompt: 'How would you describe their personality?',
+    prompt: 'When did they pass?',
+    subtext: 'Take your time. This can be as specific or general as you\'d like.',
+    example: 'For example: "It was about three months ago, in September" or "It\'s been almost two years now."',
     inputType: 'voice_primary',
+    fieldId: 'when_passed',
     mediaHint: null,
     options: null
   },
   {
     id: 'q5',
-    sectionId: 'core_personality',
+    sectionId: 'relationship_context',
     questionNumber: 5,
-    prompt: 'What were they like when they were at their best?',
+    prompt: 'Would you like to share what happened?',
+    subtext: 'Only if you feel comfortable. You can skip this one.',
+    example: 'You might say something like: "It was cancer. We had about six months to prepare, which was a blessing in some ways." Or simply: "It was sudden and unexpected."',
     inputType: 'voice_primary',
+    fieldId: 'how_passed',
     mediaHint: null,
-    options: null
+    options: null,
+    optional: true
   },
   {
     id: 'q6',
-    sectionId: 'core_personality',
+    sectionId: 'relationship_context',
     questionNumber: 6,
-    prompt: 'What little quirks, habits, or traits do people remember about them?',
-    inputType: 'voice_primary',
-    mediaHint: 'photos_videos_encouraged',
-    options: null
+    prompt: 'Who is this persona for?',
+    subtext: 'Who will be talking with them?',
+    example: null,
+    inputType: 'select',
+    fieldId: 'persona_for',
+    mediaHint: null,
+    options: [
+      { value: 'yourself', label: 'Myself' },
+      { value: 'child', label: 'A child or children' },
+      { value: 'partner', label: 'My partner' },
+      { value: 'family_member', label: 'Other family members' },
+      { value: 'multiple', label: 'Multiple people' }
+    ]
   },
 
-  // SECTION 3 - Communication Style
+  // SECTION 2 - Core Personality
   {
     id: 'q7',
-    sectionId: 'communication_style',
+    sectionId: 'core_personality',
     questionNumber: 7,
-    prompt: 'How did they usually speak to you?',
+    prompt: 'How would you describe their personality?',
+    subtext: 'What was it like to be around them?',
+    example: 'For example: "He was the kind of person who could walk into a room and make everyone feel at ease. He had this quiet confidence, but he never took himself too seriously. He\'d crack jokes at the worst times."',
     inputType: 'voice_primary',
+    fieldId: 'personality',
     mediaHint: null,
     options: null
   },
   {
     id: 'q8',
-    sectionId: 'communication_style',
+    sectionId: 'core_personality',
     questionNumber: 8,
-    prompt: 'When you were upset, how did they comfort you?',
+    prompt: 'What were they like when they were at their best?',
+    subtext: 'Think of a time when they were really shining.',
+    example: 'For example: "When she was cooking for the whole family on holidays, she was in her element. She\'d be humming, tasting everything, and telling stories while stirring three pots at once."',
     inputType: 'voice_primary',
+    fieldId: 'at_their_best',
     mediaHint: null,
     options: null
   },
   {
     id: 'q9',
-    sectionId: 'communication_style',
+    sectionId: 'core_personality',
     questionNumber: 9,
-    prompt: 'Were there phrases, sayings, or expressions they used often?',
+    prompt: 'What quirks or habits did people notice about them?',
+    subtext: 'Those little things that made them uniquely them.',
+    example: 'For example: "He always had to have his coffee in this one specific mug. And he\'d tap his foot when he was thinking. Oh, and he\'d whistle the same tune every morning."',
     inputType: 'voice_primary',
+    fieldId: 'quirks_habits',
+    mediaHint: 'photos_videos_encouraged',
+    options: null
+  },
+  {
+    id: 'q10',
+    sectionId: 'core_personality',
+    questionNumber: 10,
+    prompt: 'What did their laugh sound like?',
+    subtext: 'Or what made them really laugh?',
+    example: 'For example: "She had this big, loud laugh that she was kind of embarrassed about. When something really got her, she\'d cover her mouth. Dad jokes always got her."',
+    inputType: 'voice_primary',
+    fieldId: 'their_laugh',
     mediaHint: 'audio_encouraged',
+    options: null
+  },
+  {
+    id: 'q11',
+    sectionId: 'core_personality',
+    questionNumber: 11,
+    prompt: 'Were there daily rituals or routines that were important to them?',
+    subtext: 'Little things they did every day.',
+    example: 'For example: "Every morning without fail, he\'d sit on the porch with his coffee and watch the birds. Sundays were for calling his sister. He never missed that call."',
+    inputType: 'voice_primary',
+    fieldId: 'daily_rituals',
+    mediaHint: null,
+    options: null
+  },
+
+  // SECTION 3 - Communication Style
+  {
+    id: 'q12',
+    sectionId: 'communication_style',
+    questionNumber: 12,
+    prompt: 'How did they usually talk to you?',
+    subtext: 'What was their tone? Formal, casual, playful?',
+    example: 'For example: "She had this gentle way of speaking, even when she was being stern. She\'d always start with \'Now honey...\' when she was about to give advice."',
+    inputType: 'voice_primary',
+    fieldId: 'how_they_spoke',
+    mediaHint: null,
+    options: null
+  },
+  {
+    id: 'q13',
+    sectionId: 'communication_style',
+    questionNumber: 13,
+    prompt: 'When you were upset, how did they comfort you?',
+    subtext: 'What did they say or do?',
+    example: 'For example: "He\'d just sit with me. Wouldn\'t say much at first. Then he\'d put his hand on my shoulder and say something like \'We\'ll figure it out together.\'"',
+    inputType: 'voice_primary',
+    fieldId: 'how_they_comforted',
+    mediaHint: null,
+    options: null
+  },
+  {
+    id: 'q14',
+    sectionId: 'communication_style',
+    questionNumber: 14,
+    prompt: 'Were there phrases or sayings they used often?',
+    subtext: 'Things you can still hear them saying.',
+    example: 'For example: "She always said \'This too shall pass\' and \'Don\'t borrow trouble from tomorrow.\' When I was overthinking she\'d say \'You\'re making mountains out of molehills again.\'"',
+    inputType: 'voice_primary',
+    fieldId: 'phrases_sayings',
+    mediaHint: 'audio_encouraged',
+    options: null
+  },
+  {
+    id: 'q15',
+    sectionId: 'communication_style',
+    questionNumber: 15,
+    prompt: 'How did they show love without using words?',
+    subtext: 'The little things they did.',
+    example: 'For example: "He wasn\'t big on saying \'I love you\' but he\'d always warm up my car in winter. Or he\'d cut articles out of the newspaper he thought I\'d find interesting."',
+    inputType: 'voice_primary',
+    fieldId: 'showing_love',
+    mediaHint: null,
     options: null
   },
 
   // SECTION 4 - Values & Beliefs
   {
-    id: 'q10',
+    id: 'q16',
     sectionId: 'values_beliefs',
-    questionNumber: 10,
+    questionNumber: 16,
     prompt: 'What mattered most to them in life?',
+    subtext: 'What did they really care about?',
+    example: 'For example: "Family was everything to her. She\'d drop anything for any of us. She also really valued honesty - she couldn\'t stand when people weren\'t straight with her."',
     inputType: 'voice_primary',
+    fieldId: 'what_mattered',
     mediaHint: null,
     options: null
   },
   {
-    id: 'q11',
+    id: 'q17',
     sectionId: 'values_beliefs',
-    questionNumber: 11,
+    questionNumber: 17,
     prompt: 'What did they believe about getting through hard times?',
+    subtext: 'Their philosophy on life\'s challenges.',
+    example: 'For example: "He believed you just had to keep moving forward. \'One foot in front of the other,\' he\'d say. He didn\'t believe in wallowing - action was his answer to everything."',
     inputType: 'voice_primary',
+    fieldId: 'hard_times_belief',
     mediaHint: null,
     options: null
   },
   {
-    id: 'q12',
+    id: 'q18',
     sectionId: 'values_beliefs',
-    questionNumber: 12,
-    prompt: 'What would they want the person using this persona to remember?',
+    questionNumber: 18,
+    prompt: 'What would they want the person using this to remember?',
+    subtext: 'If they could leave one message.',
+    example: 'For example: "She\'d want me to remember that I\'m stronger than I think. And that it\'s okay to ask for help - that was something she learned late in life."',
     inputType: 'voice_primary',
+    fieldId: 'want_to_remember',
+    mediaHint: null,
+    options: null
+  },
+  {
+    id: 'q19',
+    sectionId: 'values_beliefs',
+    questionNumber: 19,
+    prompt: 'What frustrated them, or what were their flaws?',
+    subtext: 'Nobody\'s perfect. What made them human?',
+    example: 'For example: "He could be stubborn as a mule. Once he made up his mind, that was it. And he was terrible at asking for directions - we got lost constantly."',
+    inputType: 'voice_primary',
+    fieldId: 'flaws_frustrations',
     mediaHint: null,
     options: null
   },
 
   // SECTION 5 - Shared Memories
   {
-    id: 'q13',
+    id: 'q20',
     sectionId: 'shared_memories',
-    questionNumber: 13,
+    questionNumber: 20,
     prompt: 'Tell me about a memory that feels especially important.',
+    subtext: 'One that you hold close.',
+    example: 'For example: "The last time we went fishing together. We didn\'t catch anything but we talked for hours. He told me stories about his dad that I\'d never heard before."',
     inputType: 'voice_primary',
+    fieldId: 'important_memory',
     mediaHint: null,
     options: null
   },
   {
-    id: 'q14',
+    id: 'q21',
     sectionId: 'shared_memories',
-    questionNumber: 14,
+    questionNumber: 21,
     prompt: 'What kinds of moments did you share most often?',
+    subtext: 'The everyday things.',
+    example: 'For example: "Sunday dinners. We\'d all pile into her tiny kitchen. The kids would be running around, she\'d be fussing over the food, and there was always way too much of it."',
     inputType: 'voice_primary',
+    fieldId: 'moments_shared',
     mediaHint: null,
     options: null
   },
   {
-    id: 'q15',
+    id: 'q22',
     sectionId: 'shared_memories',
-    questionNumber: 15,
-    prompt: 'Are there photos or videos that capture who they really were?',
+    questionNumber: 22,
+    prompt: 'If they walked into the room right now, what would they do?',
+    subtext: 'How would they greet you?',
+    example: 'For example: "He\'d probably make some joke about my hair. Then give me a big hug and ask if I\'d eaten today. He always worried I wasn\'t eating enough."',
     inputType: 'voice_primary',
+    fieldId: 'if_walked_in',
+    mediaHint: null,
+    options: null
+  },
+  {
+    id: 'q23',
+    sectionId: 'shared_memories',
+    questionNumber: 23,
+    prompt: 'Are there photos or videos that really capture who they were?',
+    subtext: 'You can upload these later if you\'d like.',
+    example: 'For example: "There\'s this one video from my wedding where she\'s dancing. That\'s exactly who she was - just pure joy. I watch it all the time."',
+    inputType: 'voice_primary',
+    fieldId: 'photos_videos',
     mediaHint: 'photos_videos_encouraged',
     options: null
   },
 
   // SECTION 6 - Boundaries & Safety
   {
-    id: 'q16',
+    id: 'q24',
     sectionId: 'boundaries_safety',
-    questionNumber: 16,
+    questionNumber: 24,
     prompt: 'Are there things this persona should avoid talking about?',
+    subtext: 'Topics that would be too painful or sensitive.',
+    example: 'For example: "I don\'t want to discuss the last few weeks when she was in the hospital. And please don\'t bring up the family disagreements about the will."',
     inputType: 'voice_primary',
+    fieldId: 'topics_avoid',
     mediaHint: null,
     options: null
   },
   {
-    id: 'q17',
+    id: 'q25',
     sectionId: 'boundaries_safety',
-    questionNumber: 17,
-    prompt: 'Is there anything that would feel inaccurate or upsetting if said?',
+    questionNumber: 25,
+    prompt: 'Is there anything that would feel wrong or inaccurate if the persona said it?',
+    subtext: 'Things that just wouldn\'t be them.',
+    example: 'For example: "She would never curse - that just wasn\'t her. And she\'d never push religion on anyone even though she was spiritual herself."',
     inputType: 'voice_primary',
+    fieldId: 'would_feel_wrong',
     mediaHint: null,
     options: null
   },
 
   // SECTION 7 - Present-Day Awareness
   {
-    id: 'q18',
+    id: 'q26',
     sectionId: 'present_awareness',
-    questionNumber: 18,
+    questionNumber: 26,
     prompt: 'How aware should this persona be about their passing?',
+    subtext: 'This affects how they\'ll speak about being here.',
+    example: null,
     inputType: 'select',
+    fieldId: 'awareness_level',
     mediaHint: null,
     options: [
-      { value: 'fully_aware', label: 'Fully aware' },
-      { value: 'gently_aware', label: 'Gently aware' },
-      { value: 'not_explicit', label: 'Not explicitly aware' },
-      { value: 'conversation_guided', label: 'Let conversation guide it' }
+      { value: 'fully_aware', label: 'Fully aware - can acknowledge it gently' },
+      { value: 'gently_aware', label: 'Gently aware - uses indirect language' },
+      { value: 'not_explicit', label: 'Not explicitly aware - speaks as if present' },
+      { value: 'conversation_guided', label: 'Let the conversation guide it' }
     ]
   },
   {
-    id: 'q19',
+    id: 'q27',
     sectionId: 'present_awareness',
-    questionNumber: 19,
+    questionNumber: 27,
     prompt: 'How should they talk about being here now?',
+    subtext: 'What would feel natural to you?',
+    example: 'For example: "I think she\'d say something like \'I\'m always with you, even when you can\'t see me.\' She believed in that kind of thing."',
     inputType: 'voice_primary',
+    fieldId: 'talk_about_presence',
     mediaHint: null,
     options: null
   },
 
   // SECTION 8 - Final Tuning
   {
-    id: 'q20',
+    id: 'q28',
     sectionId: 'final_tuning',
-    questionNumber: 20,
-    prompt: 'Is there anything else you want this persona to understand about themselves or about you?',
+    questionNumber: 28,
+    prompt: 'Is there anything else you want this persona to understand?',
+    subtext: 'About them, about you, about your relationship.',
+    example: 'For example: "I want them to know that I\'m trying my best, even when it doesn\'t feel like enough. And that I think about them every single day."',
     inputType: 'voice_primary',
+    fieldId: 'anything_else',
     mediaHint: null,
     options: null
-  },
-  {
-    id: 'q21',
-    sectionId: 'final_tuning',
-    questionNumber: 21,
-    prompt: 'Would you like to review or add to this later?',
-    inputType: 'select',
-    mediaHint: null,
-    options: [
-      { value: 'yes_later', label: 'Yes, I\'d like to add more later' },
-      { value: 'complete_for_now', label: 'This feels complete for now' }
-    ]
   }
 ];
 
@@ -283,4 +435,26 @@ export function getSectionById(sectionId) {
 // Get total question count
 export function getTotalQuestionCount() {
   return ONBOARDING_QUESTIONS.length;
+}
+
+// Get progress percentage
+export function getProgressPercentage(currentQuestion) {
+  return Math.round((currentQuestion / ONBOARDING_QUESTIONS.length) * 100);
+}
+
+// Get section progress info
+export function getSectionProgress(currentQuestion) {
+  const currentQ = ONBOARDING_QUESTIONS[currentQuestion - 1];
+  if (!currentQ) return null;
+
+  const section = getSectionById(currentQ.sectionId);
+  const sectionQuestions = getQuestionsBySection(currentQ.sectionId);
+  const questionIndexInSection = sectionQuestions.findIndex(q => q.id === currentQ.id) + 1;
+
+  return {
+    sectionTitle: section?.title || '',
+    sectionDescription: section?.description || '',
+    questionInSection: questionIndexInSection,
+    totalInSection: sectionQuestions.length
+  };
 }

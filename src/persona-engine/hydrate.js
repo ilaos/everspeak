@@ -126,7 +126,8 @@ function formatSectionContent(sectionKey, answers) {
 
   // Add special formatting for certain sections
   if (sectionKey === 'PRESENT_AWARENESS') {
-    const awarenessAnswer = meaningfulAnswers.find(a => a.questionId === 'q18');
+    // q26 is the awareness level question in the enhanced 28-question system
+    const awarenessAnswer = meaningfulAnswers.find(a => a.questionId === 'q26');
     if (awarenessAnswer?.selectedOption) {
       const awarenessDescription = AWARENESS_LEVELS[awarenessAnswer.selectedOption];
       if (awarenessDescription) {

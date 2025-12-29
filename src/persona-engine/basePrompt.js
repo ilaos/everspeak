@@ -295,72 +295,88 @@ export const SECTION_MARKERS = {
   FINAL_TUNING: '{{FINAL_TUNING}}',
 };
 
-// Question IDs mapped to sections
+// Question IDs mapped to sections (Enhanced 28-question system)
 export const QUESTION_TO_SECTION_MAP = {
-  // Relationship Context (Q1-Q3)
-  q1: 'RELATIONSHIP_CONTEXT',
-  q2: 'RELATIONSHIP_CONTEXT',
-  q3: 'RELATIONSHIP_CONTEXT',
+  // Getting Started (Q1-Q2) - User and loved one names
+  q1: 'RELATIONSHIP_CONTEXT',  // User's name
+  q2: 'RELATIONSHIP_CONTEXT',  // Loved one's name
 
-  // Core Personality (Q4-Q6)
-  q4: 'CORE_PERSONALITY',
-  q5: 'CORE_PERSONALITY',
-  q6: 'CORE_PERSONALITY',
+  // Relationship Context (Q3-Q6)
+  q3: 'RELATIONSHIP_CONTEXT',  // Who were they to you
+  q4: 'RELATIONSHIP_CONTEXT',  // When they passed
+  q5: 'RELATIONSHIP_CONTEXT',  // How they passed (optional)
+  q6: 'RELATIONSHIP_CONTEXT',  // Who is this for
 
-  // Communication Style (Q7-Q9)
-  q7: 'COMMUNICATION_STYLE',
-  q8: 'COMMUNICATION_STYLE',
-  q9: 'COMMUNICATION_STYLE',
+  // Core Personality (Q7-Q11)
+  q7: 'CORE_PERSONALITY',   // Personality description
+  q8: 'CORE_PERSONALITY',   // At their best
+  q9: 'CORE_PERSONALITY',   // Quirks and habits
+  q10: 'CORE_PERSONALITY',  // Their laugh
+  q11: 'CORE_PERSONALITY',  // Daily rituals
 
-  // Values & Beliefs (Q10-Q12)
-  q10: 'VALUES_BELIEFS',
-  q11: 'VALUES_BELIEFS',
-  q12: 'VALUES_BELIEFS',
+  // Communication Style (Q12-Q15)
+  q12: 'COMMUNICATION_STYLE',  // How they talked
+  q13: 'COMMUNICATION_STYLE',  // How they comforted
+  q14: 'COMMUNICATION_STYLE',  // Phrases and sayings
+  q15: 'COMMUNICATION_STYLE',  // Showing love without words
 
-  // Shared Memories (Q13-Q15)
-  q13: 'SHARED_MEMORIES',
-  q14: 'SHARED_MEMORIES',
-  q15: 'SHARED_MEMORIES',
+  // Values & Beliefs (Q16-Q19)
+  q16: 'VALUES_BELIEFS',  // What mattered most
+  q17: 'VALUES_BELIEFS',  // Hard times beliefs
+  q18: 'VALUES_BELIEFS',  // What to remember
+  q19: 'VALUES_BELIEFS',  // Flaws and frustrations
 
-  // Boundaries & Safety (Q16-Q17)
-  q16: 'BOUNDARIES_SAFETY',
-  q17: 'BOUNDARIES_SAFETY',
+  // Shared Memories (Q20-Q23)
+  q20: 'SHARED_MEMORIES',  // Important memory
+  q21: 'SHARED_MEMORIES',  // Moments shared often
+  q22: 'SHARED_MEMORIES',  // If walked in right now
+  q23: 'SHARED_MEMORIES',  // Photos/videos
 
-  // Present-Day Awareness (Q18-Q19)
-  q18: 'PRESENT_AWARENESS',
-  q19: 'PRESENT_AWARENESS',
+  // Boundaries & Safety (Q24-Q25)
+  q24: 'BOUNDARIES_SAFETY',  // Topics to avoid
+  q25: 'BOUNDARIES_SAFETY',  // Would feel wrong
 
-  // Final Tuning (Q20-Q21)
-  q20: 'FINAL_TUNING',
-  q21: 'FINAL_TUNING',
+  // Present-Day Awareness (Q26-Q27)
+  q26: 'PRESENT_AWARENESS',  // Awareness level
+  q27: 'PRESENT_AWARENESS',  // How to talk about presence
+
+  // Final Tuning (Q28)
+  q28: 'FINAL_TUNING',  // Anything else
 };
 
 // Human-readable labels for each question (used in hydrated output)
 export const QUESTION_LABELS = {
-  q1: 'Who this persona represents and their relationship to the creator',
-  q2: 'Who this persona is intended for',
-  q3: 'One-sentence relationship description',
-  q4: 'Personality description',
-  q5: 'What they were like at their best',
-  q6: 'Quirks, habits, and memorable traits',
-  q7: 'How they usually spoke',
-  q8: 'How they comforted when upset',
-  q9: 'Common phrases or expressions',
-  q10: 'What mattered most to them in life',
-  q11: 'Their beliefs about getting through hard times',
-  q12: 'What they would want the user to remember',
-  q13: 'An especially important memory',
-  q14: 'Types of moments shared most often',
-  q15: 'Photos or videos that capture who they were',
-  q16: 'Topics the persona should avoid',
-  q17: 'Things that would feel inaccurate or upsetting if said',
-  q18: 'Awareness level about their passing',
-  q19: 'How they should talk about being here now',
-  q20: 'Additional context for the persona to understand',
-  q21: 'Creator preference for future additions',
+  q1: 'User\'s name',
+  q2: 'Loved one\'s name and nicknames',
+  q3: 'Relationship to the user',
+  q4: 'When they passed',
+  q5: 'How they passed',
+  q6: 'Who this persona is intended for',
+  q7: 'Personality description',
+  q8: 'What they were like at their best',
+  q9: 'Quirks, habits, and memorable traits',
+  q10: 'Their laugh and what made them laugh',
+  q11: 'Daily rituals and routines',
+  q12: 'How they usually spoke',
+  q13: 'How they comforted when upset',
+  q14: 'Common phrases or expressions',
+  q15: 'How they showed love without words',
+  q16: 'What mattered most to them in life',
+  q17: 'Their beliefs about getting through hard times',
+  q18: 'What they would want the user to remember',
+  q19: 'Their flaws and frustrations',
+  q20: 'An especially important memory',
+  q21: 'Types of moments shared most often',
+  q22: 'What they would do if walked in right now',
+  q23: 'Photos or videos that capture who they were',
+  q24: 'Topics the persona should avoid',
+  q25: 'Things that would feel inaccurate or upsetting if said',
+  q26: 'Awareness level about their passing',
+  q27: 'How they should talk about being here now',
+  q28: 'Additional context for the persona to understand',
 };
 
-// Awareness level mappings (Q18 options)
+// Awareness level mappings (Q26 options)
 export const AWARENESS_LEVELS = {
   fully_aware: 'Fully aware — may acknowledge death gently, never dramatize, never lead with it',
   gently_aware: 'Gently aware — use indirect language only, avoid explicit references',

@@ -1,5 +1,8 @@
 // Everspeak App - Version 2024.12.28.1 (with wizard persistence)
-console.log('📦 App.js loaded - VERSION 2024.12.28.9 - If you see this, cache is cleared!');
+console.log('📦 App.js loaded - VERSION 2024.12.28.14 - Enhanced 28-question wizard!');
+
+// Feature flag for new wizard engine (set to true to use dynamic 28-question wizard)
+const USE_NEW_WIZARD_ENGINE = true;
 
 // State
 let personas = [];
@@ -528,6 +531,48 @@ async function handleBeginConversationFromBanner() {
   // Reload wizard inputs from persona or generate first message
   // For now, we'll just send a simple first message
   await generateFirstMessageFromBanner();
+}
+
+// Global navigation function (callable by wizard engine)
+function navigateToPage(pageName) {
+  const allPages = [
+    document.getElementById('page-home'),
+    document.getElementById('page-conversation'),
+    document.getElementById('page-journal'),
+    document.getElementById('page-memories'),
+    document.getElementById('page-personas'),
+    document.getElementById('page-settings')
+  ];
+
+  // Hide all pages
+  allPages.forEach(page => {
+    if (page) page.style.display = 'none';
+  });
+
+  // Show target page
+  const pageElement = document.getElementById(`page-${pageName}`);
+  if (pageElement) {
+    if (pageName === 'conversation') {
+      pageElement.style.display = 'flex';
+    } else {
+      pageElement.style.display = 'block';
+    }
+  }
+
+  // Update tab bar active state
+  const tabItems = document.querySelectorAll('.tab-item');
+  tabItems.forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`.tab-item[data-page="${pageName}"]`);
+  if (activeTab) activeTab.classList.add('active');
+
+  // Update sidebar nav active state
+  const navLinks = document.querySelectorAll('.nav-link');
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.dataset.page === pageName) link.classList.add('active');
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Setup Navigation
@@ -1700,12 +1745,22 @@ async function handleBulkImport(event) {
 }
 
 // Open wizard modal
-function openWizardModal() {
+async function openWizardModal() {
   console.log('[Wizard] openWizardModal called');
   if (!selectedPersonaId) {
     showError('Please select a persona first');
     return;
   }
+
+  // Use new wizard engine if flag is set
+  if (USE_NEW_WIZARD_ENGINE && window.wizardEngine) {
+    console.log('[Wizard] Using new WizardEngine with 28 questions');
+    await openNewWizard();
+    return;
+  }
+
+  // Fall back to old wizard
+  console.log('[Wizard] Using legacy wizard');
 
   // Hide bottom tab bar during wizard to prevent touch interference
   const bottomTabBar = document.getElementById('bottom-tab-bar');
@@ -1723,6 +1778,28 @@ function openWizardModal() {
     // Add visible class after a brief delay for CSS transition
     setTimeout(() => wizardModal.classList.add('visible'), 10);
   }
+}
+
+// Open new dynamic wizard
+async function openNewWizard() {
+  const engine = window.wizardEngine;
+
+  // Initialize if not already done
+  if (engine.questions.length === 0) {
+    await engine.init();
+  }
+
+  // Inject wizard HTML if not present
+  let wizardContainer = document.getElementById('new-wizard-container');
+  if (!wizardContainer) {
+    wizardContainer = document.createElement('div');
+    wizardContainer.id = 'new-wizard-container';
+    wizardContainer.innerHTML = engine.generateWizardHTML();
+    document.body.appendChild(wizardContainer);
+  }
+
+  // Open the wizard
+  engine.open(selectedPersonaId);
 }
 
 // Close wizard modal

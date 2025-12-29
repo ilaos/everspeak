@@ -151,3 +151,148 @@ fc86936 Fix wizard step visibility - add .active class for CSS opacity
 1e96220 Fix wizard modal visibility - add .visible class for CSS opacity transition
 f1450fc Fix rate limiter validation error and expand CORS origins (deployed)
 ```
+
+---
+
+## Session: December 28, 2025 (Continued)
+
+### Summary
+This session focused on fixing the wizard persistence/resume feature, breathing exercise, and mobile UX issues.
+
+---
+
+## Fixes Implemented
+
+### 5. Wizard Resume/Continue Feature
+**Problem:** "Continue where you left off" button wasn't appearing for users who started a persona but quit mid-wizard.
+
+**Root Cause:** Multiple issues:
+1. Home button always created a NEW persona instead of checking for existing incomplete one
+2. `saveWizardProgress()` only saved when step > 1, missing initial persona creation
+3. Calling non-existent `showWizardModal()` instead of `openWizardModal()`
+
+**Solution:**
+- Check localStorage for saved progress before creating new persona
+- Save progress at step 1 immediately after persona creation
+- Fix function name to `openWizardModal()`
+
+**Commits:** `f04364f`, `3b6dcad`, `310f96a`
+
+---
+
+### 6. Cache-Busting Version Strings
+**Problem:** Users not seeing deployed changes.
+
+**Solution:** Added version query strings to script/style references in `index.html`:
+```html
+<link rel="stylesheet" href="/styles.css?v=20241228-4">
+<script src="/app.js?v=20241228-9"></script>
+```
+
+**Commit:** `5801a7f`
+
+---
+
+### 7. Breathing Exercise Screen Fix
+**Problem:** Breathing exercise between wizard questions was invisible (12-second blank screen).
+
+**Root Cause:** CSS had `opacity: 0` by default, requiring `.visible` class which was never added.
+
+**Solution:**
+```javascript
+// Show breathing screen
+breathingScreen.style.display = 'flex';
+setTimeout(() => breathingScreen.classList.add('visible'), 10);
+
+// Cleanup
+breathingScreen.classList.remove('visible');
+breathingScreen.style.display = 'none';
+```
+
+**Commit:** `dcb085f`
+
+---
+
+### 8. Skip Button for Breathing Exercise
+**Problem:** Users wanted ability to skip the 12-second breathing exercise.
+
+**Solution:** Added skip button to breathing screen HTML and CSS, with JavaScript handler to immediately resolve the promise.
+
+**Commit:** `3189c72`
+
+---
+
+### 9. Wizard Button Sizing
+**Problem:** "Continue where you left off" button was smaller than other welcome buttons.
+
+**Solution:** Updated CSS to match all three buttons:
+```css
+.btn-wizard-continue {
+  padding: 16px 32px;
+  font-size: 1.1rem;
+}
+```
+
+**Commit:** `09660a1`
+
+---
+
+### 10. Wizard Step Fade-In Transition
+**Problem:** Next question appeared abruptly after breathing screen.
+
+**Root Cause:** CSS transitions don't work from `display: none`. The `.active` class was added simultaneously with `display: block`.
+
+**Solution:**
+```javascript
+// First show element, then add active class after delay for transition
+step.style.display = 'block';
+setTimeout(() => step.classList.add('active'), 20);
+```
+
+**Commit:** `92723e2`
+
+---
+
+### 11. Mobile Double-Tap Fix
+**Problem:** On mobile, Next button required two taps - first tap triggered bottom tab bar to appear.
+
+**Root Cause:** `touchstart` event listener showed hidden tab bar on ANY tap, causing layout shift.
+
+**Solution:** Hide bottom tab bar entirely when wizard is open:
+```javascript
+// In openWizardModal()
+const bottomTabBar = document.getElementById('bottom-tab-bar');
+if (bottomTabBar) bottomTabBar.style.display = 'none';
+
+// In closeWizardModal()
+if (bottomTabBar) bottomTabBar.style.display = 'flex';
+```
+
+**Commit:** `93fc5a1`
+
+---
+
+### 12. Bulk Feature Commit
+**Features committed:**
+- Onboarding flow (21 questions, persistence, controller)
+- Voice recording and transcription components
+- Persona engine for AI hydration
+- Safety and TTS services
+- Updated client navigation and screens
+
+**Commit:** `d5ce519` (30 files, +6446 lines)
+
+---
+
+## Current Version
+`app.js v2024.12.28.9`
+`styles.css v20241228-4`
+
+---
+
+## Key Lessons Learned
+
+1. **Don't blame browser cache first** - Check CSS opacity, visibility, and class requirements
+2. **CSS transitions require state change** - Can't transition from `display: none`
+3. **Mobile touch events can interfere** - Auto-hide features can steal first tap
+4. **Always add debug logging** - Console logs reveal exactly where flow breaks

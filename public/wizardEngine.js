@@ -175,15 +175,18 @@ class WizardEngine {
       <div class="voice-recorder-container" data-field="${question.fieldId}">
         ${question.example ? `<p class="voice-guidance">${question.example}</p>` : ''}
 
-        <!-- Default state: mic button -->
-        <div class="voice-recorder-default">
+        <!-- Ready state: recording bar ready to start -->
+        <div class="voice-recorder-ready">
           <button type="button" class="btn-start-recording" data-step="${stepNumber}">
             <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
               <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
             </svg>
           </button>
-          <p class="tap-to-record">Tap to record</p>
+          <div class="ready-text">
+            <span class="ready-label">Tap to record</span>
+          </div>
+          <div class="ready-spacer"></div>
         </div>
 
         <!-- Recording state -->
@@ -593,7 +596,7 @@ class WizardEngine {
       // Start timer
       const container = document.querySelector(`.wizard-step[data-step="${stepNumber}"] .voice-recorder-container`);
       if (container) {
-        container.querySelector('.voice-recorder-default').style.display = 'none';
+        container.querySelector('.voice-recorder-ready').style.display = 'none';
         container.querySelector('.voice-recorder-recording').style.display = 'flex';
 
         const timerEl = container.querySelector('.recording-timer');
@@ -663,7 +666,7 @@ class WizardEngine {
     } catch (error) {
       console.error('Transcription error:', error);
       container.querySelector('.voice-recorder-processing').style.display = 'none';
-      container.querySelector('.voice-recorder-default').style.display = 'flex';
+      container.querySelector('.voice-recorder-ready').style.display = 'flex';
       alert('Sorry, we couldn\'t transcribe your recording. Please try again or type your answer.');
     }
   }
@@ -777,7 +780,7 @@ class WizardEngine {
         const container = btn.closest('.voice-recorder-container');
         if (container) {
           container.querySelector('.voice-recorder-complete').style.display = 'none';
-          container.querySelector('.voice-recorder-default').style.display = 'flex';
+          container.querySelector('.voice-recorder-ready').style.display = 'flex';
           const hiddenInput = container.querySelector('input[type="hidden"]');
           if (hiddenInput) hiddenInput.value = '';
         }
@@ -789,7 +792,7 @@ class WizardEngine {
       btn.onclick = () => {
         const container = btn.closest('.voice-recorder-container');
         if (container) {
-          container.querySelector('.voice-recorder-default').style.display = 'none';
+          container.querySelector('.voice-recorder-ready').style.display = 'none';
           container.querySelector('.type-fallback').style.display = 'none';
           container.querySelector('.text-input-fallback').style.display = 'block';
         }
@@ -801,7 +804,7 @@ class WizardEngine {
         const container = btn.closest('.voice-recorder-container');
         if (container) {
           container.querySelector('.text-input-fallback').style.display = 'none';
-          container.querySelector('.voice-recorder-default').style.display = 'flex';
+          container.querySelector('.voice-recorder-ready').style.display = 'flex';
           container.querySelector('.type-fallback').style.display = 'block';
         }
       };

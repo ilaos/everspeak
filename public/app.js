@@ -1,5 +1,5 @@
 // Everspeak App - Version 2024.12.28.1 (with wizard persistence)
-console.log('📦 App.js loaded - VERSION 2024.12.28.3 - If you see this, cache is cleared!');
+console.log('📦 App.js loaded - VERSION 2024.12.28.4 - If you see this, cache is cleared!');
 
 // State
 let personas = [];
@@ -859,7 +859,7 @@ function setupEventListeners() {
             }
 
             // Open wizard and show continue button
-            showWizardModal();
+            openWizardModal();
             return;
           }
         }
@@ -895,11 +895,18 @@ function setupEventListeners() {
 
           // Save initial progress with new persona ID so we can resume later
           wizardCurrentStep = 1;
-          saveWizardProgress();
-          console.log('[Home Wizard] Saved initial progress for new persona');
+          console.log('[Home Wizard] About to save initial progress...');
+          try {
+            saveWizardProgress();
+            console.log('[Home Wizard] Saved initial progress for new persona');
+          } catch (e) {
+            console.error('[Home Wizard] Error saving progress:', e);
+          }
 
           // Open wizard modal directly
-          showWizardModal();
+          console.log('[Home Wizard] About to show wizard modal...');
+          openWizardModal();
+          console.log('[Home Wizard] openWizardModal() called');
         } else {
           console.error('Failed to create persona:', response.status);
           alert('Unable to start wizard. Please try again.');

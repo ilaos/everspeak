@@ -2323,18 +2323,33 @@ async function handleWizardSubmit(event) {
     loadingEl.style.display = 'block';
   }
   
-  // Collect wizard inputs
-  const wizardInputs = {
-    user_name: document.getElementById('wizard-user-name').value.trim(),
-    first_name: document.getElementById('wizard-first-name').value.trim(),
-    relationship: document.getElementById('wizard-relationship').value.trim(),
-    date_passed: document.getElementById('wizard-date-passed').value.trim(),
-    humor: document.getElementById('wizard-humor').value.trim(),
-    relationship_end: document.getElementById('wizard-relationship-end').value.trim(),
-    circumstances: document.getElementById('wizard-circumstances').value.trim(),
-    memories: document.getElementById('wizard-memories').value.trim(),
-    conversations: document.getElementById('wizard-conversations').value.trim()
+  // Helper to get value from voice recorder (hidden input) OR text fallback
+  const getWizardValue = (fieldId) => {
+    // First check hidden input (voice recording transcription)
+    const hiddenInput = document.getElementById(fieldId);
+    if (hiddenInput?.value?.trim()) return hiddenInput.value.trim();
+
+    // Then check text fallback input
+    const textFallback = document.querySelector(`[data-testid="input-${fieldId}-text"]`);
+    if (textFallback?.value?.trim()) return textFallback.value.trim();
+
+    return '';
   };
+
+  // Collect wizard inputs (supports both voice and text input)
+  const wizardInputs = {
+    user_name: document.getElementById('wizard-user-name')?.value?.trim() || '',
+    first_name: getWizardValue('wizard-first-name'),
+    relationship: getWizardValue('wizard-relationship'),
+    date_passed: getWizardValue('wizard-date-passed'),
+    humor: getWizardValue('wizard-humor'),
+    relationship_end: getWizardValue('wizard-relationship-end'),
+    circumstances: getWizardValue('wizard-circumstances'),
+    memories: getWizardValue('wizard-memories'),
+    conversations: getWizardValue('wizard-conversations')
+  };
+
+  console.log('[Wizard Submit] Collected inputs:', wizardInputs);
   
   try {
     const response = await fetch(`/api/personas/${selectedPersonaId}/wizard`, {

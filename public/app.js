@@ -1,5 +1,5 @@
 // Everspeak App - Version 2024.12.28.1 (with wizard persistence)
-console.log('📦 App.js loaded - VERSION 2024.12.28.1 - If you see this, cache is cleared!');
+console.log('📦 App.js loaded - VERSION 2024.12.28.3 - If you see this, cache is cleared!');
 
 // State
 let personas = [];
@@ -274,8 +274,14 @@ const WIZARD_PROGRESS_KEY = 'everspeak_wizard_progress';
 function saveWizardProgress() {
   console.log('[Wizard Persistence] saveWizardProgress called, step:', wizardCurrentStep, 'personaId:', selectedPersonaId);
 
-  if (!selectedPersonaId || wizardCurrentStep <= 1) {
-    console.log('[Wizard Persistence] Skipping save - no persona or step <= 1');
+  if (!selectedPersonaId) {
+    console.log('[Wizard Persistence] Skipping save - no persona selected');
+    return;
+  }
+
+  // Save even at step 1 so we can track the persona
+  if (wizardCurrentStep < 1) {
+    console.log('[Wizard Persistence] Skipping save - step < 1');
     return;
   }
 
@@ -887,8 +893,10 @@ function setupEventListeners() {
             personaDropdown.value = newPersona.id;
           }
 
-          // Clear any old wizard progress since we're starting fresh
-          clearWizardProgress();
+          // Save initial progress with new persona ID so we can resume later
+          wizardCurrentStep = 1;
+          saveWizardProgress();
+          console.log('[Home Wizard] Saved initial progress for new persona');
 
           // Open wizard modal directly
           showWizardModal();

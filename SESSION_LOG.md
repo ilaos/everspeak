@@ -587,18 +587,20 @@ OPENAI_API_KEY=... (TTS only)
 
 ## Key Lesson Learned (NEW)
 
-5. **Voice recorder has logic in TWO files** - When changing voice recorder UI:
-   - `wizardEngine.js` generates the HTML structure
+5. **Voice recorder has logic in THREE files** - When changing voice recorder UI:
+   - `wizardEngine.js` generates HTML dynamically (for API-driven wizard)
    - `app.js` controls the behavior and state transitions
-   - **Both must be updated together** or selectors won't match
+   - `index.html` has **hardcoded HTML** for an older wizard version
+   - **All THREE must be updated together** or selectors won't match
 
-This caused the "still seeing mic icon" bug - wizardEngine.js had the new class name but app.js was still looking for the old one.
+This caused the "still seeing mic icon" bug - we updated wizardEngine.js and app.js but missed the hardcoded HTML in index.html.
 
 ---
 
 ## Git Commits This Session
 
 ```
+a0a8c8f Fix voice recorder: update hardcoded HTML in index.html to use .voice-recorder-ready
 2398bf9 Fix voice recorder: update app.js to use .voice-recorder-ready class
 1c2328e Bump cache version strings to 20241229-1
 6e3bf34 Change voice recorder to show horizontal bar by default

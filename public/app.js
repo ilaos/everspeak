@@ -3178,20 +3178,35 @@ async function startVoiceRecording(container) {
   }
 
   try {
+    // Show "Get ready" state before requesting permission
+    showGetReadyState(container);
+
     voiceRecorderStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // Brief delay after permission granted so user knows recording is about to start
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Determine best audio format for playback compatibility
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : 'audio/mp4';
 
     activeVoiceRecorder = {
       container,
-      mediaRecorder: new MediaRecorder(voiceRecorderStream),
+      mediaRecorder: new MediaRecorder(voiceRecorderStream, { mimeType }),
       audioChunks: []
     };
 
     activeVoiceRecorder.mediaRecorder.addEventListener('dataavailable', (event) => {
-      activeVoiceRecorder.audioChunks.push(event.data);
+      if (event.data.size > 0) {
+        activeVoiceRecorder.audioChunks.push(event.data);
+      }
     });
 
     activeVoiceRecorder.mediaRecorder.addEventListener('stop', async () => {
-      const audioBlob = new Blob(activeVoiceRecorder.audioChunks, { type: 'audio/webm' });
+      const audioBlob = new Blob(activeVoiceRecorder.audioChunks, { type: mimeType });
 
       // Show preview state so user can listen before transcribing
       showPreviewState(container, audioBlob);
@@ -3201,7 +3216,8 @@ async function startVoiceRecording(container) {
       voiceRecorderStream = null;
     });
 
-    activeVoiceRecorder.mediaRecorder.start();
+    // Start recording with timeslice to ensure data is captured
+    activeVoiceRecorder.mediaRecorder.start(100);
 
     // Update UI to recording state
     showRecordingState(container);
@@ -3219,6 +3235,20 @@ async function startVoiceRecording(container) {
   } catch (error) {
     console.error('[Voice Recorder] Failed to start recording:', error);
     handleRecordingError(error);
+  }
+}
+
+// Show "Get ready" state while waiting for permission
+function showGetReadyState(container) {
+  const defaultState = container.querySelector('.voice-recorder-default');
+  const recordingState = container.querySelector('.voice-recorder-recording');
+  const timerEl = container.querySelector('.recording-timer');
+
+  // Temporarily show a "preparing" state
+  if (defaultState) defaultState.style.display = 'none';
+  if (recordingState) {
+    recordingState.style.display = 'flex';
+    if (timerEl) timerEl.textContent = 'Get ready...';
   }
 }
 
@@ -3348,6 +3378,7 @@ function showCompleteState(container, transcription) {
 function resetVoiceRecorder(container) {
   const defaultState = container.querySelector('.voice-recorder-default');
   const recordingState = container.querySelector('.voice-recorder-recording');
+  const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
   const typeFallback = container.querySelector('.type-fallback');
@@ -3355,6 +3386,7 @@ function resetVoiceRecorder(container) {
 
   if (defaultState) defaultState.style.display = 'flex';
   if (recordingState) recordingState.style.display = 'none';
+  if (previewState) previewState.style.display = 'none';
   if (processingState) processingState.style.display = 'none';
   if (completeState) completeState.style.display = 'none';
   if (typeFallback) typeFallback.style.display = 'block';
@@ -3364,6 +3396,16 @@ function resetVoiceRecorder(container) {
   const hiddenInput = container.querySelector('input[type="hidden"]');
   if (hiddenInput) {
     hiddenInput.value = '';
+  }
+
+  // Clear stored audio blob
+  container._audioBlob = null;
+
+  // Reset audio player
+  const audioPlayer = container.querySelector('.audio-preview-player');
+  if (audioPlayer) {
+    audioPlayer.pause();
+    audioPlayer.src = '';
   }
 
   activeVoiceRecorder = null;

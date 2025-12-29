@@ -1,3 +1,9 @@
+// Polyfill for Node.js < 20 (required for OpenAI SDK file uploads)
+import { File as NodeFile } from 'node:buffer';
+if (!globalThis.File) {
+  globalThis.File = NodeFile;
+}
+
 import OpenAI from 'openai';
 import { AppError } from '../utils/errorHandler.js';
 import fs from 'node:fs';

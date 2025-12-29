@@ -1,8 +1,9 @@
 // Everspeak App - Version 2024.12.28.1 (with wizard persistence)
-console.log('📦 App.js loaded - VERSION 2024.12.28.14 - Enhanced 28-question wizard!');
+console.log('📦 App.js loaded - VERSION 2024.12.28.15 - Mic button removed, old wizard restored');
 
-// Feature flag for new wizard engine (set to true to use dynamic 28-question wizard)
-const USE_NEW_WIZARD_ENGINE = true;
+// Feature flag for new wizard engine (set to false until properly tested)
+// TODO: Enable once new wizard engine is fully working
+const USE_NEW_WIZARD_ENGINE = false;
 
 // State
 let personas = [];

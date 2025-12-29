@@ -3122,6 +3122,113 @@ button[type="submit"]:active {
   color: white;
 }
 
+/* Preview state - listen before transcribing */
+.voice-recorder-preview {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: #faf8f5;
+  border-radius: 12px;
+}
+
+.audio-preview-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e8e0d5;
+}
+
+.btn-play-preview {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #A68966;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.btn-play-preview:hover {
+  background: #8c724f;
+  transform: scale(1.05);
+}
+
+.btn-play-preview svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.audio-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #e8e0d5;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.audio-progress-fill {
+  height: 100%;
+  background: #A68966;
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.audio-duration {
+  font-size: 0.85rem;
+  color: #8b7d6f;
+  min-width: 70px;
+  text-align: right;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-re-record-preview {
+  background: transparent;
+  border: 1px solid #C9BCA8;
+  color: #8b7d6f;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-re-record-preview:hover {
+  background: #f5f0ea;
+  border-color: #a89a8a;
+}
+
+.btn-use-recording {
+  background: #A68966;
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-use-recording:hover {
+  background: #8c724f;
+}
+
 /* Processing state */
 .voice-recorder-processing {
   display: none;

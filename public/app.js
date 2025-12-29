@@ -2976,6 +2976,11 @@ function initializeVoiceRecorders() {
     const typeInsteadBtn = container.querySelector('.btn-type-instead');
     const useVoiceBtn = container.querySelector('.btn-use-voice');
 
+    // Inject preview state if missing
+    if (!container.querySelector('.voice-recorder-preview')) {
+      injectPreviewState(container);
+    }
+
     // Start recording
     if (startBtn) {
       startBtn.addEventListener('click', () => startVoiceRecording(container));
@@ -2986,7 +2991,7 @@ function initializeVoiceRecorders() {
       stopBtn.addEventListener('click', () => stopVoiceRecording(container));
     }
 
-    // Re-record
+    // Re-record (from complete state)
     if (reRecordBtn) {
       reRecordBtn.addEventListener('click', () => resetVoiceRecorder(container));
     }
@@ -3001,9 +3006,167 @@ function initializeVoiceRecorders() {
       useVoiceBtn.addEventListener('click', () => hideTextFallback(container));
     }
 
+    // Preview state buttons
+    setupPreviewButtons(container);
+
     // Slide to cancel (touch events)
     setupSlideToCancel(container);
   });
+}
+
+// Inject preview state HTML if not present
+function injectPreviewState(container) {
+  const processingState = container.querySelector('.voice-recorder-processing');
+  if (!processingState) return;
+
+  const previewHTML = `
+    <div class="voice-recorder-preview" style="display: none;">
+      <div class="audio-preview-container">
+        <audio class="audio-preview-player"></audio>
+        <button type="button" class="btn-play-preview">
+          <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
+        <span class="audio-duration">0:00</span>
+      </div>
+      <div class="preview-actions">
+        <button type="button" class="btn-re-record-preview">Re-record</button>
+        <button type="button" class="btn-use-recording">Use this recording</button>
+      </div>
+    </div>
+  `;
+
+  processingState.insertAdjacentHTML('beforebegin', previewHTML);
+}
+
+// Setup preview state button handlers
+function setupPreviewButtons(container) {
+  const playBtn = container.querySelector('.btn-play-preview');
+  const reRecordBtn = container.querySelector('.btn-re-record-preview');
+  const useRecordingBtn = container.querySelector('.btn-use-recording');
+  const audioPlayer = container.querySelector('.audio-preview-player');
+
+  if (playBtn && audioPlayer) {
+    playBtn.addEventListener('click', () => toggleAudioPlayback(container));
+
+    // Update progress bar during playback
+    audioPlayer.addEventListener('timeupdate', () => updateAudioProgress(container));
+    audioPlayer.addEventListener('ended', () => resetAudioPlayback(container));
+  }
+
+  if (reRecordBtn) {
+    reRecordBtn.addEventListener('click', () => {
+      // Clear the stored audio blob
+      container._audioBlob = null;
+      resetVoiceRecorder(container);
+    });
+  }
+
+  if (useRecordingBtn) {
+    useRecordingBtn.addEventListener('click', () => {
+      // Proceed with transcription
+      const audioBlob = container._audioBlob;
+      if (audioBlob) {
+        showProcessingState(container);
+        processVoiceRecording(container, audioBlob);
+      }
+    });
+  }
+}
+
+// Toggle audio playback
+function toggleAudioPlayback(container) {
+  const audioPlayer = container.querySelector('.audio-preview-player');
+  const playIcon = container.querySelector('.play-icon');
+  const pauseIcon = container.querySelector('.pause-icon');
+
+  if (!audioPlayer) return;
+
+  if (audioPlayer.paused) {
+    audioPlayer.play();
+    if (playIcon) playIcon.style.display = 'none';
+    if (pauseIcon) pauseIcon.style.display = 'block';
+  } else {
+    audioPlayer.pause();
+    if (playIcon) playIcon.style.display = 'block';
+    if (pauseIcon) pauseIcon.style.display = 'none';
+  }
+}
+
+// Update audio progress bar
+function updateAudioProgress(container) {
+  const audioPlayer = container.querySelector('.audio-preview-player');
+  const progressFill = container.querySelector('.audio-progress-fill');
+  const durationSpan = container.querySelector('.audio-duration');
+
+  if (!audioPlayer || !progressFill) return;
+
+  const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+  progressFill.style.width = `${percent}%`;
+
+  // Update duration display
+  if (durationSpan) {
+    const current = formatTime(audioPlayer.currentTime);
+    const total = formatTime(audioPlayer.duration);
+    durationSpan.textContent = `${current} / ${total}`;
+  }
+}
+
+// Reset audio playback when ended
+function resetAudioPlayback(container) {
+  const audioPlayer = container.querySelector('.audio-preview-player');
+  const playIcon = container.querySelector('.play-icon');
+  const pauseIcon = container.querySelector('.pause-icon');
+  const progressFill = container.querySelector('.audio-progress-fill');
+
+  if (audioPlayer) audioPlayer.currentTime = 0;
+  if (progressFill) progressFill.style.width = '0%';
+  if (playIcon) playIcon.style.display = 'block';
+  if (pauseIcon) pauseIcon.style.display = 'none';
+}
+
+// Format time as M:SS
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Show preview state with audio
+function showPreviewState(container, audioBlob) {
+  const defaultState = container.querySelector('.voice-recorder-default');
+  const recordingState = container.querySelector('.voice-recorder-recording');
+  const previewState = container.querySelector('.voice-recorder-preview');
+  const processingState = container.querySelector('.voice-recorder-processing');
+  const completeState = container.querySelector('.voice-recorder-complete');
+  const typeFallback = container.querySelector('.type-fallback');
+  const audioPlayer = container.querySelector('.audio-preview-player');
+  const durationSpan = container.querySelector('.audio-duration');
+
+  // Store the blob for later use
+  container._audioBlob = audioBlob;
+
+  // Create object URL for audio playback
+  if (audioPlayer && audioBlob) {
+    const audioUrl = URL.createObjectURL(audioBlob);
+    audioPlayer.src = audioUrl;
+
+    // Update duration when metadata loads
+    audioPlayer.addEventListener('loadedmetadata', () => {
+      if (durationSpan) {
+        durationSpan.textContent = formatTime(audioPlayer.duration);
+      }
+    }, { once: true });
+  }
+
+  if (defaultState) defaultState.style.display = 'none';
+  if (recordingState) recordingState.style.display = 'none';
+  if (previewState) previewState.style.display = 'flex';
+  if (processingState) processingState.style.display = 'none';
+  if (completeState) completeState.style.display = 'none';
+  if (typeFallback) typeFallback.style.display = 'none';
 }
 
 // Start voice recording
@@ -3029,7 +3192,9 @@ async function startVoiceRecording(container) {
 
     activeVoiceRecorder.mediaRecorder.addEventListener('stop', async () => {
       const audioBlob = new Blob(activeVoiceRecorder.audioChunks, { type: 'audio/webm' });
-      await processVoiceRecording(container, audioBlob);
+
+      // Show preview state so user can listen before transcribing
+      showPreviewState(container, audioBlob);
 
       // Stop all tracks
       voiceRecorderStream.getTracks().forEach(track => track.stop());
@@ -3068,9 +3233,7 @@ function stopVoiceRecording(container) {
       voiceRecorderTimer = null;
     }
 
-    // Show processing state
-    showProcessingState(container);
-
+    // Preview state will be shown by the mediaRecorder.onstop handler
     console.log('[Voice Recorder] Recording stopped for', container.dataset.field);
   }
 }

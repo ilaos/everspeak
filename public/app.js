@@ -3181,19 +3181,17 @@ function setupSlideToCancel(container) {
 
 // Handle recording errors
 function handleRecordingError(error) {
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const isChrome = /Chrome|CriOS/i.test(ua) && !/Edge|Edg/i.test(ua);
+  const isSafari = /Safari/i.test(ua) && !/Chrome|CriOS/i.test(ua);
+  const isFirefox = /Firefox|FxiOS/i.test(ua);
+
+  console.log('[Voice Recorder] Error:', error.name, 'Browser:', { isIOS, isAndroid, isChrome, isSafari, isFirefox });
 
   if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-    if (isMobile) {
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (isIOS) {
-        showError('Microphone access denied. Please go to Settings > Safari > Microphone, and allow access for this site.');
-      } else {
-        showError('Microphone access denied. Please tap the lock icon in your browser\'s address bar, enable Microphone, and refresh.');
-      }
-    } else {
-      showError('Microphone access denied. Please click the camera/microphone icon in your browser\'s address bar to enable access.');
-    }
+    showMicrophonePermissionHelp(isIOS, isAndroid, isChrome, isSafari);
   } else if (error.name === 'NotFoundError') {
     showError('No microphone found. Please connect a microphone and try again.');
   } else if (error.name === 'NotReadableError') {
@@ -3203,6 +3201,95 @@ function handleRecordingError(error) {
   } else {
     showError('Could not access microphone: ' + error.message);
   }
+}
+
+// Show helpful microphone permission modal
+function showMicrophonePermissionHelp(isIOS, isAndroid, isChrome, isSafari) {
+  let title = 'Microphone Access Needed';
+  let steps = [];
+
+  if (isIOS && isSafari) {
+    // iOS Safari
+    steps = [
+      'Open your iPhone/iPad <strong>Settings</strong> app',
+      'Scroll down and tap <strong>Safari</strong>',
+      'Tap <strong>Microphone</strong>',
+      'Select <strong>Allow</strong>',
+      'Return here and tap the mic button again'
+    ];
+  } else if (isIOS && isChrome) {
+    // iOS Chrome
+    steps = [
+      'Open your iPhone/iPad <strong>Settings</strong> app',
+      'Scroll down and tap <strong>Chrome</strong>',
+      'Enable <strong>Microphone</strong>',
+      'Return here and tap the mic button again'
+    ];
+  } else if (isAndroid && isChrome) {
+    // Android Chrome
+    steps = [
+      'Tap the <strong>lock icon</strong> (or tune icon) in the address bar',
+      'Tap <strong>Permissions</strong> or <strong>Site settings</strong>',
+      'Find <strong>Microphone</strong> and set it to <strong>Allow</strong>',
+      'Tap the mic button again'
+    ];
+  } else if (isAndroid) {
+    // Android other browsers
+    steps = [
+      'Tap the <strong>menu icon</strong> (⋮) in your browser',
+      'Go to <strong>Settings > Site settings > Microphone</strong>',
+      'Make sure this site is allowed',
+      'Tap the mic button again'
+    ];
+  } else {
+    // Desktop
+    steps = [
+      'Click the <strong>lock/camera icon</strong> in your address bar',
+      'Find <strong>Microphone</strong> and set it to <strong>Allow</strong>',
+      'Refresh the page if needed',
+      'Tap the mic button again'
+    ];
+  }
+
+  // Create and show modal
+  const modal = document.createElement('div');
+  modal.className = 'permission-help-modal';
+  modal.innerHTML = `
+    <div class="permission-help-content">
+      <h3>${title}</h3>
+      <p>To record your answer, please enable microphone access:</p>
+      <ol class="permission-steps">
+        ${steps.map(step => `<li>${step}</li>`).join('')}
+      </ol>
+      <div class="permission-help-actions">
+        <button type="button" class="btn-permission-dismiss">Got it</button>
+        <button type="button" class="btn-permission-type">I'll type instead</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Add event listeners
+  modal.querySelector('.btn-permission-dismiss').addEventListener('click', () => {
+    modal.remove();
+  });
+
+  modal.querySelector('.btn-permission-type').addEventListener('click', () => {
+    modal.remove();
+    // Find the active voice recorder and switch to text input
+    const activeContainer = document.querySelector('.wizard-step.active .voice-recorder-container');
+    if (activeContainer) {
+      showTextFallback(activeContainer);
+    }
+  });
+
+  // Close on background click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
 }
 
 // Get the current wizard step's input field

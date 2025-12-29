@@ -4354,3 +4354,122 @@ button[type="submit"]:active {
     display: none !important;
   }
 }
+
+/* ========================================
+   MICROPHONE PERMISSION HELP MODAL
+   ======================================== */
+
+.permission-help-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.permission-help-content {
+  background: #FAF8F5;
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.permission-help-content h3 {
+  color: #3d352c;
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.permission-help-content > p {
+  color: #5a4f42;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.permission-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  counter-reset: step-counter;
+}
+
+.permission-steps li {
+  position: relative;
+  padding-left: 36px;
+  margin-bottom: 14px;
+  color: #5a4f42;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.permission-steps li::before {
+  content: counter(step-counter);
+  counter-increment: step-counter;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #948979 0%, #7d7464 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.permission-steps li strong {
+  color: #3d352c;
+}
+
+.permission-help-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-permission-dismiss {
+  flex: 1;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #948979 0%, #7d7464 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-permission-dismiss:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(148, 137, 121, 0.4);
+}
+
+.btn-permission-type {
+  flex: 1;
+  padding: 14px 20px;
+  background: transparent;
+  color: #8b7d6f;
+  border: 1px solid #C9BCA8;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-permission-type:hover {
+  background: #f5f0ea;
+  border-color: #a89a8a;
+}

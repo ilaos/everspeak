@@ -4886,29 +4886,6 @@ button[type="submit"]:active {
   box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
 }
 
-/* Enhanced Breathing Circle Animation */
-.breathing-circle.inhale {
-  animation: breatheIn 4s ease-in-out forwards;
-}
-
-.breathing-circle.exhale {
-  animation: breatheOut 4s ease-in-out forwards;
-}
-
-.breathing-circle.hold {
-  /* Hold at current size */
-}
-
-@keyframes breatheIn {
-  from { transform: scale(1); }
-  to { transform: scale(1.4); }
-}
-
-@keyframes breatheOut {
-  from { transform: scale(1.4); }
-  to { transform: scale(1); }
-}
-
 /* Mobile Optimizations for Wizard */
 @media (max-width: 768px) {
   .wizard-section-progress {

@@ -5,6 +5,7 @@ import SetupWizardScreen from '../screens/SetupWizardScreen';
 import BulkImportScreen from '../screens/BulkImportScreen';
 import PersonaBoosterScreen from '../screens/PersonaBoosterScreen';
 import SnapshotsScreen from '../screens/SnapshotsScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 import { Colors } from '../constants/theme';
 
 export type RootStackParamList = {
@@ -22,6 +23,10 @@ export type RootStackParamList = {
     personaName: string;
   };
   Snapshots: {
+    personaId: string;
+    personaName: string;
+  };
+  Onboarding: {
     personaId: string;
     personaName: string;
   };
@@ -67,6 +72,14 @@ export default function RootNavigator() {
       <Stack.Screen
         name="Snapshots"
         component={SnapshotsScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Onboarding"
+        component={OnboardingScreen}
         options={{
           presentation: 'modal',
           headerShown: false,

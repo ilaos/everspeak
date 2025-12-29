@@ -1,10 +1,14 @@
 import express from 'express';
 import multer from 'multer';
+import path from 'path';
 import { testController } from '../controllers/testController.js';
 import { exampleController } from '../controllers/exampleController.js';
 import { handleMessage } from '../controllers/messageController.js';
 import { personaController } from '../controllers/personaController.js';
 import { transcriptionController } from '../controllers/transcriptionController.js';
+import { onboardingController } from '../controllers/onboardingController.js';
+import { personaEngineController } from '../controllers/personaEngineController.js';
+import { voiceController } from '../controllers/voiceController.js';
 import { validateExample } from '../utils/validation.js';
 import {
   listJournalEntries,
@@ -16,7 +20,7 @@ import {
 
 const router = express.Router();
 
-// Configure multer for audio file uploads
+// Configure multer for audio file uploads (transcription)
 const upload = multer({
   dest: 'uploads/',
   limits: {
@@ -28,6 +32,29 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Invalid audio format. Supported: webm, wav, mp3, m4a'));
+    }
+  }
+});
+
+// Configure multer for onboarding media uploads (photos, audio, video)
+const onboardingMediaUpload = multer({
+  dest: 'uploads/onboarding/',
+  limits: {
+    fileSize: 100 * 1024 * 1024 // 100MB limit for video files
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = [
+      // Photos
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif',
+      // Audio
+      'audio/webm', 'audio/wav', 'audio/mpeg', 'audio/mp4', 'audio/m4a', 'audio/aac',
+      // Video
+      'video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'
+    ];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file format. Supported: jpg, png, gif, webp, heic, mp3, wav, m4a, mp4, webm, mov, avi'));
     }
   }
 });
@@ -1293,5 +1320,454 @@ router.put('/journal/:id', updateJournalEntry);
  *         description: Journal entry not found
  */
 router.delete('/journal/:id', deleteJournalEntry);
+
+// Onboarding Routes (Voice-First Persona Creation)
+
+/**
+ * @swagger
+ * /api/onboarding/questions:
+ *   get:
+ *     summary: Get all onboarding questions
+ *     description: Retrieve the full structure of onboarding questions and sections
+ *     tags: [Onboarding]
+ *     responses:
+ *       200:
+ *         description: Questions retrieved successfully
+ */
+router.get('/onboarding/questions', onboardingController.getQuestions);
+
+/**
+ * @swagger
+ * /api/onboarding/questions/{questionId}:
+ *   get:
+ *     summary: Get a single question
+ *     description: Retrieve details for a specific onboarding question
+ *     tags: [Onboarding]
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The question ID (e.g., q1, q2, etc.)
+ *     responses:
+ *       200:
+ *         description: Question retrieved successfully
+ *       404:
+ *         description: Question not found
+ */
+router.get('/onboarding/questions/:questionId', onboardingController.getQuestion);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/onboarding:
+ *   get:
+ *     summary: Get all onboarding answers for a persona
+ *     description: Retrieve all answers and progress for a persona's onboarding
+ *     tags: [Onboarding]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     responses:
+ *       200:
+ *         description: Answers retrieved successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:personaId/onboarding', onboardingController.getPersonaAnswers);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/onboarding/progress:
+ *   get:
+ *     summary: Get onboarding progress for a persona
+ *     description: Get a summary of onboarding completion status
+ *     tags: [Onboarding]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     responses:
+ *       200:
+ *         description: Progress retrieved successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:personaId/onboarding/progress', onboardingController.getProgress);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/onboarding/{questionId}:
+ *   get:
+ *     summary: Get answer for a specific question
+ *     description: Retrieve the answer for a specific onboarding question
+ *     tags: [Onboarding]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Answer retrieved successfully
+ *       404:
+ *         description: Persona or question not found
+ */
+router.get('/personas/:personaId/onboarding/:questionId', onboardingController.getAnswer);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/onboarding/{questionId}:
+ *   put:
+ *     summary: Save or update an answer
+ *     description: Save or update the answer for a specific onboarding question. Supports incremental saves.
+ *     tags: [Onboarding]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               textResponse:
+ *                 type: string
+ *                 description: Text response (optional)
+ *               voiceTranscript:
+ *                 type: string
+ *                 description: Transcribed voice response (optional)
+ *               selectedOption:
+ *                 type: string
+ *                 description: Selected option value for select questions (optional)
+ *     responses:
+ *       200:
+ *         description: Answer saved successfully
+ *       404:
+ *         description: Persona or question not found
+ */
+router.put('/personas/:personaId/onboarding/:questionId', onboardingController.saveAnswer);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/onboarding/{questionId}/media:
+ *   post:
+ *     summary: Upload media for an answer
+ *     description: Upload a photo, audio, or video file for a specific question
+ *     tags: [Onboarding]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *               - mediaType
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *               mediaType:
+ *                 type: string
+ *                 enum: [photos, audio, video]
+ *     responses:
+ *       201:
+ *         description: Media uploaded successfully
+ *       400:
+ *         description: Invalid file or media type
+ *       404:
+ *         description: Persona or question not found
+ */
+router.post('/personas/:personaId/onboarding/:questionId/media', onboardingMediaUpload.single('file'), handleMulterError, onboardingController.uploadMedia);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/onboarding/{questionId}/media/{mediaId}:
+ *   delete:
+ *     summary: Remove media from an answer
+ *     description: Remove a previously uploaded media file
+ *     tags: [Onboarding]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: mediaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mediaType
+ *             properties:
+ *               mediaType:
+ *                 type: string
+ *                 enum: [photos, audio, video]
+ *     responses:
+ *       200:
+ *         description: Media removed successfully
+ *       404:
+ *         description: Persona, question, or media not found
+ */
+router.delete('/personas/:personaId/onboarding/:questionId/media/:mediaId', onboardingController.deleteMedia);
+
+// Persona Engine Routes (Hydration & Prompt Generation)
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/hydrate:
+ *   get:
+ *     summary: Generate hydrated system prompt for a persona
+ *     description: Assembles the full persona system prompt by injecting onboarding answers. Useful for testing.
+ *     tags: [Persona Engine]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *       - in: query
+ *         name: includePrompt
+ *         schema:
+ *           type: string
+ *           enum: ['true', 'false']
+ *           default: 'false'
+ *         description: Whether to include the full prompt text in response
+ *     responses:
+ *       200:
+ *         description: Prompt hydrated successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:personaId/hydrate', personaEngineController.hydratePrompt);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/hydrate/preview:
+ *   get:
+ *     summary: Preview hydration status for a persona
+ *     description: Get a lightweight summary of which sections have content and validation status
+ *     tags: [Persona Engine]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The persona ID
+ *     responses:
+ *       200:
+ *         description: Preview generated successfully
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:personaId/hydrate/preview', personaEngineController.previewHydration);
+
+// Voice Chat Routes
+
+/**
+ * @swagger
+ * /api/voice/options:
+ *   get:
+ *     summary: Get available voice options
+ *     tags: [Voice]
+ *     responses:
+ *       200:
+ *         description: Voice options retrieved
+ */
+router.get('/voice/options', voiceController.getVoiceOptions);
+
+/**
+ * @swagger
+ * /api/voice/generate:
+ *   post:
+ *     summary: Generate voice reply for persona text
+ *     description: Generates TTS audio if voice is enabled and safety checks pass
+ *     tags: [Voice]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - personaId
+ *               - text
+ *             properties:
+ *               personaId:
+ *                 type: string
+ *               text:
+ *                 type: string
+ *                 description: The persona's text reply
+ *               userMessage:
+ *                 type: string
+ *                 description: The user's original message (for safety checks)
+ *     responses:
+ *       200:
+ *         description: Voice generated or text-only returned
+ */
+router.post('/voice/generate', voiceController.generateVoiceReply);
+
+/**
+ * @swagger
+ * /api/voice/{filename}:
+ *   get:
+ *     summary: Serve a voice audio file
+ *     tags: [Voice]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Audio file
+ *         content:
+ *           audio/mpeg:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: File not found
+ */
+router.get('/voice/:filename', voiceController.serveVoiceFile);
+
+/**
+ * @swagger
+ * /api/voice/{filename}:
+ *   delete:
+ *     summary: Delete a voice file
+ *     tags: [Voice]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: File deleted
+ */
+router.delete('/voice/:filename', voiceController.deleteVoiceFile);
+
+/**
+ * @swagger
+ * /api/voice/cleanup:
+ *   post:
+ *     summary: Clean up old voice files
+ *     tags: [Voice]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               maxAgeHours:
+ *                 type: number
+ *                 default: 24
+ *     responses:
+ *       200:
+ *         description: Cleanup completed
+ */
+router.post('/voice/cleanup', voiceController.cleanupVoiceFiles);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/voice-settings:
+ *   get:
+ *     summary: Get voice settings for a persona
+ *     tags: [Voice]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Voice settings retrieved
+ *       404:
+ *         description: Persona not found
+ */
+router.get('/personas/:personaId/voice-settings', voiceController.getVoiceSettings);
+
+/**
+ * @swagger
+ * /api/personas/{personaId}/voice-settings:
+ *   put:
+ *     summary: Update voice settings for a persona
+ *     tags: [Voice]
+ *     parameters:
+ *       - in: path
+ *         name: personaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               enabled:
+ *                 type: boolean
+ *               voice_id:
+ *                 type: string
+ *                 enum: [alloy, echo, fable, onyx, nova, shimmer]
+ *     responses:
+ *       200:
+ *         description: Voice settings updated
+ *       404:
+ *         description: Persona not found
+ */
+router.put('/personas/:personaId/voice-settings', voiceController.updateVoiceSettings);
 
 export { router };

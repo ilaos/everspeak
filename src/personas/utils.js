@@ -144,20 +144,35 @@ export function getDefaultSettings() {
       no_paranormal_language: true,
       soften_sensitive_topics: true,
       prefer_reassurance: true
+    },
+    voice: {
+      enabled: false,
+      voice_id: 'alloy', // OpenAI TTS voice options: alloy, echo, fable, onyx, nova, shimmer
+      auto_play: false // Always false per safety rules
     }
   };
 }
 
+// Available voice options (curated, not generated)
+export const AVAILABLE_VOICES = [
+  { id: 'alloy', name: 'Alloy', description: 'Neutral and balanced' },
+  { id: 'echo', name: 'Echo', description: 'Warm and steady' },
+  { id: 'fable', name: 'Fable', description: 'Gentle and calm' },
+  { id: 'onyx', name: 'Onyx', description: 'Deep and grounded' },
+  { id: 'nova', name: 'Nova', description: 'Soft and clear' },
+  { id: 'shimmer', name: 'Shimmer', description: 'Light and soothing' }
+];
+
 export function validateSettings(settings) {
   const errors = [];
-  
+
   // Validate tone mode
   if (settings.default_tone_mode !== undefined) {
     if (typeof settings.default_tone_mode !== 'string' || !VALID_TONE_MODES.includes(settings.default_tone_mode)) {
       errors.push(`default_tone_mode must be one of: ${VALID_TONE_MODES.join(', ')}`);
     }
   }
-  
+
   // Validate level fields (0-5)
   const levelFields = ['humor_level', 'honesty_level', 'sentimentality_level', 'energy_level', 'advice_level'];
   for (const field of levelFields) {
@@ -168,7 +183,7 @@ export function validateSettings(settings) {
       }
     }
   }
-  
+
   // Validate boundaries
   if (settings.boundaries !== undefined) {
     if (typeof settings.boundaries !== 'object' || settings.boundaries === null) {
@@ -182,6 +197,27 @@ export function validateSettings(settings) {
       }
     }
   }
-  
+
+  // Validate voice settings
+  if (settings.voice !== undefined) {
+    if (typeof settings.voice !== 'object' || settings.voice === null) {
+      errors.push('voice must be an object');
+    } else {
+      if (settings.voice.enabled !== undefined && typeof settings.voice.enabled !== 'boolean') {
+        errors.push('voice.enabled must be a boolean');
+      }
+      if (settings.voice.voice_id !== undefined) {
+        const validVoiceIds = AVAILABLE_VOICES.map(v => v.id);
+        if (!validVoiceIds.includes(settings.voice.voice_id)) {
+          errors.push(`voice.voice_id must be one of: ${validVoiceIds.join(', ')}`);
+        }
+      }
+      // auto_play is always forced to false for safety
+      if (settings.voice.auto_play === true) {
+        errors.push('voice.auto_play cannot be enabled (safety rule)');
+      }
+    }
+  }
+
   return errors;
 }

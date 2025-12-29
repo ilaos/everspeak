@@ -144,3 +144,66 @@ export interface BoosterRecommendations {
   };
   boundary_flags: string[];
 }
+
+// Onboarding Types (Voice-First Persona Creation)
+
+export interface OnboardingSection {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export interface OnboardingQuestionOption {
+  value: string;
+  label: string;
+}
+
+export interface OnboardingQuestion {
+  id: string;
+  sectionId: string;
+  questionNumber: number;
+  prompt: string;
+  inputType: 'voice_primary' | 'select';
+  mediaHint: 'photos_videos_encouraged' | 'audio_encouraged' | null;
+  options: OnboardingQuestionOption[] | null;
+}
+
+export interface OnboardingMediaItem {
+  id: string;
+  path: string;
+  uploadedAt: string;
+}
+
+export interface OnboardingAnswer {
+  id: string;
+  personaId: string;
+  questionId: string;
+  textResponse: string | null;
+  voiceTranscript: string | null;
+  selectedOption: string | null;
+  media: {
+    photos: OnboardingMediaItem[];
+    audio: OnboardingMediaItem[];
+    video: OnboardingMediaItem[];
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OnboardingProgress {
+  totalQuestions: number;
+  answeredCount: number;
+  answeredQuestionIds: string[];
+  percentComplete: number;
+}
+
+export interface OnboardingQuestionsResponse {
+  sections: OnboardingSection[];
+  questions: OnboardingQuestion[];
+  totalQuestions: number;
+}
+
+export interface OnboardingAnswersResponse {
+  answers: OnboardingAnswer[];
+  progress: OnboardingProgress;
+}

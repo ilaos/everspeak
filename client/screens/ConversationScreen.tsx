@@ -9,38 +9,76 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Modal,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
 import { ChatMessage } from '../types';
 import { chatService } from '../services/chatService';
+import { voiceService, VoiceSettings } from '../services/voiceService';
 import { useSelectedPersona } from '../hooks/usePersona';
 import { format } from 'date-fns';
+import VoiceRecorder from '../components/VoiceRecorder';
+import AudioMessage from '../components/AudioMessage';
+import VoiceSettingsComponent from '../components/VoiceSettings';
+
+// Extended message type with audio support
+interface VoiceChatMessage extends ChatMessage {
+  audioUrl?: string;
+  audioDuration?: number;
+  isVoiceInput?: boolean;
+}
 
 export default function ConversationScreen() {
   const { selectedPersona, selectedPersonaId, loading: personaLoading } = useSelectedPersona();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<VoiceChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
+  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings | null>(null);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     // Clear messages when persona changes
     if (selectedPersonaId) {
       setMessages([]);
+      loadVoiceSettings();
     }
   }, [selectedPersonaId]);
 
-  const handleSend = async () => {
-    if (!inputText.trim() || !selectedPersonaId || sending) return;
+  const loadVoiceSettings = async () => {
+    if (!selectedPersonaId) return;
+    try {
+      const response = await voiceService.getVoiceSettings(selectedPersonaId);
+      if (response.success) {
+        setVoiceSettings(response.data.voice);
+      }
+    } catch (err) {
+      console.error('Failed to load voice settings:', err);
+    }
+  };
 
-    const userMessage: ChatMessage = {
+  const handleSend = async (
+    content: string,
+    audioUri?: string,
+    audioDuration?: number,
+    isVoice: boolean = false
+  ) => {
+    if (!content.trim() || !selectedPersonaId || sending) return;
+
+    const userMessage: VoiceChatMessage = {
       id: Date.now().toString(),
       type: 'user',
-      content: inputText.trim(),
+      content: content.trim(),
       timestamp: new Date().toISOString(),
       persona_id: selectedPersonaId,
+      audioUrl: audioUri,
+      audioDuration,
+      isVoiceInput: isVoice,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -53,12 +91,41 @@ export default function ConversationScreen() {
         persona_id: selectedPersonaId,
       });
 
-      const aiMessage: ChatMessage = {
+      const aiTextReply = response.data.reply;
+
+      // Try to generate voice if enabled
+      let voiceData: { url: string; duration: number } | undefined;
+
+      if (voiceSettings?.enabled) {
+        try {
+          const voiceResponse = await voiceService.generateVoiceReply(
+            selectedPersonaId,
+            aiTextReply,
+            userMessage.content
+          );
+
+          if (voiceResponse.success && voiceResponse.data.voiceGenerated && voiceResponse.data.audio) {
+            voiceData = {
+              url: voiceResponse.data.audio.url,
+              duration: voiceResponse.data.audio.duration,
+            };
+          }
+          // Note: If voice was disabled due to safety, we silently fall back to text
+          // No announcement per spec
+        } catch (err) {
+          console.error('Voice generation failed:', err);
+          // Silently fall back to text
+        }
+      }
+
+      const aiMessage: VoiceChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: response.data.reply,
+        content: aiTextReply,
         timestamp: new Date().toISOString(),
         persona_id: selectedPersonaId,
+        audioUrl: voiceData?.url,
+        audioDuration: voiceData?.duration,
       };
 
       setMessages((prev) => [...prev, aiMessage]);
@@ -69,7 +136,7 @@ export default function ConversationScreen() {
       }, 100);
     } catch (err: any) {
       console.error('Failed to send message:', err);
-      const errorMessage: ChatMessage = {
+      const errorMessage: VoiceChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
         content: 'Sorry, I couldn\'t respond right now. Please make sure the backend is running and try again.',
@@ -82,9 +149,41 @@ export default function ConversationScreen() {
     }
   };
 
-  const renderMessage = ({ item, index }: { item: ChatMessage; index: number }) => {
+  const handleTextSend = () => {
+    handleSend(inputText);
+  };
+
+  const handleVoiceRecordingComplete = async (audioUri: string, duration: number) => {
+    if (!selectedPersonaId) return;
+
+    try {
+      setIsTranscribing(true);
+
+      // Fetch audio file and transcribe
+      const response = await fetch(audioUri);
+      const blob = await response.blob();
+      const transcription = await voiceService.transcribeAudio(blob, 'voice_message.webm');
+
+      if (transcription.success && transcription.text) {
+        // Send with both audio and transcription
+        handleSend(transcription.text, audioUri, duration, true);
+      } else {
+        Alert.alert('Transcription failed', 'Could not transcribe audio. Please try again.');
+      }
+    } catch (err) {
+      console.error('Voice processing failed:', err);
+      Alert.alert('Error', 'Failed to process voice message');
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const toggleInputMode = () => {
+    setInputMode((prev) => (prev === 'text' ? 'voice' : 'text'));
+  };
+
+  const renderMessage = ({ item, index }: { item: VoiceChatMessage; index: number }) => {
     const isUser = item.type === 'user';
-    const showAvatar = index === messages.length - 1 || messages[index + 1]?.type !== item.type;
 
     return (
       <View style={[styles.messageContainer, isUser && styles.userMessageContainer]}>
@@ -98,10 +197,26 @@ export default function ConversationScreen() {
           {!isUser && (
             <Text style={styles.senderName}>{selectedPersona?.name}</Text>
           )}
+
+          {/* Text content - always shown (text is source of truth) */}
           <Text style={[styles.messageText, isUser && styles.userMessageText]}>
             {item.content}
           </Text>
+
+          {/* Audio player if available */}
+          {item.audioUrl && (
+            <View style={styles.audioContainer}>
+              <AudioMessage
+                audioUrl={item.audioUrl}
+                duration={item.audioDuration}
+                isPersona={!isUser}
+              />
+            </View>
+          )}
+
           <Text style={[styles.timestamp, isUser && styles.userTimestamp]}>
+            {item.isVoiceInput && <Ionicons name="mic" size={10} color={Colors.textMuted} />}
+            {' '}
             {format(new Date(item.timestamp), 'h:mm a')}
           </Text>
         </View>
@@ -151,11 +266,23 @@ export default function ConversationScreen() {
 
       {/* Room header */}
       <View style={styles.roomHeader}>
-        <View>
-          <Text style={styles.roomTitle}>Conversation with {selectedPersona.name}</Text>
-          <Text style={styles.roomSubtitle}>
-            This is a safe space to honor and reflect
-          </Text>
+        <View style={styles.roomHeaderContent}>
+          <View>
+            <Text style={styles.roomTitle}>Conversation with {selectedPersona.name}</Text>
+            <Text style={styles.roomSubtitle}>
+              This is a safe space to honor and reflect
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => setShowVoiceSettings(true)}
+          >
+            <Ionicons
+              name={voiceSettings?.enabled ? 'volume-high' : 'volume-mute'}
+              size={24}
+              color={voiceSettings?.enabled ? Colors.primaryLight : Colors.textMuted}
+            />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -177,36 +304,89 @@ export default function ConversationScreen() {
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
 
+      {/* Transcribing indicator */}
+      {isTranscribing && (
+        <View style={styles.transcribingBanner}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+          <Text style={styles.transcribingText}>Transcribing...</Text>
+        </View>
+      )}
+
       {/* Input area */}
       <View style={styles.inputContainer}>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Type your message..."
-            placeholderTextColor={Colors.textMuted}
-            multiline
-            maxLength={1000}
-            editable={!sending}
-          />
-          <TouchableOpacity
-            style={[styles.sendButton, (!inputText.trim() || sending) && styles.sendButtonDisabled]}
-            onPress={handleSend}
-            disabled={!inputText.trim() || sending}
-          >
-            {sending ? (
-              <ActivityIndicator size="small" color={Colors.text} />
-            ) : (
-              <Ionicons
-                name="send"
-                size={24}
-                color={inputText.trim() ? Colors.text : Colors.textMuted}
-              />
-            )}
-          </TouchableOpacity>
-        </View>
+        {inputMode === 'text' ? (
+          <View style={styles.inputWrapper}>
+            {/* Voice mode toggle */}
+            <TouchableOpacity
+              style={styles.modeToggle}
+              onPress={toggleInputMode}
+              disabled={sending}
+            >
+              <Ionicons name="mic-outline" size={24} color={Colors.textSecondary} />
+            </TouchableOpacity>
+
+            <TextInput
+              style={styles.input}
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="Type your message..."
+              placeholderTextColor={Colors.textMuted}
+              multiline
+              maxLength={1000}
+              editable={!sending}
+            />
+
+            <TouchableOpacity
+              style={[styles.sendButton, (!inputText.trim() || sending) && styles.sendButtonDisabled]}
+              onPress={handleTextSend}
+              disabled={!inputText.trim() || sending}
+            >
+              {sending ? (
+                <ActivityIndicator size="small" color={Colors.text} />
+              ) : (
+                <Ionicons
+                  name="send"
+                  size={24}
+                  color={inputText.trim() ? Colors.text : Colors.textMuted}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.voiceInputWrapper}>
+            {/* Text mode toggle */}
+            <TouchableOpacity
+              style={styles.modeToggle}
+              onPress={toggleInputMode}
+              disabled={sending || isTranscribing}
+            >
+              <Ionicons name="text-outline" size={24} color={Colors.textSecondary} />
+            </TouchableOpacity>
+
+            {/* Voice recorder */}
+            <VoiceRecorder
+              onRecordingComplete={handleVoiceRecordingComplete}
+              disabled={sending || isTranscribing}
+            />
+          </View>
+        )}
       </View>
+
+      {/* Voice Settings Modal */}
+      <Modal
+        visible={showVoiceSettings}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowVoiceSettings(false)}
+      >
+        <VoiceSettingsComponent
+          personaId={selectedPersonaId!}
+          onClose={() => {
+            setShowVoiceSettings(false);
+            loadVoiceSettings(); // Refresh settings
+          }}
+        />
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -229,6 +409,11 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
     backgroundColor: Colors.background,
   },
+  roomHeaderContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   roomTitle: {
     ...Typography.h2,
     color: Colors.text,
@@ -237,6 +422,9 @@ const styles = StyleSheet.create({
   roomSubtitle: {
     ...Typography.bodySmall,
     color: Colors.textSecondary,
+  },
+  settingsButton: {
+    padding: Spacing.sm,
   },
   messagesList: {
     padding: Spacing.md,
@@ -308,6 +496,9 @@ const styles = StyleSheet.create({
   userMessageText: {
     color: Colors.text,
   },
+  audioContainer: {
+    marginTop: Spacing.sm,
+  },
   timestamp: {
     ...Typography.caption,
     color: Colors.textMuted,
@@ -315,6 +506,20 @@ const styles = StyleSheet.create({
   },
   userTimestamp: {
     color: Colors.textSecondary,
+  },
+  transcribingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.sm,
+    backgroundColor: Colors.backgroundCard,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  transcribingText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginLeft: Spacing.sm,
   },
   inputContainer: {
     borderTopWidth: 1,
@@ -329,8 +534,22 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.border,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.sm,
+  },
+  voiceInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.sm,
+  },
+  modeToggle: {
+    padding: Spacing.sm,
   },
   input: {
     flex: 1,
@@ -338,6 +557,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     maxHeight: 100,
     paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
   },
   sendButton: {
     width: 40,
@@ -346,7 +566,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: Spacing.sm,
   },
   sendButtonDisabled: {
     backgroundColor: Colors.backgroundLight,

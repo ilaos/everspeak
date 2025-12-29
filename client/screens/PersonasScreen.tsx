@@ -176,40 +176,16 @@ export default function PersonasScreen() {
         <View style={styles.cardActions}>
           <View style={styles.actionsRow}>
             <TouchableOpacity
-              onPress={() => (navigation as any).navigate('SetupWizard', {
+              onPress={() => (navigation as any).navigate('Onboarding', {
                 personaId: item.id,
                 personaName: item.name,
               })}
               style={styles.actionButton}
             >
-              <Ionicons name="sparkles-outline" size={18} color={Colors.success} />
-              <Text style={[styles.actionText, { color: Colors.success }]}>Wizard</Text>
+              <Ionicons name="mic-outline" size={18} color={Colors.success} />
+              <Text style={[styles.actionText, { color: Colors.success }]}>Onboard</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => (navigation as any).navigate('BulkImport', {
-                personaId: item.id,
-                personaName: item.name,
-              })}
-              style={styles.actionButton}
-            >
-              <Ionicons name="cloud-upload-outline" size={18} color={Colors.info} />
-              <Text style={[styles.actionText, { color: Colors.info }]}>Import</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => (navigation as any).navigate('PersonaBooster', {
-                personaId: item.id,
-                personaName: item.name,
-              })}
-              style={styles.actionButton}
-            >
-              <Ionicons name="analytics-outline" size={18} color={Colors.warning} />
-              <Text style={[styles.actionText, { color: Colors.warning }]}>Boost</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.actionsRow}>
             <TouchableOpacity
               onPress={() => (navigation as any).navigate('Snapshots', {
                 personaId: item.id,
@@ -228,7 +204,9 @@ export default function PersonasScreen() {
               <Ionicons name="create-outline" size={18} color={Colors.primary} />
               <Text style={styles.actionText}>Edit</Text>
             </TouchableOpacity>
+          </View>
 
+          <View style={styles.actionsRow}>
             <TouchableOpacity
               onPress={() => handleDelete(item)}
               style={styles.actionButton}

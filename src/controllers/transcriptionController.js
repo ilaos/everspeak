@@ -1,23 +1,15 @@
-// Polyfill for Node.js < 20 (required for OpenAI SDK file uploads)
-import { File as NodeFile } from 'node:buffer';
-if (!globalThis.File) {
-  globalThis.File = NodeFile;
-}
-
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AppError } from '../utils/errorHandler.js';
 import fs from 'node:fs';
 import { unlink } from 'node:fs/promises';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const transcriptionController = {
   // POST /api/transcribe - Transcribe audio to text
   async transcribe(req, res, next) {
     let tempFilePath = null;
-    
+
     try {
       // Validate that a file was uploaded
       if (!req.file) {
@@ -26,16 +18,32 @@ export const transcriptionController = {
 
       tempFilePath = req.file.path;
 
-      // Transcribe using OpenAI Whisper
-      // Use createReadStream to pass a File-like object to OpenAI SDK
-      const transcription = await openai.audio.transcriptions.create({
-        file: fs.createReadStream(tempFilePath),
-        model: 'whisper-1'
-      });
+      // Read the audio file and convert to base64
+      const audioBuffer = fs.readFileSync(tempFilePath);
+      const base64Audio = audioBuffer.toString('base64');
+
+      // Determine MIME type from file extension or use default
+      const mimeType = req.file.mimetype || 'audio/webm';
+
+      // Use Gemini to transcribe the audio
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+      const result = await model.generateContent([
+        {
+          inlineData: {
+            mimeType: mimeType,
+            data: base64Audio
+          }
+        },
+        { text: 'Transcribe this audio recording exactly as spoken. Return only the transcription text with no additional commentary, labels, or formatting. If the audio is unclear or empty, return an empty string.' }
+      ]);
+
+      const response = await result.response;
+      const transcribedText = response.text().trim();
 
       res.status(200).json({
         success: true,
-        text: transcription.text
+        text: transcribedText
       });
     } catch (error) {
       if (error instanceof AppError) {

@@ -1,3 +1,6 @@
+// Everspeak App - Version 2024.12.28.1 (with wizard persistence)
+console.log('📦 App.js loaded - VERSION 2024.12.28.1 - If you see this, cache is cleared!');
+
 // State
 let personas = [];
 let selectedPersonaId = null;
@@ -40,7 +43,7 @@ let wizardMediaRecorder = null;
 let wizardAudioChunks = [];
 let isWizardRecording = false;
 let wizardVoiceBtn;
-let wizardWelcomeMain, wizardWelcomeMore, btnWizardReady, btnWizardTellMore, btnWizardOkayBegin, btnWizardBack;
+let wizardWelcomeMain, wizardWelcomeMore, btnWizardReady, btnWizardTellMore, btnWizardOkayBegin, btnWizardBack, btnWizardContinue;
 let voiceNameConfirmation, voiceDetectedName, voiceNameCorrection, btnConfirmVoiceName, btnUseCorrection;
 let detectedNameFromVoice = '';
 let boostPersonaBtn, boostModal, closeBoost, refreshBoostBtn, applyToneBtn;
@@ -130,6 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   wizardWelcomeMain = document.getElementById('wizard-welcome-main');
   wizardWelcomeMore = document.getElementById('wizard-welcome-more');
   btnWizardReady = document.getElementById('btn-wizard-ready');
+  btnWizardContinue = document.getElementById('btn-wizard-continue');
   btnWizardTellMore = document.getElementById('btn-wizard-tell-more');
   btnWizardOkayBegin = document.getElementById('btn-wizard-okay-begin');
   btnWizardBack = document.getElementById('btn-wizard-back');
@@ -258,6 +262,157 @@ function isWizardSnoozed() {
   } catch (e) {
     return false;
   }
+}
+
+// ========================================
+// WIZARD PROGRESS PERSISTENCE
+// ========================================
+
+const WIZARD_PROGRESS_KEY = 'everspeak_wizard_progress';
+
+// Save wizard progress to localStorage
+function saveWizardProgress() {
+  console.log('[Wizard Persistence] saveWizardProgress called, step:', wizardCurrentStep, 'personaId:', selectedPersonaId);
+
+  if (!selectedPersonaId || wizardCurrentStep <= 1) {
+    console.log('[Wizard Persistence] Skipping save - no persona or step <= 1');
+    return;
+  }
+
+  const progressData = {
+    personaId: selectedPersonaId,
+    personaName: selectedPersona?.name || '',
+    currentStep: wizardCurrentStep,
+    timestamp: Date.now(),
+    inputs: {
+      userName: document.getElementById('wizard-user-name')?.value || '',
+      firstName: document.getElementById('wizard-first-name')?.value || '',
+      relationship: document.getElementById('wizard-relationship')?.value || '',
+      datePassed: document.getElementById('wizard-date-passed')?.value || '',
+      circumstances: document.getElementById('wizard-circumstances')?.value || '',
+      relationshipEnd: document.getElementById('wizard-relationship-end')?.value || '',
+      humor: document.getElementById('wizard-humor')?.value || '',
+      memories: document.getElementById('wizard-memories')?.value || '',
+      conversations: document.getElementById('wizard-conversations')?.value || '',
+    }
+  };
+
+  localStorage.setItem(WIZARD_PROGRESS_KEY, JSON.stringify(progressData));
+  console.log('[Wizard Persistence] Saved progress at step', wizardCurrentStep);
+}
+
+// Load wizard progress from localStorage
+function loadWizardProgress() {
+  try {
+    const data = localStorage.getItem(WIZARD_PROGRESS_KEY);
+    if (!data) return null;
+    return JSON.parse(data);
+  } catch (e) {
+    console.error('[Wizard Persistence] Failed to load progress:', e);
+    return null;
+  }
+}
+
+// Check if there's saved wizard progress
+function hasWizardProgress() {
+  const progress = loadWizardProgress();
+  if (!progress) return false;
+
+  // Check if progress is recent (within 30 days)
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+  if (Date.now() - progress.timestamp > thirtyDaysMs) {
+    clearWizardProgress();
+    return false;
+  }
+
+  return progress.currentStep > 1;
+}
+
+// Clear wizard progress (called when wizard completes)
+function clearWizardProgress() {
+  localStorage.removeItem(WIZARD_PROGRESS_KEY);
+  console.log('[Wizard Persistence] Cleared progress');
+}
+
+// Restore wizard inputs from saved progress
+function restoreWizardInputs(progress) {
+  if (!progress || !progress.inputs) return;
+
+  const inputs = progress.inputs;
+  const fieldMap = {
+    'wizard-user-name': inputs.userName,
+    'wizard-first-name': inputs.firstName,
+    'wizard-relationship': inputs.relationship,
+    'wizard-date-passed': inputs.datePassed,
+    'wizard-circumstances': inputs.circumstances,
+    'wizard-relationship-end': inputs.relationshipEnd,
+    'wizard-humor': inputs.humor,
+    'wizard-memories': inputs.memories,
+    'wizard-conversations': inputs.conversations,
+  };
+
+  for (const [id, value] of Object.entries(fieldMap)) {
+    const el = document.getElementById(id);
+    if (el && value) {
+      el.value = value;
+    }
+  }
+
+  console.log('[Wizard Persistence] Restored inputs');
+}
+
+// Update continue button visibility based on saved progress
+function updateWizardContinueButton() {
+  console.log('[Wizard Persistence] updateWizardContinueButton called');
+  console.log('[Wizard Persistence] btnWizardContinue element:', btnWizardContinue);
+
+  if (!btnWizardContinue) {
+    console.error('[Wizard Persistence] btnWizardContinue element NOT FOUND!');
+    // Try to find it again
+    btnWizardContinue = document.getElementById('btn-wizard-continue');
+    console.log('[Wizard Persistence] Retry finding button:', btnWizardContinue);
+    if (!btnWizardContinue) {
+      console.error('[Wizard Persistence] Button still not found after retry!');
+      return;
+    }
+  }
+
+  const progress = loadWizardProgress();
+  console.log('[Wizard Persistence] Loaded progress:', progress);
+  console.log('[Wizard Persistence] localStorage raw:', localStorage.getItem('everspeak_wizard_progress'));
+
+  if (progress && progress.currentStep > 1) {
+    const stepLabel = progress.currentStep > 2
+      ? ` (Step ${progress.currentStep})`
+      : '';
+    btnWizardContinue.textContent = `Continue where you left off${stepLabel}`;
+    btnWizardContinue.style.display = 'block';
+    console.log('[Wizard Persistence] Button SHOWN - check if visible in DOM');
+  } else {
+    btnWizardContinue.style.display = 'none';
+    console.log('[Wizard Persistence] Button hidden (no progress or step <= 1)');
+  }
+}
+
+// Handle continue button click
+function handleWizardContinue() {
+  const progress = loadWizardProgress();
+  if (!progress) return;
+
+  // If progress is for a different persona, we need to select that persona first
+  if (progress.personaId && progress.personaId !== selectedPersonaId) {
+    // Select the saved persona
+    selectPersona(progress.personaId);
+  }
+
+  // Restore inputs
+  restoreWizardInputs(progress);
+
+  // Jump to saved step
+  wizardCurrentStep = progress.currentStep;
+  updateWizardUI();
+
+  console.log('[Wizard Persistence] Resumed at step', wizardCurrentStep);
 }
 
 // Update continue setup button visibility
@@ -675,10 +830,36 @@ function setupEventListeners() {
   const btnHomeSetupWizard = document.getElementById('btn-home-setup-wizard');
   if (btnHomeSetupWizard) {
     btnHomeSetupWizard.addEventListener('click', async () => {
-      console.log('Home wizard button clicked - creating persona and opening wizard');
+      console.log('Home wizard button clicked');
 
       try {
-        // Create a placeholder persona
+        // Check if there's saved wizard progress we should resume
+        const savedProgress = loadWizardProgress();
+        console.log('[Home Wizard] Saved progress:', savedProgress);
+
+        if (savedProgress && savedProgress.personaId) {
+          // Check if that persona still exists and is incomplete
+          const existingPersona = personas.find(p => p.id === savedProgress.personaId);
+          console.log('[Home Wizard] Found existing persona:', existingPersona?.name);
+
+          if (existingPersona && !existingPersona.onboarding_context?.completed_at) {
+            // Resume with existing persona
+            console.log('[Home Wizard] Resuming with existing incomplete persona');
+            selectedPersonaId = existingPersona.id;
+            selectedPersona = existingPersona;
+
+            if (personaDropdown) {
+              personaDropdown.value = existingPersona.id;
+            }
+
+            // Open wizard and show continue button
+            showWizardModal();
+            return;
+          }
+        }
+
+        // No saved progress or persona doesn't exist - create new persona
+        console.log('[Home Wizard] Creating new persona');
         const response = await fetch('/api/personas', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -706,20 +887,11 @@ function setupEventListeners() {
             personaDropdown.value = newPersona.id;
           }
 
-          // Open wizard modal directly
-          console.log('Opening wizard modal...');
-          wizardCurrentStep = 1;
-          updateWizardUI();
+          // Clear any old wizard progress since we're starting fresh
+          clearWizardProgress();
 
-          const wizardModalElement = document.getElementById('wizard-modal');
-          if (wizardModalElement) {
-            wizardModalElement.style.display = 'flex';
-            // Add visible class after a brief delay for CSS transition
-            setTimeout(() => wizardModalElement.classList.add('visible'), 10);
-            console.log('Wizard opened successfully!');
-          } else {
-            console.error('Wizard modal not found');
-          }
+          // Open wizard modal directly
+          showWizardModal();
         } else {
           console.error('Failed to create persona:', response.status);
           alert('Unable to start wizard. Please try again.');
@@ -819,7 +991,10 @@ function setupEventListeners() {
   if (btnWizardBack) {
     btnWizardBack.addEventListener('click', showWizardMain);
   }
-  
+  if (btnWizardContinue) {
+    btnWizardContinue.addEventListener('click', handleWizardContinue);
+  }
+
   // Voice name confirmation buttons
   if (btnConfirmVoiceName) {
     btnConfirmVoiceName.addEventListener('click', confirmVoiceName);
@@ -1479,12 +1654,16 @@ async function handleBulkImport(event) {
 
 // Open wizard modal
 function openWizardModal() {
+  console.log('[Wizard] openWizardModal called');
   if (!selectedPersonaId) {
     showError('Please select a persona first');
     return;
   }
   wizardCurrentStep = 1;
   updateWizardUI();
+  // Update continue button visibility based on saved progress
+  console.log('[Wizard] About to call updateWizardContinueButton');
+  updateWizardContinueButton();
   if (wizardModal) {
     wizardModal.style.display = 'flex';
     // Add visible class after a brief delay for CSS transition
@@ -1494,6 +1673,9 @@ function openWizardModal() {
 
 // Close wizard modal
 function closeWizardModal() {
+  // Save progress before closing (if past step 1)
+  saveWizardProgress();
+
   // Snooze wizard for current session if it's incomplete
   if (isWizardIncomplete() && selectedPersonaId) {
     localStorage.setItem('wizardSnoozed', JSON.stringify({
@@ -1713,6 +1895,8 @@ async function wizardNextStep() {
   if (wizardCurrentStep < WIZARD_TOTAL_STEPS) {
     wizardCurrentStep++;
     updateWizardUI();
+    // Save progress after advancing
+    saveWizardProgress();
   }
 }
 
@@ -2097,7 +2281,10 @@ async function handleWizardSubmit(event) {
       // Update sidebar and continue setup button to reflect completion
       updateSidebarContent();
       updateContinueSetupButton();
-      
+
+      // Clear saved wizard progress since wizard completed successfully
+      clearWizardProgress();
+
       // Hide loading and close modal
       if (loadingEl) {
         loadingEl.style.display = 'none';

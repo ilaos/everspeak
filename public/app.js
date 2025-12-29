@@ -3262,8 +3262,7 @@ function showMicrophonePermissionHelp(isIOS, isAndroid, isChrome, isSafari) {
         ${steps.map(step => `<li>${step}</li>`).join('')}
       </ol>
       <div class="permission-help-actions">
-        <button type="button" class="btn-permission-dismiss">Got it</button>
-        <button type="button" class="btn-permission-type">I'll type instead</button>
+        <button type="button" class="btn-permission-dismiss">Got it, let me try again</button>
       </div>
     </div>
   `;
@@ -3273,15 +3272,6 @@ function showMicrophonePermissionHelp(isIOS, isAndroid, isChrome, isSafari) {
   // Add event listeners
   modal.querySelector('.btn-permission-dismiss').addEventListener('click', () => {
     modal.remove();
-  });
-
-  modal.querySelector('.btn-permission-type').addEventListener('click', () => {
-    modal.remove();
-    // Find the active voice recorder and switch to text input
-    const activeContainer = document.querySelector('.wizard-step.active .voice-recorder-container');
-    if (activeContainer) {
-      showTextFallback(activeContainer);
-    }
   });
 
   // Close on background click

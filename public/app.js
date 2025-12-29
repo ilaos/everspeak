@@ -1,5 +1,5 @@
 // Everspeak App - Version 2024.12.28.1 (with wizard persistence)
-console.log('📦 App.js loaded - VERSION 2024.12.28.8 - If you see this, cache is cleared!');
+console.log('📦 App.js loaded - VERSION 2024.12.28.9 - If you see this, cache is cleared!');
 
 // State
 let personas = [];
@@ -1674,6 +1674,13 @@ function openWizardModal() {
     showError('Please select a persona first');
     return;
   }
+
+  // Hide bottom tab bar during wizard to prevent touch interference
+  const bottomTabBar = document.getElementById('bottom-tab-bar');
+  if (bottomTabBar) {
+    bottomTabBar.style.display = 'none';
+  }
+
   wizardCurrentStep = 1;
   updateWizardUI();
   // Update continue button visibility based on saved progress
@@ -1711,6 +1718,12 @@ function closeWizardModal() {
   }
   wizardCurrentStep = 1;
   updateWizardUI();
+
+  // Show bottom tab bar again
+  const bottomTabBar = document.getElementById('bottom-tab-bar');
+  if (bottomTabBar) {
+    bottomTabBar.style.display = 'flex';
+  }
 }
 
 // Wizard next step
@@ -2005,11 +2018,12 @@ function updateWizardUI() {
     const step = document.getElementById(`wizard-step-${i}`);
     if (step) {
       if (i === wizardCurrentStep) {
+        // First show the element, then add active class after brief delay for CSS transition
         step.style.display = 'block';
-        step.classList.add('active');
+        setTimeout(() => step.classList.add('active'), 20);
       } else {
-        step.style.display = 'none';
         step.classList.remove('active');
+        step.style.display = 'none';
       }
     }
   }

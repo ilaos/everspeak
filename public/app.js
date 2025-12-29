@@ -3148,14 +3148,34 @@ function showPreviewState(container, audioBlob) {
   // Store the blob for later use
   container._audioBlob = audioBlob;
 
+  // Show the duration we recorded (voiceRecorderSeconds is still available)
+  if (durationSpan) {
+    durationSpan.textContent = formatTime(voiceRecorderSeconds);
+  }
+
   // Create object URL for audio playback
   if (audioPlayer && audioBlob) {
+    // Clean up any previous URL
+    if (audioPlayer.src && audioPlayer.src.startsWith('blob:')) {
+      URL.revokeObjectURL(audioPlayer.src);
+    }
+
     const audioUrl = URL.createObjectURL(audioBlob);
     audioPlayer.src = audioUrl;
 
-    // Update duration when metadata loads
+    // Force load the audio
+    audioPlayer.load();
+
+    // Update duration when metadata loads (as backup)
     audioPlayer.addEventListener('loadedmetadata', () => {
-      if (durationSpan) {
+      if (durationSpan && audioPlayer.duration && isFinite(audioPlayer.duration)) {
+        durationSpan.textContent = formatTime(audioPlayer.duration);
+      }
+    }, { once: true });
+
+    // Also try on canplaythrough
+    audioPlayer.addEventListener('canplaythrough', () => {
+      if (durationSpan && audioPlayer.duration && isFinite(audioPlayer.duration)) {
         durationSpan.textContent = formatTime(audioPlayer.duration);
       }
     }, { once: true });

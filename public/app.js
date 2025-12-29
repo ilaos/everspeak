@@ -3189,6 +3189,11 @@ function showPreviewState(container, audioBlob) {
   if (typeFallback) typeFallback.style.display = 'none';
 }
 
+// Audio context and analyser for waveform visualization
+let audioContext = null;
+let audioAnalyser = null;
+let waveformAnimationId = null;
+
 // Start voice recording
 async function startVoiceRecording(container) {
   // Check if mediaDevices is available
@@ -3204,7 +3209,18 @@ async function startVoiceRecording(container) {
     voiceRecorderStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
     // Brief delay after permission granted so user knows recording is about to start
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Set up audio analyser for waveform visualization
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioAnalyser = audioContext.createAnalyser();
+      audioAnalyser.fftSize = 32;
+      const source = audioContext.createMediaStreamSource(voiceRecorderStream);
+      source.connect(audioAnalyser);
+    } catch (e) {
+      console.log('[Voice Recorder] Audio analyser not available:', e);
+    }
 
     // Determine best audio format for playback compatibility
     const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
@@ -3228,6 +3244,9 @@ async function startVoiceRecording(container) {
     activeVoiceRecorder.mediaRecorder.addEventListener('stop', async () => {
       const audioBlob = new Blob(activeVoiceRecorder.audioChunks, { type: mimeType });
 
+      // Stop waveform animation
+      stopWaveformAnimation();
+
       // Show preview state so user can listen before transcribing
       showPreviewState(container, audioBlob);
 
@@ -3242,6 +3261,9 @@ async function startVoiceRecording(container) {
     // Update UI to recording state
     showRecordingState(container);
 
+    // Start waveform animation
+    startWaveformAnimation(container);
+
     // Start timer
     voiceRecorderSeconds = 0;
     updateRecordingTimer(container);
@@ -3255,6 +3277,52 @@ async function startVoiceRecording(container) {
   } catch (error) {
     console.error('[Voice Recorder] Failed to start recording:', error);
     handleRecordingError(error);
+  }
+}
+
+// Start waveform animation based on audio input
+function startWaveformAnimation(container) {
+  const waveformBars = container.querySelectorAll('.waveform-bar');
+  if (!waveformBars.length || !audioAnalyser) return;
+
+  const dataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+
+  function animate() {
+    audioAnalyser.getByteFrequencyData(dataArray);
+
+    // Map audio data to waveform bars
+    const barCount = waveformBars.length;
+    for (let i = 0; i < barCount; i++) {
+      // Get a frequency value for this bar
+      const dataIndex = Math.floor((i / barCount) * dataArray.length);
+      const value = dataArray[dataIndex] || 0;
+
+      // Map 0-255 to 8-40px height
+      const minHeight = 8;
+      const maxHeight = 40;
+      const height = minHeight + (value / 255) * (maxHeight - minHeight);
+
+      waveformBars[i].style.height = `${height}px`;
+      waveformBars[i].style.animation = 'none'; // Override CSS animation
+    }
+
+    waveformAnimationId = requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+// Stop waveform animation
+function stopWaveformAnimation() {
+  if (waveformAnimationId) {
+    cancelAnimationFrame(waveformAnimationId);
+    waveformAnimationId = null;
+  }
+
+  if (audioContext) {
+    audioContext.close().catch(() => {});
+    audioContext = null;
+    audioAnalyser = null;
   }
 }
 
@@ -3291,6 +3359,9 @@ function stopVoiceRecording(container) {
 // Cancel voice recording (slide to cancel)
 function cancelVoiceRecording(container) {
   if (activeVoiceRecorder && activeVoiceRecorder.mediaRecorder) {
+    // Stop waveform animation
+    stopWaveformAnimation();
+
     // Stop the recorder without processing
     activeVoiceRecorder.mediaRecorder.stop();
     activeVoiceRecorder.audioChunks = []; // Clear audio

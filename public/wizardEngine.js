@@ -175,52 +175,74 @@ class WizardEngine {
       <div class="voice-recorder-container" data-field="${question.fieldId}">
         ${question.example ? `<p class="voice-guidance">${question.example}</p>` : ''}
 
-        <!-- Ready state: recording bar ready to start -->
+        <!-- Ready state: waiting for user to start recording -->
         <div class="voice-recorder-ready">
+          <p class="recorder-instruction">Speak your answer</p>
           <button type="button" class="btn-start-recording" data-step="${stepNumber}">
-            <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-            </svg>
+            Start Recording
           </button>
-          <div class="ready-text">
-            <span class="ready-label">Tap to record</span>
-          </div>
-          <div class="ready-spacer"></div>
+          <p class="recorder-hint">You can pause or redo anytime.</p>
         </div>
 
-        <!-- Recording state -->
+        <!-- Recording state with waveform -->
         <div class="voice-recorder-recording" style="display: none;">
-          <div class="recording-indicator">
+          <div class="recording-header">
             <span class="recording-dot"></span>
-            <span class="recording-timer">0:00</span>
+            <span class="recording-label">Recording</span>
           </div>
-          <div class="slide-to-cancel">
-            <span class="slide-arrow">&larr;</span>
-            <span class="slide-text">Slide to cancel</span>
+          <div class="waveform-container">
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
           </div>
+          <span class="recording-timer">0:00</span>
           <button type="button" class="btn-stop-recording">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <rect x="6" y="6" width="12" height="12" rx="2"/>
-            </svg>
+            Stop Recording
           </button>
+        </div>
+
+        <!-- Preview state -->
+        <div class="voice-recorder-preview" style="display: none;">
+          <div class="audio-preview-container">
+            <button type="button" class="btn-play-preview">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </button>
+            <div class="audio-progress-bar">
+              <div class="audio-progress-fill"></div>
+            </div>
+            <span class="audio-duration">0:00</span>
+          </div>
+          <audio class="audio-preview-player" style="display: none;"></audio>
+          <div class="preview-actions">
+            <button type="button" class="btn-re-record-preview">Redo</button>
+            <button type="button" class="btn-use-recording">Use This</button>
+          </div>
         </div>
 
         <!-- Processing state -->
         <div class="voice-recorder-processing" style="display: none;">
           <div class="processing-spinner"></div>
-          <p class="processing-text">Transcribing...</p>
+          <p class="processing-text">Listening to your words...</p>
         </div>
 
         <!-- Complete state -->
         <div class="voice-recorder-complete" style="display: none;">
           <div class="transcription-preview">
             <p class="transcription-text"></p>
-            <button type="button" class="btn-re-record">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-              </svg>
-            </button>
+          </div>
+          <div class="transcription-actions">
+            <button type="button" class="btn-re-record">Record Again</button>
           </div>
         </div>
 

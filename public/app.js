@@ -1,5 +1,5 @@
 // Everspeak App - Version 2024.12.28.1 (with wizard persistence)
-console.log('📦 App.js loaded - VERSION 2024.12.28.6 - If you see this, cache is cleared!');
+console.log('📦 App.js loaded - VERSION 2024.12.28.7 - If you see this, cache is cleared!');
 
 // State
 let personas = [];
@@ -1896,14 +1896,19 @@ function getAnswerForStep(step) {
 
 // Modified wizard next step with breathing exercise (skippable)
 async function wizardNextStep() {
+  console.log('[Wizard Next] wizardNextStep called, current step:', wizardCurrentStep);
+
   // Steps that should get breathing exercise (skip step 1 welcome, skip step 11 final)
   const shouldShowBreathing = wizardCurrentStep >= 2 && wizardCurrentStep <= 10;
+  console.log('[Wizard Next] shouldShowBreathing:', shouldShowBreathing);
 
   if (shouldShowBreathing) {
     const currentAnswer = getAnswerForStep(wizardCurrentStep);
+    console.log('[Wizard Next] currentAnswer:', currentAnswer);
 
     // Only show breathing if user actually answered something
     if (currentAnswer && currentAnswer.length > 0) {
+      console.log('[Wizard Next] Answer found, showing breathing exercise');
       // Hide current step
       const currentStepEl = document.getElementById(`wizard-step-${wizardCurrentStep}`);
       if (currentStepEl) {

@@ -296,6 +296,8 @@ if (bottomTabBar) bottomTabBar.style.display = 'flex';
 2. **CSS transitions require state change** - Can't transition from `display: none`
 3. **Mobile touch events can interfere** - Auto-hide features can steal first tap
 4. **Always add debug logging** - Console logs reveal exactly where flow breaks
+5. **Check if changes need deployment** - Local changes aren't visible on production until pushed and deployed with: `ssh everspeak "cd /var/www/everspeak && git pull && pm2 restart everspeak"`
+6. **Voice recorder has logic in THREE files** - `wizardEngine.js`, `app.js`, AND `index.html`
 
 ---
 

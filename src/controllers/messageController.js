@@ -24,6 +24,7 @@ export const handleMessage = async (req, res, next) => {
     let personaRelationship = null;
     let personaSettings = null;
     let onboardingContext = null;
+    let pronounInstruction = '';
 
     // Load persona if persona_id is provided
     if (persona_id) {
@@ -38,6 +39,20 @@ export const handleMessage = async (req, res, next) => {
       personaName = persona.name;
       personaRelationship = persona.relationship;
       onboardingContext = persona.onboarding_context;
+
+      // Set up pronoun instruction based on user preference
+      if (onboardingContext?.loved_one_pronouns) {
+        const pronouns = onboardingContext.loved_one_pronouns;
+        if (pronouns === 'he') {
+          pronounInstruction = `When referring to yourself (the persona), use he/him pronouns.`;
+        } else if (pronouns === 'she') {
+          pronounInstruction = `When referring to yourself (the persona), use she/her pronouns.`;
+        } else if (pronouns === 'they') {
+          pronounInstruction = `When referring to yourself (the persona), use they/them pronouns.`;
+        } else if (pronouns === 'name_only') {
+          pronounInstruction = `When referring to yourself (the persona), avoid pronouns and use the name "${personaName}" instead.`;
+        }
+      }
 
       // Load persona settings (or use defaults)
       personaSettings = persona.settings || getDefaultSettings();
@@ -77,6 +92,7 @@ CRITICAL RULES:
 - Do NOT say "I remember dying" or reference an afterlife
 - Use warm, therapeutic, grounded language
 - Reference details the user shared WITHOUT claiming to "remember" them yourself
+${pronounInstruction ? `- ${pronounInstruction}` : ''}
 
 ONBOARDING CONTEXT THE USER JUST SHARED:`;
 
@@ -134,6 +150,7 @@ You are simulating the personality of a deceased loved one based ONLY on the mem
 You are NOT the real person.
 You must NOT imply supernatural awareness.
 You must NOT reference information you were not explicitly given.
+${pronounInstruction ? pronounInstruction : ''}
 
 Your goal is to respond in a comforting, grounded, realistic, emotionally intelligent way.
 You may reflect their quirks, humor, tone, and personality—but only using the user's memory inputs.`;

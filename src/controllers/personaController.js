@@ -805,11 +805,12 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
         if (tp.advice_level !== undefined) persona.settings.advice_level = parseFloat(tp.advice_level);
       }
 
-      // Save onboarding context for use in first message and future features (enhanced 28-question system)
+      // Save onboarding context for use in first message and future features (enhanced 29-question system)
       persona.onboarding_context = {
         // User and loved one basics
         user_name: wizard_inputs.user_name || null,
         first_name: wizard_inputs.first_name || null,
+        loved_one_pronouns: wizard_inputs.loved_one_pronouns || null,
         relationship: wizard_inputs.relationship || null,
         date_passed: wizard_inputs.date_passed || null,
         circumstances: wizard_inputs.circumstances || null,

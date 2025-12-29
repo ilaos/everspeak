@@ -850,6 +850,7 @@ class WizardEngine {
       const wizardInputs = {
         user_name: this.answers.user_name || '',
         first_name: this.answers.loved_one_name || '',
+        loved_one_pronouns: this.answers.loved_one_pronouns || '',
         relationship: this.answers.relationship_to_user || '',
         date_passed: this.answers.when_passed || '',
         circumstances: this.answers.how_passed || '',

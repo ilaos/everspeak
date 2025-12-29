@@ -491,3 +491,136 @@ b934c26 Fix voice recorder preview issues
 2. **Test full voice flow** - Record → Preview → Playback → Transcribe
 3. **Test re-record flow** - Record → Preview → Re-record → Record again
 4. **Continue with any remaining wizard/onboarding work**
+
+---
+
+## Session: December 29, 2025 (Continued)
+
+### Summary
+This session focused on **switching from OpenAI to Google Gemini** for AI features, **adding a pronoun question** to the onboarding wizard, and **redesigning the voice recorder UI** to show a horizontal bar by default.
+
+---
+
+## Major Changes
+
+### 1. Switched AI Provider: OpenAI → Google Gemini
+
+**Reason:** User preferred to use their existing Gemini API key instead of OpenAI.
+
+**Files Updated:**
+| File | Change |
+|------|--------|
+| `src/controllers/transcriptionController.js` | OpenAI Whisper → Gemini 2.0 Flash (audio as base64) |
+| `src/controllers/messageController.js` | GPT-4o-mini → Gemini 2.0 Flash for persona conversations |
+| `src/controllers/personaController.js` | All AI features → Gemini (wizard, acknowledgments, bulk import, boost) |
+| `src/controllers/journalController.js` | Journal reflections → Gemini |
+| `src/services/ttsService.js` | **Kept with OpenAI** (Gemini has no TTS API) |
+
+**Environment Variables:**
+```
+GEMINI_API_KEY=... (text generation, transcription)
+OPENAI_API_KEY=... (TTS only)
+```
+
+**Commits:**
+- `3e628ea` - Switch transcription to Gemini
+- `e3800ed` - Switch all AI text features to Gemini
+
+---
+
+### 2. Added Pronoun Question to Onboarding (Q3)
+
+**Request:** User wanted to know how to refer to the loved one without asking about gender directly (to avoid political sensitivity).
+
+**Solution:** Added question after "What was their name?":
+> **"When I talk about them, should I say 'he,' 'she,' or 'they'?"**
+>
+> Options: He | She | They | Just use their name
+
+**Files Updated:**
+| File | Change |
+|------|--------|
+| `src/onboarding/questions.js` | Added Q3, renumbered Q4-Q29 (now 29 total questions) |
+| `public/wizardEngine.js` | Added `loved_one_pronouns` to wizard submission |
+| `src/controllers/personaController.js` | Store pronouns in `onboarding_context.loved_one_pronouns` |
+| `src/controllers/messageController.js` | Inject pronoun instructions into AI system prompt |
+
+**How It Works:**
+- `"he"` → AI prompt includes: "When referring to yourself (the persona), use he/him pronouns."
+- `"she"` → "...use she/her pronouns."
+- `"they"` → "...use they/them pronouns."
+- `"name_only"` → "...avoid pronouns and use the name instead."
+
+**Commit:** `ae8b604` - Add pronoun question to onboarding wizard (Q3)
+
+---
+
+### 3. Voice Recorder UI: Horizontal Bar by Default
+
+**Request:** Instead of showing a mic icon that expands to a recording bar, show the horizontal bar immediately in a "ready" state.
+
+**Before:**
+```
+        🎤
+  "Tap to record"
+```
+
+**After:**
+```
+┌────────────────────────────────────────┐
+│  🎤  │    Tap to record    │          │
+└────────────────────────────────────────┘
+```
+
+**Files Updated:**
+| File | Change |
+|------|--------|
+| `public/wizardEngine.js` | Renamed `.voice-recorder-default` → `.voice-recorder-ready`, new HTML structure |
+| `public/app.js` | Updated all 14 references to use `.voice-recorder-ready` |
+| `public/styles.css` | Added `.voice-recorder-ready` styles (horizontal bar layout) |
+
+**Commits:**
+- `6e3bf34` - Change voice recorder to show horizontal bar by default
+- `2398bf9` - Fix voice recorder: update app.js to use .voice-recorder-ready class
+
+---
+
+## Key Lesson Learned (NEW)
+
+5. **Voice recorder has logic in TWO files** - When changing voice recorder UI:
+   - `wizardEngine.js` generates the HTML structure
+   - `app.js` controls the behavior and state transitions
+   - **Both must be updated together** or selectors won't match
+
+This caused the "still seeing mic icon" bug - wizardEngine.js had the new class name but app.js was still looking for the old one.
+
+---
+
+## Git Commits This Session
+
+```
+2398bf9 Fix voice recorder: update app.js to use .voice-recorder-ready class
+1c2328e Bump cache version strings to 20241229-1
+6e3bf34 Change voice recorder to show horizontal bar by default
+ae8b604 Add pronoun question to onboarding wizard (Q3)
+e3800ed Switch all AI text features from OpenAI to Google Gemini
+3e628ea Switch from OpenAI Whisper to Google Gemini for audio transcription
+```
+
+---
+
+## Current Production State
+
+- **URL:** https://everspeak.almaseo.com
+- **AI Provider:** Gemini 2.0 Flash (text), OpenAI (TTS only)
+- **Onboarding Questions:** 29 total (added pronoun question as Q3)
+- **Voice Recorder:** Horizontal bar UI by default
+
+---
+
+## Server Environment
+
+```
+GEMINI_API_KEY=AIzaSy...  ✓
+OPENAI_API_KEY=sk-proj... ✓ (for TTS)
+```

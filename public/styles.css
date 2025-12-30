@@ -3038,7 +3038,7 @@ button[type="submit"]:active {
 }
 
 /* ========================================
-   RECORDING STATE - Active recording
+   RECORDING STATE - Active recording (calm, neutral)
    ======================================== */
 .voice-recorder-recording {
   display: none;
@@ -3046,9 +3046,9 @@ button[type="submit"]:active {
   align-items: center;
   gap: 20px;
   padding: 24px;
-  background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
+  background: linear-gradient(135deg, #faf8f5 0%, #f5f0ea 100%);
   border-radius: 16px;
-  border: 1px solid #ffcdd2;
+  border: 1px solid #e8e0d5;
 }
 
 .voice-recorder-recording.active {
@@ -3062,32 +3062,29 @@ button[type="submit"]:active {
 }
 
 .recording-dot {
-  width: 12px;
-  height: 12px;
-  background: #e53935;
+  width: 10px;
+  height: 10px;
+  background: #A68966;
   border-radius: 50%;
-  animation: recordingPulse 1.2s ease-in-out infinite;
+  animation: recordingPulse 1.5s ease-in-out infinite;
 }
 
 @keyframes recordingPulse {
   0%, 100% {
     opacity: 1;
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.4);
   }
   50% {
-    opacity: 0.8;
-    transform: scale(1.1);
-    box-shadow: 0 0 0 8px rgba(229, 57, 53, 0);
+    opacity: 0.5;
+    transform: scale(0.9);
   }
 }
 
 .recording-label {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #e53935;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #5a4f42;
+  letter-spacing: 0.3px;
 }
 
 /* Waveform animation container */
@@ -3103,7 +3100,7 @@ button[type="submit"]:active {
 .waveform-bar {
   width: 4px;
   height: 8px;
-  background: #e53935;
+  background: #A68966;
   border-radius: 2px;
   animation: waveform 0.8s ease-in-out infinite;
 }
@@ -3121,7 +3118,7 @@ button[type="submit"]:active {
 @keyframes waveform {
   0%, 100% {
     height: 8px;
-    opacity: 0.6;
+    opacity: 0.5;
   }
   50% {
     height: 32px;
@@ -3130,18 +3127,12 @@ button[type="submit"]:active {
 }
 
 .recording-timer {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 500;
   color: #5a4f42;
   font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
   min-width: 60px;
   text-align: center;
-  opacity: 0;
-  animation: timerFadeIn 0.3s ease-out 0.3s forwards;
-}
-
-@keyframes timerFadeIn {
-  to { opacity: 1; }
 }
 
 .btn-stop-recording {
@@ -3149,7 +3140,7 @@ button[type="submit"]:active {
   font-size: 0.95rem;
   font-weight: 600;
   color: white;
-  background: #e53935;
+  background: linear-gradient(135deg, #8b7d6f 0%, #6d6155 100%);
   border: none;
   border-radius: 28px;
   cursor: pointer;
@@ -3157,7 +3148,7 @@ button[type="submit"]:active {
 }
 
 .btn-stop-recording:hover {
-  background: #c62828;
+  background: linear-gradient(135deg, #6d6155 0%, #5a4f42 100%);
   transform: translateY(-1px);
 }
 

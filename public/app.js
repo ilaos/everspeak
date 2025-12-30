@@ -3203,13 +3203,8 @@ async function startVoiceRecording(container) {
   }
 
   try {
-    // Show "Get ready" state before requesting permission
-    showGetReadyState(container);
-
+    // Request mic permission - NO UI change until permission is granted and recording starts
     voiceRecorderStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-    // Brief delay after permission granted so user knows recording is about to start
-    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Set up audio analyser for waveform visualization
     try {
@@ -3323,20 +3318,6 @@ function stopWaveformAnimation() {
     audioContext.close().catch(() => {});
     audioContext = null;
     audioAnalyser = null;
-  }
-}
-
-// Show "Get ready" state while waiting for permission
-function showGetReadyState(container) {
-  const defaultState = container.querySelector('.voice-recorder-ready');
-  const recordingState = container.querySelector('.voice-recorder-recording');
-  const timerEl = container.querySelector('.recording-timer');
-
-  // Temporarily show a "preparing" state
-  if (defaultState) defaultState.style.display = 'none';
-  if (recordingState) {
-    recordingState.style.display = 'flex';
-    if (timerEl) timerEl.textContent = 'Get ready...';
   }
 }
 

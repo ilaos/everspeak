@@ -2970,8 +2970,7 @@ function initializeVoiceRecorders() {
 
   recorderContainers.forEach(container => {
     const fieldId = container.dataset.field;
-    const startBtn = container.querySelector('.btn-start-recording');
-    const stopBtn = container.querySelector('.btn-stop-recording');
+    const toggleBtn = container.querySelector('.btn-record-toggle');
     const reRecordBtn = container.querySelector('.btn-re-record');
     const typeInsteadBtn = container.querySelector('.btn-type-instead');
     const useVoiceBtn = container.querySelector('.btn-use-voice');
@@ -2981,14 +2980,9 @@ function initializeVoiceRecorders() {
       injectPreviewState(container);
     }
 
-    // Start recording
-    if (startBtn) {
-      startBtn.addEventListener('click', () => startVoiceRecording(container));
-    }
-
-    // Stop recording
-    if (stopBtn) {
-      stopBtn.addEventListener('click', () => stopVoiceRecording(container));
+    // Toggle recording (new single-button approach)
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => toggleVoiceRecording(container));
     }
 
     // Re-record (from complete state)
@@ -3136,8 +3130,7 @@ function formatTime(seconds) {
 
 // Show preview state with audio
 function showPreviewState(container, audioBlob) {
-  const defaultState = container.querySelector('.voice-recorder-ready');
-  const recordingState = container.querySelector('.voice-recorder-recording');
+  const bar = container.querySelector('.voice-recorder-bar');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
@@ -3181,8 +3174,7 @@ function showPreviewState(container, audioBlob) {
     }, { once: true });
   }
 
-  if (defaultState) defaultState.style.display = 'none';
-  if (recordingState) recordingState.style.display = 'none';
+  if (bar) bar.style.display = 'none';
   if (previewState) previewState.style.display = 'flex';
   if (processingState) processingState.style.display = 'none';
   if (completeState) completeState.style.display = 'none';
@@ -3193,6 +3185,18 @@ function showPreviewState(container, audioBlob) {
 let audioContext = null;
 let audioAnalyser = null;
 let waveformAnimationId = null;
+
+// Toggle voice recording (single button approach)
+function toggleVoiceRecording(container) {
+  const bar = container.querySelector('.voice-recorder-bar');
+  const isRecording = bar && bar.dataset.recording === 'true';
+
+  if (isRecording) {
+    stopVoiceRecording(container);
+  } else {
+    startVoiceRecording(container);
+  }
+}
 
 // Start voice recording
 async function startVoiceRecording(container) {
@@ -3403,66 +3407,100 @@ async function processVoiceRecording(container, audioBlob) {
 
 // Show recording state UI
 function showRecordingState(container) {
-  const defaultState = container.querySelector('.voice-recorder-ready');
-  const recordingState = container.querySelector('.voice-recorder-recording');
+  const bar = container.querySelector('.voice-recorder-bar');
+  const micIcon = container.querySelector('.mic-icon');
+  const stopIcon = container.querySelector('.stop-icon');
+  const statusText = container.querySelector('.recording-status');
+  const timerEl = container.querySelector('.recording-timer');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
-  const typeFallback = container.querySelector('.type-fallback');
+  const previewState = container.querySelector('.voice-recorder-preview');
 
-  if (defaultState) defaultState.style.display = 'none';
-  if (recordingState) recordingState.style.display = 'flex';
+  // Update bar state
+  if (bar) {
+    bar.dataset.recording = 'true';
+    bar.classList.add('recording');
+  }
+
+  // Toggle icons
+  if (micIcon) micIcon.style.display = 'none';
+  if (stopIcon) stopIcon.style.display = 'block';
+
+  // Toggle status/timer
+  if (statusText) statusText.style.display = 'none';
+  if (timerEl) timerEl.style.display = 'block';
+
+  // Hide other states
   if (processingState) processingState.style.display = 'none';
   if (completeState) completeState.style.display = 'none';
-  if (typeFallback) typeFallback.style.display = 'none';
+  if (previewState) previewState.style.display = 'none';
 }
 
 // Show processing state UI
 function showProcessingState(container) {
-  const defaultState = container.querySelector('.voice-recorder-ready');
-  const recordingState = container.querySelector('.voice-recorder-recording');
+  const bar = container.querySelector('.voice-recorder-bar');
+  const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
 
-  if (defaultState) defaultState.style.display = 'none';
-  if (recordingState) recordingState.style.display = 'none';
+  if (bar) bar.style.display = 'none';
+  if (previewState) previewState.style.display = 'none';
   if (processingState) processingState.style.display = 'flex';
   if (completeState) completeState.style.display = 'none';
 }
 
 // Show complete state UI with transcription
 function showCompleteState(container, transcription) {
-  const defaultState = container.querySelector('.voice-recorder-ready');
-  const recordingState = container.querySelector('.voice-recorder-recording');
+  const bar = container.querySelector('.voice-recorder-bar');
+  const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
   const transcriptionText = container.querySelector('.transcription-text');
   const typeFallback = container.querySelector('.type-fallback');
 
-  if (defaultState) defaultState.style.display = 'none';
-  if (recordingState) recordingState.style.display = 'none';
+  if (bar) bar.style.display = 'none';
+  if (previewState) previewState.style.display = 'none';
   if (processingState) processingState.style.display = 'none';
   if (completeState) completeState.style.display = 'flex';
   if (transcriptionText) transcriptionText.textContent = transcription;
   if (typeFallback) typeFallback.style.display = 'block';
 }
 
-// Reset to default state
+// Reset to default/idle state
 function resetVoiceRecorder(container) {
-  const defaultState = container.querySelector('.voice-recorder-ready');
-  const recordingState = container.querySelector('.voice-recorder-recording');
+  const bar = container.querySelector('.voice-recorder-bar');
+  const micIcon = container.querySelector('.mic-icon');
+  const stopIcon = container.querySelector('.stop-icon');
+  const statusText = container.querySelector('.recording-status');
+  const timerEl = container.querySelector('.recording-timer');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
   const typeFallback = container.querySelector('.type-fallback');
-  const timerEl = container.querySelector('.recording-timer');
 
-  if (defaultState) defaultState.style.display = 'flex';
-  if (recordingState) recordingState.style.display = 'none';
+  // Reset bar to idle state
+  if (bar) {
+    bar.dataset.recording = 'false';
+    bar.classList.remove('recording');
+    bar.style.display = 'flex';
+  }
+
+  // Toggle icons back to mic
+  if (micIcon) micIcon.style.display = 'block';
+  if (stopIcon) stopIcon.style.display = 'none';
+
+  // Toggle status/timer back to status
+  if (statusText) statusText.style.display = 'block';
+  if (timerEl) {
+    timerEl.style.display = 'none';
+    timerEl.textContent = '0:00';
+  }
+
+  // Hide other states
   if (previewState) previewState.style.display = 'none';
   if (processingState) processingState.style.display = 'none';
   if (completeState) completeState.style.display = 'none';
   if (typeFallback) typeFallback.style.display = 'block';
-  if (timerEl) timerEl.textContent = '0:00';
 
   // Clear the hidden input
   const hiddenInput = container.querySelector('input[type="hidden"]');

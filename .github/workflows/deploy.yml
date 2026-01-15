@@ -18,4 +18,6 @@ jobs:
           script: |
             cd /var/www/everspeak
             git pull
+            npm install
+            npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
             pm2 restart everspeak

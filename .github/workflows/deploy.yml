@@ -18,6 +18,4 @@ jobs:
           script: |
             cd /var/www/everspeak
             git pull
-            npm install
-            npm run build
             pm2 restart everspeak

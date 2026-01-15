@@ -2980,201 +2980,274 @@ button[type="submit"]:active {
 }
 
 /* ========================================
-   VOICE RECORDER - NEW UX DESIGN
+   VOICE RECORDER - Sleek Single-Bar Design
    ======================================== */
 
-.voice-recorder-container {
+.voice-recorder {
   width: 100%;
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
-/* ========================================
-   VOICE RECORDER - WhatsApp-style idle/active states
-   ======================================== */
-
-/* Idle state - just a mic button */
-.voice-recorder-idle {
+/* Idle State - Centered mic button */
+.recorder-idle {
   display: flex;
-  justify-content: center;
-  padding: 20px 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
 }
 
-.voice-recorder-idle .btn-start-record {
-  width: 64px;
-  height: 64px;
+.recorder-mic {
+  width: 72px;
+  height: 72px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #A68966 0%, #8c724f 100%);
+  background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(166, 137, 102, 0.4);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(18, 140, 126, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.voice-recorder-idle .btn-start-record:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(166, 137, 102, 0.5);
+.recorder-mic:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 28px rgba(18, 140, 126, 0.45);
 }
 
-.voice-recorder-idle .btn-start-record:active {
-  transform: scale(0.95);
+.recorder-mic:active {
+  transform: scale(0.94);
 }
 
-.voice-recorder-idle .btn-start-record svg {
-  width: 28px;
-  height: 28px;
-  color: white;
+.recorder-mic svg {
+  width: 32px;
+  height: 32px;
   fill: white;
 }
 
-/* Active/Recording state - timer, waveform, stop button */
-.voice-recorder-active {
+.recorder-hint {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 400;
+}
+
+/* Recording/Playback Bar - Single bar that transforms */
+.recorder-bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
-  border-radius: 50px;
-  border: 1px solid #e8c0c0;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 40px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
-.voice-recorder-active .recording-timer {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #d9534f;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  min-width: 45px;
+.recorder-bar[data-mode="recording"] {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #bbf7d0;
 }
 
-.voice-recorder-active .waveform-dots {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  height: 32px;
+.recorder-bar[data-mode="playback"] {
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
 }
 
-.voice-recorder-active .waveform-dot {
-  width: 4px;
-  height: 4px;
-  background: #d9534f;
-  border-radius: 50%;
-  animation: waveform-dot-pulse 1.2s ease-in-out infinite;
-}
-
-/* Staggered animation for dots */
-.voice-recorder-active .waveform-dot:nth-child(1) { animation-delay: 0s; }
-.voice-recorder-active .waveform-dot:nth-child(2) { animation-delay: 0.06s; }
-.voice-recorder-active .waveform-dot:nth-child(3) { animation-delay: 0.12s; }
-.voice-recorder-active .waveform-dot:nth-child(4) { animation-delay: 0.18s; }
-.voice-recorder-active .waveform-dot:nth-child(5) { animation-delay: 0.24s; }
-.voice-recorder-active .waveform-dot:nth-child(6) { animation-delay: 0.30s; }
-.voice-recorder-active .waveform-dot:nth-child(7) { animation-delay: 0.36s; }
-.voice-recorder-active .waveform-dot:nth-child(8) { animation-delay: 0.42s; }
-.voice-recorder-active .waveform-dot:nth-child(9) { animation-delay: 0.48s; }
-.voice-recorder-active .waveform-dot:nth-child(10) { animation-delay: 0.54s; }
-.voice-recorder-active .waveform-dot:nth-child(11) { animation-delay: 0.48s; }
-.voice-recorder-active .waveform-dot:nth-child(12) { animation-delay: 0.42s; }
-.voice-recorder-active .waveform-dot:nth-child(13) { animation-delay: 0.36s; }
-.voice-recorder-active .waveform-dot:nth-child(14) { animation-delay: 0.30s; }
-.voice-recorder-active .waveform-dot:nth-child(15) { animation-delay: 0.24s; }
-.voice-recorder-active .waveform-dot:nth-child(16) { animation-delay: 0.18s; }
-.voice-recorder-active .waveform-dot:nth-child(17) { animation-delay: 0.12s; }
-.voice-recorder-active .waveform-dot:nth-child(18) { animation-delay: 0.06s; }
-.voice-recorder-active .waveform-dot:nth-child(19) { animation-delay: 0s; }
-.voice-recorder-active .waveform-dot:nth-child(20) { animation-delay: 0.06s; }
-
-@keyframes waveform-dot-pulse {
-  0%, 100% {
-    transform: scaleY(1);
-    opacity: 0.4;
-  }
-  50% {
-    transform: scaleY(4);
-    opacity: 1;
-  }
-}
-
-.voice-recorder-active .btn-stop-record {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
+/* Left button (Stop during recording, Play/Pause during playback) */
+.bar-btn-left {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%);
+  background: #128C7E;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(217, 83, 79, 0.4);
   transition: all 0.2s ease;
 }
 
-.voice-recorder-active .btn-stop-record:hover {
+.bar-btn-left:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(217, 83, 79, 0.5);
+  background: #0d7a6e;
 }
 
-.voice-recorder-active .btn-stop-record:active {
+.bar-btn-left:active {
   transform: scale(0.95);
 }
 
-.voice-recorder-active .btn-stop-record svg {
+.bar-btn-left svg {
   width: 20px;
   height: 20px;
-  color: white;
   fill: white;
 }
 
-/* Legacy classes for backwards compatibility */
-.voice-recorder-ready {
-  display: none;
-}
-
-.voice-recorder-recording {
-  display: none;
-}
-
-.voice-recorder-recording.active {
-  display: flex;
-}
-
-.recording-header {
+/* Waveform / Progress track */
+.bar-waveform {
+  flex: 1;
+  height: 32px;
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-.recording-dot {
-  width: 10px;
-  height: 10px;
-  background: #A68966;
+.waveform-track {
+  width: 100%;
+  height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.waveform-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: #128C7E;
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+/* Recording animation on the track */
+.recorder-bar[data-mode="recording"] .waveform-track::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #128C7E 50%,
+    transparent 100%);
+  animation: recording-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes recording-pulse {
+  0% { transform: translateX(-100%); opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0.6; }
+}
+
+/* Timer */
+.bar-time {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  min-width: 42px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Right button (Use/Check) */
+.bar-btn-right {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #128C7E;
+  border: none;
   border-radius: 50%;
-  animation: recordingPulse 1.5s ease-in-out infinite;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-@keyframes recordingPulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(0.9);
-  }
+.bar-btn-right:hover {
+  transform: scale(1.05);
+  background: #0d7a6e;
 }
 
-.recording-label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #5a4f42;
-  letter-spacing: 0.3px;
+.bar-btn-right:active {
+  transform: scale(0.95);
+}
+
+.bar-btn-right svg {
+  width: 22px;
+  height: 22px;
+  fill: white;
+}
+
+/* Redo button */
+.recorder-redo {
+  display: block;
+  margin: 12px auto 0;
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  color: #6b7280;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recorder-redo:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+/* Processing state */
+.recorder-processing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  color: #6b7280;
+}
+
+.recorder-processing .processing-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #128C7E;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Complete state */
+.recorder-complete {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.recorder-transcription {
+  font-size: 0.95rem;
+  color: #374151;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+}
+
+.recorder-again {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  color: #6b7280;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recorder-again:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
 }
 
 /* Waveform animation container */

@@ -493,80 +493,53 @@
             <p class="step-question">Would you mind sharing their first name with me?</p>
 
             <!-- Voice Recorder -->
-            <div class="voice-recorder-container" id="voice-recorder-3" data-field="wizard-first-name">
+            <div class="voice-recorder" id="voice-recorder-3" data-field="wizard-first-name">
               <p class="voice-guidance">For example: "His name was Jim, but I always called him Jimmy." Feel free to share any nicknames or what you called them.</p>
 
-              <!-- Idle state - just mic button -->
-              <div class="voice-recorder-idle">
-                <button type="button" class="btn-start-record" data-testid="btn-record-3">
-                  <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+              <!-- Idle: Mic button -->
+              <div class="recorder-idle">
+                <button type="button" class="recorder-mic" data-testid="btn-record-3">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                   </svg>
                 </button>
+                <span class="recorder-hint">Tap to record</span>
               </div>
 
-              <!-- Recording state - timer, waveform, stop button -->
-              <div class="voice-recorder-active" style="display: none;">
-                <span class="recording-timer">0:00</span>
-                <div class="waveform-dots">
-                  <span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span>
-                </div>
-                <button type="button" class="btn-stop-record">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="6" width="12" height="12" rx="2"/>
-                  </svg>
+              <!-- Bar: Recording AND Playback -->
+              <div class="recorder-bar" data-mode="recording" style="display: none;">
+                <button type="button" class="bar-btn-left">
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
+                <div class="bar-waveform"><div class="waveform-track"><div class="waveform-progress"></div></div></div>
+                <span class="bar-time">0:00</span>
+                <button type="button" class="bar-btn-right" style="display: none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
               </div>
 
-              <!-- Preview state -->
-              <div class="voice-recorder-preview" style="display: none;">
-                <div class="audio-preview-container">
-                  <button type="button" class="btn-play-preview">
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
-                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                    </svg>
-                  </button>
-                  <div class="audio-progress-bar">
-                    <div class="audio-progress-fill"></div>
-                  </div>
-                  <span class="audio-duration">0:00</span>
-                </div>
-                <audio class="audio-preview-player" style="display: none;"></audio>
-                <div class="preview-actions">
-                  <button type="button" class="btn-re-record-preview">Redo</button>
-                  <button type="button" class="btn-use-recording">Use This</button>
-                </div>
-              </div>
+              <button type="button" class="recorder-redo" style="display: none;">Redo</button>
+              <audio class="recorder-audio" style="display: none;"></audio>
 
-              <!-- Processing state -->
-              <div class="voice-recorder-processing" style="display: none;">
+              <!-- Processing -->
+              <div class="recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
-                <p class="processing-text">Listening to your words...</p>
+                <span>Processing...</span>
               </div>
 
-              <!-- Complete state -->
-              <div class="voice-recorder-complete" style="display: none;">
-                <div class="transcription-preview">
-                  <p class="transcription-text"></p>
-                </div>
-                <div class="transcription-actions">
-                  <button type="button" class="btn-re-record">Record Again</button>
-                </div>
+              <!-- Complete -->
+              <div class="recorder-complete" style="display: none;">
+                <p class="recorder-transcription"></p>
+                <button type="button" class="recorder-again">Record again</button>
               </div>
 
-              <!-- Hidden input to store the value -->
               <input type="hidden" id="wizard-first-name" data-testid="input-wizard-first-name">
 
-              <!-- Type fallback -->
               <div class="type-fallback">
                 <button type="button" class="btn-type-instead">I'd rather type my answer</button>
               </div>
 
-              <!-- Text input (hidden by default) -->
               <div class="text-input-fallback" style="display: none;">
                 <input type="text" class="wizard-text-input" data-testid="input-wizard-first-name-text" placeholder="Their first name">
                 <button type="button" class="btn-use-voice">Use voice instead</button>
@@ -581,69 +554,41 @@
             <p class="step-description">I ask because the nature of your bond is central to understanding your loss.</p>
 
             <!-- Voice Recorder -->
-            <div class="voice-recorder-container" id="voice-recorder-4" data-field="wizard-relationship">
+            <div class="voice-recorder" id="voice-recorder-4" data-field="wizard-relationship">
               <p class="voice-guidance">For example: "She was my grandmother, but she was really more like a second mom to me." Share what the relationship meant to you.</p>
 
-              <!-- Idle state - just mic button -->
-              <div class="voice-recorder-idle">
-                <button type="button" class="btn-start-record" data-testid="btn-record-4">
-                  <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="recorder-idle">
+                <button type="button" class="recorder-mic" data-testid="btn-record-4">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                   </svg>
                 </button>
+                <span class="recorder-hint">Tap to record</span>
               </div>
 
-              <!-- Recording state - timer, waveform, stop button -->
-              <div class="voice-recorder-active" style="display: none;">
-                <span class="recording-timer">0:00</span>
-                <div class="waveform-dots">
-                  <span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span>
-                </div>
-                <button type="button" class="btn-stop-record">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="6" width="12" height="12" rx="2"/>
-                  </svg>
+              <div class="recorder-bar" data-mode="recording" style="display: none;">
+                <button type="button" class="bar-btn-left">
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
+                <div class="bar-waveform"><div class="waveform-track"><div class="waveform-progress"></div></div></div>
+                <span class="bar-time">0:00</span>
+                <button type="button" class="bar-btn-right" style="display: none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
               </div>
 
-              <!-- Preview state -->
-              <div class="voice-recorder-preview" style="display: none;">
-                <div class="audio-preview-container">
-                  <button type="button" class="btn-play-preview">
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
-                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                    </svg>
-                  </button>
-                  <div class="audio-progress-bar">
-                    <div class="audio-progress-fill"></div>
-                  </div>
-                  <span class="audio-duration">0:00</span>
-                </div>
-                <audio class="audio-preview-player" style="display: none;"></audio>
-                <div class="preview-actions">
-                  <button type="button" class="btn-re-record-preview">Redo</button>
-                  <button type="button" class="btn-use-recording">Use This</button>
-                </div>
-              </div>
+              <button type="button" class="recorder-redo" style="display: none;">Redo</button>
+              <audio class="recorder-audio" style="display: none;"></audio>
 
-              <!-- Processing state -->
-              <div class="voice-recorder-processing" style="display: none;">
+              <div class="recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
-                <p class="processing-text">Listening to your words...</p>
+                <span>Processing...</span>
               </div>
 
-              <!-- Complete state -->
-              <div class="voice-recorder-complete" style="display: none;">
-                <div class="transcription-preview">
-                  <p class="transcription-text"></p>
-                </div>
-                <div class="transcription-actions">
-                  <button type="button" class="btn-re-record">Record Again</button>
-                </div>
+              <div class="recorder-complete" style="display: none;">
+                <p class="recorder-transcription"></p>
+                <button type="button" class="recorder-again">Record again</button>
               </div>
 
               <input type="hidden" id="wizard-relationship" data-testid="input-wizard-relationship">
@@ -666,69 +611,41 @@
             <p class="step-description">I ask because understanding the timeline of your loss helps me appreciate the context of your grief.</p>
 
             <!-- Voice Recorder -->
-            <div class="voice-recorder-container" id="voice-recorder-5" data-field="wizard-date-passed">
+            <div class="voice-recorder" id="voice-recorder-5" data-field="wizard-date-passed">
               <p class="voice-guidance">For example: "It was about three years ago, right before Christmas." However you remember it is perfect.</p>
 
-              <!-- Idle state - just mic button -->
-              <div class="voice-recorder-idle">
-                <button type="button" class="btn-start-record" data-testid="btn-record-5">
-                  <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="recorder-idle">
+                <button type="button" class="recorder-mic" data-testid="btn-record-5">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                   </svg>
                 </button>
+                <span class="recorder-hint">Tap to record</span>
               </div>
 
-              <!-- Recording state - timer, waveform, stop button -->
-              <div class="voice-recorder-active" style="display: none;">
-                <span class="recording-timer">0:00</span>
-                <div class="waveform-dots">
-                  <span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span>
-                </div>
-                <button type="button" class="btn-stop-record">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="6" width="12" height="12" rx="2"/>
-                  </svg>
+              <div class="recorder-bar" data-mode="recording" style="display: none;">
+                <button type="button" class="bar-btn-left">
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
+                <div class="bar-waveform"><div class="waveform-track"><div class="waveform-progress"></div></div></div>
+                <span class="bar-time">0:00</span>
+                <button type="button" class="bar-btn-right" style="display: none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
               </div>
 
-              <!-- Preview state -->
-              <div class="voice-recorder-preview" style="display: none;">
-                <div class="audio-preview-container">
-                  <button type="button" class="btn-play-preview">
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
-                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                    </svg>
-                  </button>
-                  <div class="audio-progress-bar">
-                    <div class="audio-progress-fill"></div>
-                  </div>
-                  <span class="audio-duration">0:00</span>
-                </div>
-                <audio class="audio-preview-player" style="display: none;"></audio>
-                <div class="preview-actions">
-                  <button type="button" class="btn-re-record-preview">Redo</button>
-                  <button type="button" class="btn-use-recording">Use This</button>
-                </div>
-              </div>
+              <button type="button" class="recorder-redo" style="display: none;">Redo</button>
+              <audio class="recorder-audio" style="display: none;"></audio>
 
-              <!-- Processing state -->
-              <div class="voice-recorder-processing" style="display: none;">
+              <div class="recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
-                <p class="processing-text">Listening to your words...</p>
+                <span>Processing...</span>
               </div>
 
-              <!-- Complete state -->
-              <div class="voice-recorder-complete" style="display: none;">
-                <div class="transcription-preview">
-                  <p class="transcription-text"></p>
-                </div>
-                <div class="transcription-actions">
-                  <button type="button" class="btn-re-record">Record Again</button>
-                </div>
+              <div class="recorder-complete" style="display: none;">
+                <p class="recorder-transcription"></p>
+                <button type="button" class="recorder-again">Record again</button>
               </div>
 
               <input type="hidden" id="wizard-date-passed" data-testid="input-wizard-date-passed">
@@ -751,63 +668,41 @@
             <p class="step-description">I ask because the nature of a loss can deeply shape the experience of grief.</p>
 
             <!-- Voice Recorder -->
-            <div class="voice-recorder-container" id="voice-recorder-6" data-field="wizard-circumstances">
+            <div class="voice-recorder" id="voice-recorder-6" data-field="wizard-circumstances">
               <p class="voice-guidance">Take your time. For example: "It was sudden—a heart attack. We didn't get to say goodbye." Share as much or as little as feels right.</p>
 
-              <!-- Idle state - just mic button -->
-              <div class="voice-recorder-idle">
-                <button type="button" class="btn-start-record" data-testid="btn-record-6">
-                  <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="recorder-idle">
+                <button type="button" class="recorder-mic" data-testid="btn-record-6">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                   </svg>
                 </button>
+                <span class="recorder-hint">Tap to record</span>
               </div>
 
-              <!-- Recording state - timer, waveform, stop button -->
-              <div class="voice-recorder-active" style="display: none;">
-                <span class="recording-timer">0:00</span>
-                <div class="waveform-dots">
-                  <span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span><span class="waveform-dot"></span>
-                </div>
-                <button type="button" class="btn-stop-record">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="6" width="12" height="12" rx="2"/>
-                  </svg>
+              <div class="recorder-bar" data-mode="recording" style="display: none;">
+                <button type="button" class="bar-btn-left">
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
+                <div class="bar-waveform"><div class="waveform-track"><div class="waveform-progress"></div></div></div>
+                <span class="bar-time">0:00</span>
+                <button type="button" class="bar-btn-right" style="display: none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
               </div>
 
-              <!-- Preview state -->
-              <div class="voice-recorder-preview" style="display: none;">
-                <div class="audio-preview-container">
-                  <button type="button" class="btn-play-preview">
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                  </button>
-                  <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
-                  <span class="audio-duration">0:00</span>
-                </div>
-                <audio class="audio-preview-player" style="display: none;"></audio>
-                <div class="preview-actions">
-                  <button type="button" class="btn-re-record-preview">Redo</button>
-                  <button type="button" class="btn-use-recording">Use This</button>
-                </div>
-              </div>
+              <button type="button" class="recorder-redo" style="display: none;">Redo</button>
+              <audio class="recorder-audio" style="display: none;"></audio>
 
-              <!-- Processing state -->
-              <div class="voice-recorder-processing" style="display: none;">
+              <div class="recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
-                <p class="processing-text">Listening to your words...</p>
+                <span>Processing...</span>
               </div>
 
-              <!-- Complete state -->
-              <div class="voice-recorder-complete" style="display: none;">
-                <div class="transcription-preview">
-                  <p class="transcription-text"></p>
-                </div>
-                <div class="transcription-actions">
-                  <button type="button" class="btn-re-record">Record Again</button>
-                </div>
+              <div class="recorder-complete" style="display: none;">
+                <p class="recorder-transcription"></p>
+                <button type="button" class="recorder-again">Record again</button>
               </div>
 
               <input type="hidden" id="wizard-circumstances" data-testid="input-wizard-circumstances">
@@ -832,82 +727,41 @@
             <p class="step-question" id="step-7-question"></p>
 
             <!-- Voice Recorder -->
-            <div class="voice-recorder-container" id="voice-recorder-7" data-field="wizard-relationship-end">
+            <div class="voice-recorder" id="voice-recorder-7" data-field="wizard-relationship-end">
               <p class="voice-guidance">For example: "We talked every Sunday. He always asked about the kids first." Share what your connection was like toward the end.</p>
 
-              <!-- Idle state - just mic button -->
-              <div class="voice-recorder-idle">
-                <button type="button" class="btn-start-record" data-testid="btn-record-7">
-                  <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="recorder-idle">
+                <button type="button" class="recorder-mic" data-testid="btn-record-7">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                   </svg>
                 </button>
+                <span class="recorder-hint">Tap to record</span>
               </div>
 
-              <!-- Recording state - timer, waveform, stop button -->
-              <div class="voice-recorder-active" style="display: none;">
-                <span class="recording-timer">0:00</span>
-                <div class="waveform-dots">
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                </div>
-                <button type="button" class="btn-stop-record">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="6" width="12" height="12" rx="2"/>
-                  </svg>
+              <div class="recorder-bar" data-mode="recording" style="display: none;">
+                <button type="button" class="bar-btn-left">
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
+                <div class="bar-waveform"><div class="waveform-track"><div class="waveform-progress"></div></div></div>
+                <span class="bar-time">0:00</span>
+                <button type="button" class="bar-btn-right" style="display: none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
               </div>
 
-              <!-- Preview state -->
-              <div class="voice-recorder-preview" style="display: none;">
-                <div class="audio-preview-container">
-                  <button type="button" class="btn-play-preview">
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                  </button>
-                  <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
-                  <span class="audio-duration">0:00</span>
-                </div>
-                <audio class="audio-preview-player" style="display: none;"></audio>
-                <div class="preview-actions">
-                  <button type="button" class="btn-re-record-preview">Redo</button>
-                  <button type="button" class="btn-use-recording">Use This</button>
-                </div>
-              </div>
+              <button type="button" class="recorder-redo" style="display: none;">Redo</button>
+              <audio class="recorder-audio" style="display: none;"></audio>
 
-              <!-- Processing state -->
-              <div class="voice-recorder-processing" style="display: none;">
+              <div class="recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
-                <p class="processing-text">Listening to your words...</p>
+                <span>Processing...</span>
               </div>
 
-              <!-- Complete state -->
-              <div class="voice-recorder-complete" style="display: none;">
-                <div class="transcription-preview">
-                  <p class="transcription-text"></p>
-                </div>
-                <div class="transcription-actions">
-                  <button type="button" class="btn-re-record">Record Again</button>
-                </div>
+              <div class="recorder-complete" style="display: none;">
+                <p class="recorder-transcription"></p>
+                <button type="button" class="recorder-again">Record again</button>
               </div>
 
               <input type="hidden" id="wizard-relationship-end" data-testid="input-wizard-relationship-end">
@@ -930,82 +784,41 @@
             <p class="step-description">I ask because remembering someone's spirit—the sound of their laugh, what made them light up—is often a vital part of honoring their memory and navigating the journey of grief.</p>
 
             <!-- Voice Recorder -->
-            <div class="voice-recorder-container" id="voice-recorder-8" data-field="wizard-humor">
+            <div class="voice-recorder" id="voice-recorder-8" data-field="wizard-humor">
               <p class="voice-guidance">For example: "She had this dry, sarcastic wit. She'd say something under her breath and I'd lose it." What made them laugh? What made YOU laugh together?</p>
 
-              <!-- Idle state - just mic button -->
-              <div class="voice-recorder-idle">
-                <button type="button" class="btn-start-record" data-testid="btn-record-8">
-                  <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="recorder-idle">
+                <button type="button" class="recorder-mic" data-testid="btn-record-8">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                   </svg>
                 </button>
+                <span class="recorder-hint">Tap to record</span>
               </div>
 
-              <!-- Recording state - timer, waveform, stop button -->
-              <div class="voice-recorder-active" style="display: none;">
-                <span class="recording-timer">0:00</span>
-                <div class="waveform-dots">
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                </div>
-                <button type="button" class="btn-stop-record">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="6" width="12" height="12" rx="2"/>
-                  </svg>
+              <div class="recorder-bar" data-mode="recording" style="display: none;">
+                <button type="button" class="bar-btn-left">
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
+                <div class="bar-waveform"><div class="waveform-track"><div class="waveform-progress"></div></div></div>
+                <span class="bar-time">0:00</span>
+                <button type="button" class="bar-btn-right" style="display: none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
               </div>
 
-              <!-- Preview state -->
-              <div class="voice-recorder-preview" style="display: none;">
-                <div class="audio-preview-container">
-                  <button type="button" class="btn-play-preview">
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                  </button>
-                  <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
-                  <span class="audio-duration">0:00</span>
-                </div>
-                <audio class="audio-preview-player" style="display: none;"></audio>
-                <div class="preview-actions">
-                  <button type="button" class="btn-re-record-preview">Redo</button>
-                  <button type="button" class="btn-use-recording">Use This</button>
-                </div>
-              </div>
+              <button type="button" class="recorder-redo" style="display: none;">Redo</button>
+              <audio class="recorder-audio" style="display: none;"></audio>
 
-              <!-- Processing state -->
-              <div class="voice-recorder-processing" style="display: none;">
+              <div class="recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
-                <p class="processing-text">Listening to your words...</p>
+                <span>Processing...</span>
               </div>
 
-              <!-- Complete state -->
-              <div class="voice-recorder-complete" style="display: none;">
-                <div class="transcription-preview">
-                  <p class="transcription-text"></p>
-                </div>
-                <div class="transcription-actions">
-                  <button type="button" class="btn-re-record">Record Again</button>
-                </div>
+              <div class="recorder-complete" style="display: none;">
+                <p class="recorder-transcription"></p>
+                <button type="button" class="recorder-again">Record again</button>
               </div>
 
               <input type="hidden" id="wizard-humor" data-testid="input-wizard-humor">
@@ -1028,82 +841,41 @@
             <p class="step-description">I ask because these enduring memories often hold the deepest connections to who a person was to us, and giving voice to them can be a way of honoring that bond.</p>
 
             <!-- Voice Recorder -->
-            <div class="voice-recorder-container" id="voice-recorder-9" data-field="wizard-memories">
+            <div class="voice-recorder" id="voice-recorder-9" data-field="wizard-memories">
               <p class="voice-guidance">For example: "I remember this one fishing trip. We didn't catch anything, but we talked for hours. He told me about when he met mom..." The more detail, the better.</p>
 
-              <!-- Idle state - just mic button -->
-              <div class="voice-recorder-idle">
-                <button type="button" class="btn-start-record" data-testid="btn-record-9">
-                  <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="recorder-idle">
+                <button type="button" class="recorder-mic" data-testid="btn-record-9">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                   </svg>
                 </button>
+                <span class="recorder-hint">Tap to record</span>
               </div>
 
-              <!-- Recording state - timer, waveform, stop button -->
-              <div class="voice-recorder-active" style="display: none;">
-                <span class="recording-timer">0:00</span>
-                <div class="waveform-dots">
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                </div>
-                <button type="button" class="btn-stop-record">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="6" width="12" height="12" rx="2"/>
-                  </svg>
+              <div class="recorder-bar" data-mode="recording" style="display: none;">
+                <button type="button" class="bar-btn-left">
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
+                <div class="bar-waveform"><div class="waveform-track"><div class="waveform-progress"></div></div></div>
+                <span class="bar-time">0:00</span>
+                <button type="button" class="bar-btn-right" style="display: none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
               </div>
 
-              <!-- Preview state -->
-              <div class="voice-recorder-preview" style="display: none;">
-                <div class="audio-preview-container">
-                  <button type="button" class="btn-play-preview">
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                  </button>
-                  <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
-                  <span class="audio-duration">0:00</span>
-                </div>
-                <audio class="audio-preview-player" style="display: none;"></audio>
-                <div class="preview-actions">
-                  <button type="button" class="btn-re-record-preview">Redo</button>
-                  <button type="button" class="btn-use-recording">Use This</button>
-                </div>
-              </div>
+              <button type="button" class="recorder-redo" style="display: none;">Redo</button>
+              <audio class="recorder-audio" style="display: none;"></audio>
 
-              <!-- Processing state -->
-              <div class="voice-recorder-processing" style="display: none;">
+              <div class="recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
-                <p class="processing-text">Listening to your words...</p>
+                <span>Processing...</span>
               </div>
 
-              <!-- Complete state -->
-              <div class="voice-recorder-complete" style="display: none;">
-                <div class="transcription-preview">
-                  <p class="transcription-text"></p>
-                </div>
-                <div class="transcription-actions">
-                  <button type="button" class="btn-re-record">Record Again</button>
-                </div>
+              <div class="recorder-complete" style="display: none;">
+                <p class="recorder-transcription"></p>
+                <button type="button" class="recorder-again">Record again</button>
               </div>
 
               <input type="hidden" id="wizard-memories" data-testid="input-wizard-memories">
@@ -1126,82 +898,41 @@
             <p class="step-description">I ask because unspoken words often carry a unique weight in grief. Giving them a space to be acknowledged here can sometimes help lighten that load.</p>
 
             <!-- Voice Recorder -->
-            <div class="voice-recorder-container" id="voice-recorder-10" data-field="wizard-conversations">
+            <div class="voice-recorder" id="voice-recorder-10" data-field="wizard-conversations">
               <p class="voice-guidance">For example: "I wish I'd told him how much I appreciated everything he did for us. I always assumed he knew..." This is a safe space. Say what's been left unsaid.</p>
 
-              <!-- Idle state - just mic button -->
-              <div class="voice-recorder-idle">
-                <button type="button" class="btn-start-record" data-testid="btn-record-10">
-                  <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="recorder-idle">
+                <button type="button" class="recorder-mic" data-testid="btn-record-10">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                   </svg>
                 </button>
+                <span class="recorder-hint">Tap to record</span>
               </div>
 
-              <!-- Recording state - timer, waveform, stop button -->
-              <div class="voice-recorder-active" style="display: none;">
-                <span class="recording-timer">0:00</span>
-                <div class="waveform-dots">
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                  <span class="waveform-dot"></span>
-                </div>
-                <button type="button" class="btn-stop-record">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="6" width="12" height="12" rx="2"/>
-                  </svg>
+              <div class="recorder-bar" data-mode="recording" style="display: none;">
+                <button type="button" class="bar-btn-left">
+                  <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
+                <div class="bar-waveform"><div class="waveform-track"><div class="waveform-progress"></div></div></div>
+                <span class="bar-time">0:00</span>
+                <button type="button" class="bar-btn-right" style="display: none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
               </div>
 
-              <!-- Preview state -->
-              <div class="voice-recorder-preview" style="display: none;">
-                <div class="audio-preview-container">
-                  <button type="button" class="btn-play-preview">
-                    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                  </button>
-                  <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
-                  <span class="audio-duration">0:00</span>
-                </div>
-                <audio class="audio-preview-player" style="display: none;"></audio>
-                <div class="preview-actions">
-                  <button type="button" class="btn-re-record-preview">Redo</button>
-                  <button type="button" class="btn-use-recording">Use This</button>
-                </div>
-              </div>
+              <button type="button" class="recorder-redo" style="display: none;">Redo</button>
+              <audio class="recorder-audio" style="display: none;"></audio>
 
-              <!-- Processing state -->
-              <div class="voice-recorder-processing" style="display: none;">
+              <div class="recorder-processing" style="display: none;">
                 <div class="processing-spinner"></div>
-                <p class="processing-text">Listening to your words...</p>
+                <span>Processing...</span>
               </div>
 
-              <!-- Complete state -->
-              <div class="voice-recorder-complete" style="display: none;">
-                <div class="transcription-preview">
-                  <p class="transcription-text"></p>
-                </div>
-                <div class="transcription-actions">
-                  <button type="button" class="btn-re-record">Record Again</button>
-                </div>
+              <div class="recorder-complete" style="display: none;">
+                <p class="recorder-transcription"></p>
+                <button type="button" class="recorder-again">Record again</button>
               </div>
 
               <input type="hidden" id="wizard-conversations" data-testid="input-wizard-conversations">

@@ -172,91 +172,65 @@ class WizardEngine {
 
   generateVoiceInput(question, stepNumber) {
     return `
-      <div class="voice-recorder-container" data-field="${question.fieldId}">
+      <div class="voice-recorder" data-field="${question.fieldId}">
         ${question.example ? `<p class="voice-guidance">${question.example}</p>` : ''}
 
-        <!-- Idle state - just mic button -->
-        <div class="voice-recorder-idle">
-          <button type="button" class="btn-start-record" data-step="${stepNumber}">
-            <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+        <!-- Idle: Mic button -->
+        <div class="recorder-idle">
+          <button type="button" class="recorder-mic" data-step="${stepNumber}">
+            <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
               <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
             </svg>
           </button>
+          <span class="recorder-hint">Tap to record</span>
         </div>
 
-        <!-- Recording state - timer, waveform, stop button -->
-        <div class="voice-recorder-active" style="display: none;">
-          <span class="recording-timer">0:00</span>
-          <div class="waveform-dots">
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-            <span class="waveform-dot"></span>
-          </div>
-          <button type="button" class="btn-stop-record">
-            <svg viewBox="0 0 24 24" fill="currentColor">
+        <!-- Bar: Recording AND Playback (single element, transforms) -->
+        <div class="recorder-bar" data-mode="recording" style="display: none;">
+          <button type="button" class="bar-btn-left">
+            <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor">
               <rect x="6" y="6" width="12" height="12" rx="2"/>
+            </svg>
+            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </button>
+          <div class="bar-waveform">
+            <div class="waveform-track">
+              <div class="waveform-progress"></div>
+            </div>
+          </div>
+          <span class="bar-time">0:00</span>
+          <button type="button" class="bar-btn-right" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
             </svg>
           </button>
         </div>
 
-        <!-- Preview state -->
-        <div class="voice-recorder-preview" style="display: none;">
-          <div class="audio-preview-container">
-            <button type="button" class="btn-play-preview">
-              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-              </svg>
-            </button>
-            <div class="audio-progress-bar">
-              <div class="audio-progress-fill"></div>
-            </div>
-            <span class="audio-duration">0:00</span>
-          </div>
-          <audio class="audio-preview-player" style="display: none;"></audio>
-          <div class="preview-actions">
-            <button type="button" class="btn-re-record-preview">Redo</button>
-            <button type="button" class="btn-use-recording">Use This</button>
-          </div>
-        </div>
+        <!-- Redo link (shown in playback mode) -->
+        <button type="button" class="recorder-redo" style="display: none;">Redo</button>
 
-        <!-- Processing state -->
-        <div class="voice-recorder-processing" style="display: none;">
+        <!-- Hidden audio -->
+        <audio class="recorder-audio" style="display: none;"></audio>
+
+        <!-- Processing -->
+        <div class="recorder-processing" style="display: none;">
           <div class="processing-spinner"></div>
-          <p class="processing-text">Listening to your words...</p>
+          <span>Processing...</span>
         </div>
 
-        <!-- Complete state -->
-        <div class="voice-recorder-complete" style="display: none;">
-          <div class="transcription-preview">
-            <p class="transcription-text"></p>
-          </div>
-          <div class="transcription-actions">
-            <button type="button" class="btn-re-record">Record Again</button>
-          </div>
+        <!-- Complete -->
+        <div class="recorder-complete" style="display: none;">
+          <p class="recorder-transcription"></p>
+          <button type="button" class="recorder-again">Record again</button>
         </div>
 
-        <!-- Hidden input for value -->
+        <!-- Hidden input -->
         <input type="hidden" id="answer-${question.fieldId}" data-field="${question.fieldId}">
 
         <!-- Type fallback -->
@@ -626,14 +600,28 @@ class WizardEngine {
       this.isRecording = true;
       this.recordingSeconds = 0;
 
-      // Update UI to recording state
-      const container = document.querySelector(`.wizard-step[data-step="${stepNumber}"] .voice-recorder-container`);
+      // Update UI to recording state (supports both new and legacy structures)
+      const container = document.querySelector(`.wizard-step[data-step="${stepNumber}"] .voice-recorder`) ||
+                        document.querySelector(`.wizard-step[data-step="${stepNumber}"] .voice-recorder-container`);
       if (container) {
+        // New structure elements
+        const recorderIdle = container.querySelector('.recorder-idle');
+        const recorderBar = container.querySelector('.recorder-bar');
+        const barTime = container.querySelector('.bar-time');
+
+        // Legacy elements
         const idle = container.querySelector('.voice-recorder-idle');
         const active = container.querySelector('.voice-recorder-active');
         const timerEl = container.querySelector('.recording-timer');
 
-        // Hide idle, show active
+        // New structure: hide idle, show bar in recording mode
+        if (recorderIdle) recorderIdle.style.display = 'none';
+        if (recorderBar) {
+          recorderBar.style.display = 'flex';
+          recorderBar.dataset.mode = 'recording';
+        }
+
+        // Legacy structure: hide idle, show active
         if (idle) idle.style.display = 'none';
         if (active) active.style.display = 'flex';
 
@@ -642,7 +630,9 @@ class WizardEngine {
           this.recordingSeconds++;
           const mins = Math.floor(this.recordingSeconds / 60);
           const secs = this.recordingSeconds % 60;
-          if (timerEl) timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+          const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+          if (barTime) barTime.textContent = timeStr;
+          if (timerEl) timerEl.textContent = timeStr;
         }, 1000);
       }
     } catch (error) {
@@ -665,16 +655,31 @@ class WizardEngine {
     }
   }
 
-  // Process recorded audio
+  // Process recorded audio (supports both new and legacy structures)
   async processRecording(stepNumber) {
-    const container = document.querySelector(`.wizard-step[data-step="${stepNumber}"] .voice-recorder-container`);
+    const container = document.querySelector(`.wizard-step[data-step="${stepNumber}"] .voice-recorder`) ||
+                      document.querySelector(`.wizard-step[data-step="${stepNumber}"] .voice-recorder-container`);
     if (!container) return;
 
+    // New structure elements
+    const recorderBar = container.querySelector('.recorder-bar');
+    const redoBtn = container.querySelector('.recorder-redo');
+    const recorderProcessing = container.querySelector('.recorder-processing');
+    const recorderComplete = container.querySelector('.recorder-complete');
+    const recorderTranscription = container.querySelector('.recorder-transcription');
+
+    // Legacy elements
     const active = container.querySelector('.voice-recorder-active');
+    const processingState = container.querySelector('.voice-recorder-processing');
+    const completeState = container.querySelector('.voice-recorder-complete');
+    const transcriptionText = container.querySelector('.transcription-text');
 
     // Show processing state
+    if (recorderBar) recorderBar.style.display = 'none';
+    if (redoBtn) redoBtn.style.display = 'none';
+    if (recorderProcessing) recorderProcessing.style.display = 'flex';
     if (active) active.style.display = 'none';
-    container.querySelector('.voice-recorder-processing').style.display = 'flex';
+    if (processingState) processingState.style.display = 'flex';
 
     try {
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
@@ -692,9 +697,13 @@ class WizardEngine {
         const text = result.data.text;
 
         // Show complete state with transcription
-        container.querySelector('.voice-recorder-processing').style.display = 'none';
-        container.querySelector('.voice-recorder-complete').style.display = 'flex';
-        container.querySelector('.transcription-text').textContent = text;
+        if (recorderProcessing) recorderProcessing.style.display = 'none';
+        if (recorderComplete) recorderComplete.style.display = 'flex';
+        if (recorderTranscription) recorderTranscription.textContent = text;
+
+        if (processingState) processingState.style.display = 'none';
+        if (completeState) completeState.style.display = 'flex';
+        if (transcriptionText) transcriptionText.textContent = text;
 
         // Store value in hidden input
         const fieldId = container.dataset.field;
@@ -705,19 +714,38 @@ class WizardEngine {
       }
     } catch (error) {
       console.error('Transcription error:', error);
-      container.querySelector('.voice-recorder-processing').style.display = 'none';
+      if (recorderProcessing) recorderProcessing.style.display = 'none';
+      if (processingState) processingState.style.display = 'none';
       // Reset to idle state
       this.resetToIdle(container);
       alert('Sorry, we couldn\'t transcribe your recording. Please try again or type your answer.');
     }
   }
 
-  // Reset to idle state
+  // Reset to idle state (supports both new and legacy structures)
   resetToIdle(container) {
+    // New structure elements
+    const recorderIdle = container.querySelector('.recorder-idle');
+    const recorderBar = container.querySelector('.recorder-bar');
+    const barTime = container.querySelector('.bar-time');
+    const redoBtn = container.querySelector('.recorder-redo');
+    const recorderProcessing = container.querySelector('.recorder-processing');
+    const recorderComplete = container.querySelector('.recorder-complete');
+
+    // Legacy elements
     const idle = container.querySelector('.voice-recorder-idle');
     const active = container.querySelector('.voice-recorder-active');
     const timerEl = container.querySelector('.recording-timer');
 
+    // New structure reset
+    if (recorderIdle) recorderIdle.style.display = 'flex';
+    if (recorderBar) recorderBar.style.display = 'none';
+    if (barTime) barTime.textContent = '0:00';
+    if (redoBtn) redoBtn.style.display = 'none';
+    if (recorderProcessing) recorderProcessing.style.display = 'none';
+    if (recorderComplete) recorderComplete.style.display = 'none';
+
+    // Legacy reset
     if (idle) idle.style.display = 'flex';
     if (active) active.style.display = 'none';
     if (timerEl) timerEl.textContent = '0:00';
@@ -832,9 +860,12 @@ class WizardEngine {
 
     document.querySelectorAll('.btn-re-record').forEach(btn => {
       btn.onclick = () => {
-        const container = btn.closest('.voice-recorder-container');
+        const container = btn.closest('.voice-recorder') || btn.closest('.voice-recorder-container');
         if (container) {
-          container.querySelector('.voice-recorder-complete').style.display = 'none';
+          const recorderComplete = container.querySelector('.recorder-complete');
+          const legacyComplete = container.querySelector('.voice-recorder-complete');
+          if (recorderComplete) recorderComplete.style.display = 'none';
+          if (legacyComplete) legacyComplete.style.display = 'none';
           this.resetToIdle(container);
           const hiddenInput = container.querySelector('input[type="hidden"]');
           if (hiddenInput) hiddenInput.value = '';
@@ -845,9 +876,11 @@ class WizardEngine {
     // Type instead / voice instead toggles
     document.querySelectorAll('.btn-type-instead').forEach(btn => {
       btn.onclick = () => {
-        const container = btn.closest('.voice-recorder-container');
+        const container = btn.closest('.voice-recorder') || btn.closest('.voice-recorder-container');
         if (container) {
+          const recorderIdle = container.querySelector('.recorder-idle');
           const idle = container.querySelector('.voice-recorder-idle');
+          if (recorderIdle) recorderIdle.style.display = 'none';
           if (idle) idle.style.display = 'none';
           const typeFallback = container.querySelector('.type-fallback');
           if (typeFallback) typeFallback.style.display = 'none';
@@ -859,7 +892,7 @@ class WizardEngine {
 
     document.querySelectorAll('.btn-use-voice').forEach(btn => {
       btn.onclick = () => {
-        const container = btn.closest('.voice-recorder-container');
+        const container = btn.closest('.voice-recorder') || btn.closest('.voice-recorder-container');
         if (container) {
           const textInput = container.querySelector('.text-input-fallback');
           if (textInput) textInput.style.display = 'none';

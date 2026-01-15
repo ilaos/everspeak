@@ -2957,6 +2957,10 @@ function hideVoiceNameConfirmation() {
 // WHATSAPP-STYLE VOICE RECORDER
 // ========================================
 
+// ============================================================================
+// VOICE RECORDER - Sleek WhatsApp-style single-bar approach
+// ============================================================================
+
 // Track active recording per container
 let activeVoiceRecorder = null;
 let voiceRecorderTimer = null;
@@ -2965,48 +2969,100 @@ let voiceRecorderStream = null;
 
 // Initialize all voice recorders in the wizard
 function initializeVoiceRecorders() {
-  const recorderContainers = document.querySelectorAll('.voice-recorder-container');
+  // Support both new and legacy class names during transition
+  const recorderContainers = document.querySelectorAll('.voice-recorder, .voice-recorder-container');
   console.log('[Voice Recorder] Found', recorderContainers.length, 'recorder containers');
 
   recorderContainers.forEach(container => {
     const fieldId = container.dataset.field;
+
+    // New sleek structure handlers
+    const micBtn = container.querySelector('.recorder-mic');
+    const bar = container.querySelector('.recorder-bar');
+    const btnLeft = container.querySelector('.bar-btn-left');
+    const btnRight = container.querySelector('.bar-btn-right');
+    const redoBtn = container.querySelector('.recorder-redo');
+    const againBtn = container.querySelector('.recorder-again');
+    const audioEl = container.querySelector('.recorder-audio');
+
+    // Legacy handlers (for backward compatibility)
     const startBtn = container.querySelector('.btn-start-record');
     const stopBtn = container.querySelector('.btn-stop-record');
     const reRecordBtn = container.querySelector('.btn-re-record');
     const typeInsteadBtn = container.querySelector('.btn-type-instead');
     const useVoiceBtn = container.querySelector('.btn-use-voice');
 
-    // Inject preview state if missing
-    if (!container.querySelector('.voice-recorder-preview')) {
-      injectPreviewState(container);
+    // === NEW SLEEK STRUCTURE ===
+
+    // Mic button: start recording
+    if (micBtn) {
+      micBtn.addEventListener('click', () => startVoiceRecording(container));
     }
 
-    // Start recording (WhatsApp-style - click mic to start)
+    // Left button: stop (during recording) OR play/pause (during playback)
+    if (btnLeft) {
+      btnLeft.addEventListener('click', () => {
+        const mode = bar?.dataset.mode;
+        if (mode === 'recording') {
+          stopVoiceRecording(container);
+        } else if (mode === 'playback') {
+          toggleAudioPlayback(container);
+        }
+      });
+    }
+
+    // Right button (checkmark): confirm and process recording
+    if (btnRight) {
+      btnRight.addEventListener('click', () => {
+        const audioBlob = container._audioBlob;
+        if (audioBlob) {
+          showProcessingState(container);
+          processVoiceRecording(container, audioBlob);
+        }
+      });
+    }
+
+    // Redo button: reset to idle
+    if (redoBtn) {
+      redoBtn.addEventListener('click', () => {
+        container._audioBlob = null;
+        resetVoiceRecorder(container);
+      });
+    }
+
+    // Record again button (from complete state)
+    if (againBtn) {
+      againBtn.addEventListener('click', () => {
+        container._audioBlob = null;
+        resetVoiceRecorder(container);
+      });
+    }
+
+    // Audio element: handle playback events
+    if (audioEl) {
+      audioEl.addEventListener('timeupdate', () => updateAudioProgress(container));
+      audioEl.addEventListener('ended', () => resetAudioPlayback(container));
+    }
+
+    // === LEGACY STRUCTURE (for backward compatibility) ===
+
     if (startBtn) {
       startBtn.addEventListener('click', () => startVoiceRecording(container));
     }
-
-    // Stop recording (click stop button)
     if (stopBtn) {
       stopBtn.addEventListener('click', () => stopVoiceRecording(container));
     }
-
-    // Re-record (from complete state)
     if (reRecordBtn) {
       reRecordBtn.addEventListener('click', () => resetVoiceRecorder(container));
     }
-
-    // Type instead (show text input)
     if (typeInsteadBtn) {
       typeInsteadBtn.addEventListener('click', () => showTextFallback(container));
     }
-
-    // Use voice instead (hide text input)
     if (useVoiceBtn) {
       useVoiceBtn.addEventListener('click', () => hideTextFallback(container));
     }
 
-    // Preview state buttons
+    // Legacy preview state buttons
     setupPreviewButtons(container);
 
     // Slide to cancel (touch events)
@@ -3014,33 +3070,7 @@ function initializeVoiceRecorders() {
   });
 }
 
-// Inject preview state HTML if not present
-function injectPreviewState(container) {
-  const processingState = container.querySelector('.voice-recorder-processing');
-  if (!processingState) return;
-
-  const previewHTML = `
-    <div class="voice-recorder-preview" style="display: none;">
-      <div class="audio-preview-container">
-        <audio class="audio-preview-player"></audio>
-        <button type="button" class="btn-play-preview">
-          <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-        </button>
-        <div class="audio-progress-bar"><div class="audio-progress-fill"></div></div>
-        <span class="audio-duration">0:00</span>
-      </div>
-      <div class="preview-actions">
-        <button type="button" class="btn-re-record-preview">Re-record</button>
-        <button type="button" class="btn-use-recording">Use this recording</button>
-      </div>
-    </div>
-  `;
-
-  processingState.insertAdjacentHTML('beforebegin', previewHTML);
-}
-
-// Setup preview state button handlers
+// Setup legacy preview state button handlers (for backward compatibility)
 function setupPreviewButtons(container) {
   const playBtn = container.querySelector('.btn-play-preview');
   const reRecordBtn = container.querySelector('.btn-re-record-preview');
@@ -3049,15 +3079,12 @@ function setupPreviewButtons(container) {
 
   if (playBtn && audioPlayer) {
     playBtn.addEventListener('click', () => toggleAudioPlayback(container));
-
-    // Update progress bar during playback
     audioPlayer.addEventListener('timeupdate', () => updateAudioProgress(container));
     audioPlayer.addEventListener('ended', () => resetAudioPlayback(container));
   }
 
   if (reRecordBtn) {
     reRecordBtn.addEventListener('click', () => {
-      // Clear the stored audio blob
       container._audioBlob = null;
       resetVoiceRecorder(container);
     });
@@ -3065,7 +3092,6 @@ function setupPreviewButtons(container) {
 
   if (useRecordingBtn) {
     useRecordingBtn.addEventListener('click', () => {
-      // Proceed with transcription
       const audioBlob = container._audioBlob;
       if (audioBlob) {
         showProcessingState(container);
@@ -3075,9 +3101,17 @@ function setupPreviewButtons(container) {
   }
 }
 
-// Toggle audio playback
+// Toggle audio playback (works for both new and legacy)
 function toggleAudioPlayback(container) {
-  const audioPlayer = container.querySelector('.audio-preview-player');
+  // Try new structure first, then legacy
+  const audioPlayer = container.querySelector('.recorder-audio') || container.querySelector('.audio-preview-player');
+  const bar = container.querySelector('.recorder-bar');
+
+  // New structure icons
+  const iconPlay = container.querySelector('.icon-play');
+  const iconPause = container.querySelector('.icon-pause');
+
+  // Legacy icons
   const playIcon = container.querySelector('.play-icon');
   const pauseIcon = container.querySelector('.pause-icon');
 
@@ -3085,10 +3119,18 @@ function toggleAudioPlayback(container) {
 
   if (audioPlayer.paused) {
     audioPlayer.play();
+    // New structure
+    if (iconPlay) iconPlay.style.display = 'none';
+    if (iconPause) iconPause.style.display = 'block';
+    // Legacy
     if (playIcon) playIcon.style.display = 'none';
     if (pauseIcon) pauseIcon.style.display = 'block';
   } else {
     audioPlayer.pause();
+    // New structure
+    if (iconPlay) iconPlay.style.display = 'block';
+    if (iconPause) iconPause.style.display = 'none';
+    // Legacy
     if (playIcon) playIcon.style.display = 'block';
     if (pauseIcon) pauseIcon.style.display = 'none';
   }
@@ -3096,32 +3138,54 @@ function toggleAudioPlayback(container) {
 
 // Update audio progress bar
 function updateAudioProgress(container) {
-  const audioPlayer = container.querySelector('.audio-preview-player');
-  const progressFill = container.querySelector('.audio-progress-fill');
-  const durationSpan = container.querySelector('.audio-duration');
+  // Try new structure first, then legacy
+  const audioPlayer = container.querySelector('.recorder-audio') || container.querySelector('.audio-preview-player');
+  const progressFill = container.querySelector('.waveform-progress') || container.querySelector('.audio-progress-fill');
+  const timeDisplay = container.querySelector('.bar-time') || container.querySelector('.audio-duration');
 
-  if (!audioPlayer || !progressFill) return;
+  if (!audioPlayer) return;
 
-  const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-  progressFill.style.width = `${percent}%`;
+  if (progressFill && audioPlayer.duration) {
+    const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+    progressFill.style.width = `${percent}%`;
+  }
 
-  // Update duration display
-  if (durationSpan) {
+  // Update time display
+  if (timeDisplay && audioPlayer.duration && isFinite(audioPlayer.duration)) {
     const current = formatTime(audioPlayer.currentTime);
     const total = formatTime(audioPlayer.duration);
-    durationSpan.textContent = `${current} / ${total}`;
+    timeDisplay.textContent = `${current} / ${total}`;
   }
 }
 
 // Reset audio playback when ended
 function resetAudioPlayback(container) {
-  const audioPlayer = container.querySelector('.audio-preview-player');
+  const audioPlayer = container.querySelector('.recorder-audio') || container.querySelector('.audio-preview-player');
+  const progressFill = container.querySelector('.waveform-progress') || container.querySelector('.audio-progress-fill');
+  const timeDisplay = container.querySelector('.bar-time') || container.querySelector('.audio-duration');
+
+  // New structure icons
+  const iconPlay = container.querySelector('.icon-play');
+  const iconPause = container.querySelector('.icon-pause');
+
+  // Legacy icons
   const playIcon = container.querySelector('.play-icon');
   const pauseIcon = container.querySelector('.pause-icon');
-  const progressFill = container.querySelector('.audio-progress-fill');
 
-  if (audioPlayer) audioPlayer.currentTime = 0;
+  if (audioPlayer) {
+    audioPlayer.currentTime = 0;
+
+    // Show duration after reset
+    if (timeDisplay && audioPlayer.duration && isFinite(audioPlayer.duration)) {
+      timeDisplay.textContent = formatTime(audioPlayer.duration);
+    }
+  }
+
   if (progressFill) progressFill.style.width = '0%';
+
+  // Reset to play icon
+  if (iconPlay) iconPlay.style.display = 'block';
+  if (iconPause) iconPause.style.display = 'none';
   if (playIcon) playIcon.style.display = 'block';
   if (pauseIcon) pauseIcon.style.display = 'none';
 }
@@ -3134,8 +3198,85 @@ function formatTime(seconds) {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Show preview state with audio
+// Transition bar from recording to playback mode
+function showPlaybackMode(container, audioBlob) {
+  const idleState = container.querySelector('.recorder-idle');
+  const bar = container.querySelector('.recorder-bar');
+  const btnRight = container.querySelector('.bar-btn-right');
+  const redoBtn = container.querySelector('.recorder-redo');
+  const audioEl = container.querySelector('.recorder-audio');
+  const timeDisplay = container.querySelector('.bar-time');
+  const progressFill = container.querySelector('.waveform-progress');
+
+  // Icons in left button
+  const iconStop = container.querySelector('.icon-stop');
+  const iconPlay = container.querySelector('.icon-play');
+  const iconPause = container.querySelector('.icon-pause');
+
+  // Store the blob for later use
+  container._audioBlob = audioBlob;
+
+  // Switch bar to playback mode
+  if (bar) {
+    bar.dataset.mode = 'playback';
+    bar.style.display = 'flex';
+  }
+
+  // Hide idle state
+  if (idleState) idleState.style.display = 'none';
+
+  // Switch icons: hide stop, show play
+  if (iconStop) iconStop.style.display = 'none';
+  if (iconPlay) iconPlay.style.display = 'block';
+  if (iconPause) iconPause.style.display = 'none';
+
+  // Show confirm button (checkmark)
+  if (btnRight) btnRight.style.display = 'flex';
+
+  // Show redo button
+  if (redoBtn) redoBtn.style.display = 'inline-flex';
+
+  // Reset progress
+  if (progressFill) progressFill.style.width = '0%';
+
+  // Show recorded duration
+  if (timeDisplay) {
+    timeDisplay.textContent = formatTime(voiceRecorderSeconds);
+  }
+
+  // Set up audio element for playback
+  if (audioEl && audioBlob) {
+    // Clean up any previous URL
+    if (audioEl.src && audioEl.src.startsWith('blob:')) {
+      URL.revokeObjectURL(audioEl.src);
+    }
+
+    const audioUrl = URL.createObjectURL(audioBlob);
+    audioEl.src = audioUrl;
+    audioEl.load();
+
+    // Update duration when metadata loads
+    audioEl.addEventListener('loadedmetadata', () => {
+      if (timeDisplay && audioEl.duration && isFinite(audioEl.duration)) {
+        timeDisplay.textContent = formatTime(audioEl.duration);
+      }
+    }, { once: true });
+  }
+
+  console.log('[Voice Recorder] Switched to playback mode');
+}
+
+// Legacy: Show preview state with audio (for backward compatibility)
 function showPreviewState(container, audioBlob) {
+  // Check if this is new or legacy structure
+  const newBar = container.querySelector('.recorder-bar');
+  if (newBar) {
+    // Use new playback mode instead
+    showPlaybackMode(container, audioBlob);
+    return;
+  }
+
+  // Legacy code path
   const bar = container.querySelector('.voice-recorder-bar');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
@@ -3144,36 +3285,22 @@ function showPreviewState(container, audioBlob) {
   const audioPlayer = container.querySelector('.audio-preview-player');
   const durationSpan = container.querySelector('.audio-duration');
 
-  // Store the blob for later use
   container._audioBlob = audioBlob;
 
-  // Show the duration we recorded (voiceRecorderSeconds is still available)
   if (durationSpan) {
     durationSpan.textContent = formatTime(voiceRecorderSeconds);
   }
 
-  // Create object URL for audio playback
   if (audioPlayer && audioBlob) {
-    // Clean up any previous URL
     if (audioPlayer.src && audioPlayer.src.startsWith('blob:')) {
       URL.revokeObjectURL(audioPlayer.src);
     }
 
     const audioUrl = URL.createObjectURL(audioBlob);
     audioPlayer.src = audioUrl;
-
-    // Force load the audio
     audioPlayer.load();
 
-    // Update duration when metadata loads (as backup)
     audioPlayer.addEventListener('loadedmetadata', () => {
-      if (durationSpan && audioPlayer.duration && isFinite(audioPlayer.duration)) {
-        durationSpan.textContent = formatTime(audioPlayer.duration);
-      }
-    }, { once: true });
-
-    // Also try on canplaythrough
-    audioPlayer.addEventListener('canplaythrough', () => {
       if (durationSpan && audioPlayer.duration && isFinite(audioPlayer.duration)) {
         durationSpan.textContent = formatTime(audioPlayer.duration);
       }
@@ -3425,8 +3552,23 @@ async function processVoiceRecording(container, audioBlob) {
   }
 }
 
-// Show recording state UI
+// Show recording state UI (works for both new and legacy)
 function showRecordingState(container) {
+  // New sleek structure elements
+  const recorderIdle = container.querySelector('.recorder-idle');
+  const recorderBar = container.querySelector('.recorder-bar');
+  const barTime = container.querySelector('.bar-time');
+  const btnRight = container.querySelector('.bar-btn-right');
+  const redoBtn = container.querySelector('.recorder-redo');
+  const recorderProcessing = container.querySelector('.recorder-processing');
+  const recorderComplete = container.querySelector('.recorder-complete');
+
+  // Icons in left button
+  const iconStop = container.querySelector('.icon-stop');
+  const iconPlay = container.querySelector('.icon-play');
+  const iconPause = container.querySelector('.icon-pause');
+
+  // Legacy elements
   const idleState = container.querySelector('.voice-recorder-idle');
   const activeState = container.querySelector('.voice-recorder-active');
   const timerEl = container.querySelector('.recording-timer');
@@ -3434,27 +3576,68 @@ function showRecordingState(container) {
   const completeState = container.querySelector('.voice-recorder-complete');
   const previewState = container.querySelector('.voice-recorder-preview');
 
-  // Hide idle state, show active state (WhatsApp-style reveal)
+  // === NEW STRUCTURE ===
+  if (recorderBar) {
+    // Hide idle state, show bar in recording mode
+    if (recorderIdle) recorderIdle.style.display = 'none';
+
+    recorderBar.style.display = 'flex';
+    recorderBar.dataset.mode = 'recording';
+
+    // Show stop icon, hide play/pause
+    if (iconStop) iconStop.style.display = 'block';
+    if (iconPlay) iconPlay.style.display = 'none';
+    if (iconPause) iconPause.style.display = 'none';
+
+    // Hide confirm button during recording
+    if (btnRight) btnRight.style.display = 'none';
+
+    // Hide redo during recording
+    if (redoBtn) redoBtn.style.display = 'none';
+
+    // Reset timer
+    if (barTime) barTime.textContent = '0:00';
+
+    // Hide other states
+    if (recorderProcessing) recorderProcessing.style.display = 'none';
+    if (recorderComplete) recorderComplete.style.display = 'none';
+  }
+
+  // === LEGACY STRUCTURE ===
   if (idleState) idleState.style.display = 'none';
   if (activeState) activeState.style.display = 'flex';
-
-  // Reset timer
   if (timerEl) timerEl.textContent = '0:00';
-
-  // Hide other states
   if (processingState) processingState.style.display = 'none';
   if (completeState) completeState.style.display = 'none';
   if (previewState) previewState.style.display = 'none';
 }
 
-// Show processing state UI
+// Show processing state UI (works for both new and legacy)
 function showProcessingState(container) {
+  // New sleek structure elements
+  const recorderIdle = container.querySelector('.recorder-idle');
+  const recorderBar = container.querySelector('.recorder-bar');
+  const redoBtn = container.querySelector('.recorder-redo');
+  const recorderProcessing = container.querySelector('.recorder-processing');
+  const recorderComplete = container.querySelector('.recorder-complete');
+
+  // Legacy elements
   const idleState = container.querySelector('.voice-recorder-idle');
   const activeState = container.querySelector('.voice-recorder-active');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
 
+  // === NEW STRUCTURE ===
+  if (recorderProcessing) {
+    if (recorderIdle) recorderIdle.style.display = 'none';
+    if (recorderBar) recorderBar.style.display = 'none';
+    if (redoBtn) redoBtn.style.display = 'none';
+    recorderProcessing.style.display = 'flex';
+    if (recorderComplete) recorderComplete.style.display = 'none';
+  }
+
+  // === LEGACY STRUCTURE ===
   if (idleState) idleState.style.display = 'none';
   if (activeState) activeState.style.display = 'none';
   if (previewState) previewState.style.display = 'none';
@@ -3462,8 +3645,17 @@ function showProcessingState(container) {
   if (completeState) completeState.style.display = 'none';
 }
 
-// Show complete state UI with transcription
+// Show complete state UI with transcription (works for both new and legacy)
 function showCompleteState(container, transcription) {
+  // New sleek structure elements
+  const recorderIdle = container.querySelector('.recorder-idle');
+  const recorderBar = container.querySelector('.recorder-bar');
+  const redoBtn = container.querySelector('.recorder-redo');
+  const recorderProcessing = container.querySelector('.recorder-processing');
+  const recorderComplete = container.querySelector('.recorder-complete');
+  const recorderTranscription = container.querySelector('.recorder-transcription');
+
+  // Legacy elements
   const idleState = container.querySelector('.voice-recorder-idle');
   const activeState = container.querySelector('.voice-recorder-active');
   const previewState = container.querySelector('.voice-recorder-preview');
@@ -3472,6 +3664,17 @@ function showCompleteState(container, transcription) {
   const transcriptionText = container.querySelector('.transcription-text');
   const typeFallback = container.querySelector('.type-fallback');
 
+  // === NEW STRUCTURE ===
+  if (recorderComplete) {
+    if (recorderIdle) recorderIdle.style.display = 'none';
+    if (recorderBar) recorderBar.style.display = 'none';
+    if (redoBtn) redoBtn.style.display = 'none';
+    if (recorderProcessing) recorderProcessing.style.display = 'none';
+    recorderComplete.style.display = 'flex';
+    if (recorderTranscription) recorderTranscription.textContent = transcription;
+  }
+
+  // === LEGACY STRUCTURE ===
   if (idleState) idleState.style.display = 'none';
   if (activeState) activeState.style.display = 'none';
   if (previewState) previewState.style.display = 'none';
@@ -3481,8 +3684,20 @@ function showCompleteState(container, transcription) {
   if (typeFallback) typeFallback.style.display = 'block';
 }
 
-// Reset to default/idle state
+// Reset to default/idle state (works for both new and legacy)
 function resetVoiceRecorder(container) {
+  // New sleek structure elements
+  const recorderIdle = container.querySelector('.recorder-idle');
+  const recorderBar = container.querySelector('.recorder-bar');
+  const barTime = container.querySelector('.bar-time');
+  const btnRight = container.querySelector('.bar-btn-right');
+  const redoBtn = container.querySelector('.recorder-redo');
+  const recorderProcessing = container.querySelector('.recorder-processing');
+  const recorderComplete = container.querySelector('.recorder-complete');
+  const recorderAudio = container.querySelector('.recorder-audio');
+  const progressFill = container.querySelector('.waveform-progress');
+
+  // Legacy elements
   const idleState = container.querySelector('.voice-recorder-idle');
   const activeState = container.querySelector('.voice-recorder-active');
   const timerEl = container.querySelector('.recording-timer');
@@ -3491,6 +3706,30 @@ function resetVoiceRecorder(container) {
   const completeState = container.querySelector('.voice-recorder-complete');
   const typeFallback = container.querySelector('.type-fallback');
 
+  // === NEW STRUCTURE ===
+  if (recorderIdle) {
+    recorderIdle.style.display = 'flex';
+    if (recorderBar) recorderBar.style.display = 'none';
+    if (barTime) barTime.textContent = '0:00';
+    if (btnRight) btnRight.style.display = 'none';
+    if (redoBtn) redoBtn.style.display = 'none';
+    if (recorderProcessing) recorderProcessing.style.display = 'none';
+    if (recorderComplete) recorderComplete.style.display = 'none';
+
+    // Reset progress bar
+    if (progressFill) progressFill.style.width = '0%';
+
+    // Reset audio element
+    if (recorderAudio) {
+      recorderAudio.pause();
+      if (recorderAudio.src && recorderAudio.src.startsWith('blob:')) {
+        URL.revokeObjectURL(recorderAudio.src);
+      }
+      recorderAudio.src = '';
+    }
+  }
+
+  // === LEGACY STRUCTURE ===
   // Show idle state, hide active state (WhatsApp-style)
   if (idleState) idleState.style.display = 'flex';
   if (activeState) activeState.style.display = 'none';
@@ -3513,7 +3752,7 @@ function resetVoiceRecorder(container) {
   // Clear stored audio blob
   container._audioBlob = null;
 
-  // Reset audio player
+  // Reset legacy audio player
   const audioPlayer = container.querySelector('.audio-preview-player');
   if (audioPlayer) {
     audioPlayer.pause();
@@ -3524,8 +3763,17 @@ function resetVoiceRecorder(container) {
   voiceRecorderSeconds = 0;
 }
 
-// Update recording timer display
+// Update recording timer display (works for both new and legacy)
 function updateRecordingTimer(container) {
+  // New structure
+  const barTime = container.querySelector('.bar-time');
+  if (barTime) {
+    const minutes = Math.floor(voiceRecorderSeconds / 60);
+    const seconds = voiceRecorderSeconds % 60;
+    barTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  // Legacy structure
   const timerEl = container.querySelector('.recording-timer');
   if (timerEl) {
     const minutes = Math.floor(voiceRecorderSeconds / 60);
@@ -3558,21 +3806,33 @@ function hideTextFallback(container) {
   if (typeFallbackBtn) typeFallbackBtn.style.display = 'block';
 }
 
-// Setup slide to cancel gesture
+// Setup slide to cancel gesture (works for both new and legacy)
 function setupSlideToCancel(container) {
+  // New structure: use the recorder bar
+  const newBar = container.querySelector('.recorder-bar');
+  // Legacy structure
   const recordingState = container.querySelector('.voice-recorder-recording');
-  if (!recordingState) return;
+
+  const targetElement = newBar || recordingState;
+  if (!targetElement) return;
 
   let startX = 0;
   let isSwiping = false;
 
-  recordingState.addEventListener('touchstart', (e) => {
+  targetElement.addEventListener('touchstart', (e) => {
+    // Only enable swipe during recording mode
+    if (newBar && newBar.dataset.mode !== 'recording') return;
     startX = e.touches[0].clientX;
     isSwiping = true;
   }, { passive: true });
 
-  recordingState.addEventListener('touchmove', (e) => {
+  targetElement.addEventListener('touchmove', (e) => {
     if (!isSwiping) return;
+    // Check recording mode for new structure
+    if (newBar && newBar.dataset.mode !== 'recording') {
+      isSwiping = false;
+      return;
+    }
 
     const currentX = e.touches[0].clientX;
     const diff = startX - currentX;
@@ -3584,7 +3844,7 @@ function setupSlideToCancel(container) {
     }
   }, { passive: true });
 
-  recordingState.addEventListener('touchend', () => {
+  targetElement.addEventListener('touchend', () => {
     isSwiping = false;
   }, { passive: true });
 }

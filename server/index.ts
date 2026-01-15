@@ -116,11 +116,16 @@ app.use(limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static file serving - always serve from root public/ folder
-// In dev: __dirname is /server, so ../public = /public
-// In prod: __dirname is /dist, so ../public = /public
-const publicPath = path.join(__dirname, '..', 'public');
-const assetsPath = path.join(__dirname, '..', 'attached_assets');
+// Static file serving
+const publicPath =
+  process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, 'public')
+    : path.join(__dirname, '..', 'public');
+
+const assetsPath =
+  process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, 'attached_assets')
+    : path.join(__dirname, '..', 'attached_assets');
 
 app.use(express.static(publicPath));
 app.use('/attached_assets', express.static(assetsPath));

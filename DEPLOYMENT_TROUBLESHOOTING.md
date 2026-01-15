@@ -1,130 +1,164 @@
 # Deployment Troubleshooting Guide
 
-## ✅ Your App Works!
+## Quick Diagnosis
 
-The production build was tested successfully and returns HTTP 200 OK. The deployment configuration needs to be fixed.
+### Check if deployment ran
+Go to: https://github.com/ilaos/everspeak/actions
 
-## 🔧 Fix the Deployment - Step by Step
+- **Green checkmark** = Workflow succeeded
+- **Red X** = Workflow failed (click to see error)
+- **Yellow dot** = Still running
 
-### Step 1: Check Deployment Logs
+---
 
-1. Go to your Replit workspace
-2. Click on the **"Deployments"** tab
-3. Select your deployment
-4. Click **"Logs"** to see what's happening
-5. Look for any error messages
+## Common Issues & Fixes
 
-Common errors to look for:
-- "Module not found"
-- "PORT is not defined"
-- "Build failed"
-- "Cannot find module"
+### Issue: Changes not appearing (workflow succeeded)
 
-### Step 2: Verify Deployment Configuration
+**Symptoms:** GitHub Actions shows green checkmark, but site hasn't updated.
 
-Click **"Edit Deployment"** or **"Settings"** and verify:
+**Cause:** File permission issue - the `deploy` user can't write to git files.
 
-**✅ Critical Settings:**
-
-1. **Run Command** must be: `npm start`
-   - NOT `npm run dev`
-   - NOT `tsx server/index.ts`
-
-2. **Build Command** must be: `npm run build`
-   - This creates the `dist/` folder
-
-3. **Environment Variables** must include:
-   ```
-   NODE_ENV=production
-   OPENAI_API_KEY=<your-key>
-   SESSION_SECRET=<your-secret>
-   ```
-   
-   ⚠️ **WITHOUT NODE_ENV=production the app won't find static files!**
-
-4. **Root Directory**: Leave blank or set to `/` (root)
-   - Do NOT set to `/dist`
-
-### Step 3: Common Issues & Fixes
-
-#### Issue: "Page not found" or 404 error
-
-**Cause**: Deployment is not starting correctly
-
-**Fix**:
-1. Make sure `npm start` is the run command
-2. Verify `NODE_ENV=production` is set
-3. Check deployment logs for errors
-4. Try redeploying after fixing settings
-
-#### Issue: Build fails
-
-**Cause**: Build command not running or failing
-
-**Fix**:
-1. Check build logs for errors
-2. Verify `npm run build` works locally (it does!)
-3. Make sure all dependencies are installed
-
-#### Issue: Environment variables not set
-
-**Cause**: Missing required secrets
-
-**Fix**:
-1. Go to deployment settings
-2. Add environment variables:
-   - `NODE_ENV` = `production`
-   - `OPENAI_API_KEY` = your OpenAI key
-   - `SESSION_SECRET` = your session secret
-3. Redeploy
-
-### Step 4: Redeploy with Correct Settings
-
-After fixing the configuration:
-
-1. Click **"Deploy"** or **"Redeploy"**
-2. Wait for the build to complete (watch the logs)
-3. Test the URL: https://ever-speak-backend-ilaos.replit.app
-
-### Step 5: Verify It Works
-
-Once deployed successfully, test:
-
-1. Homepage loads: https://ever-speak-backend-ilaos.replit.app
-2. API works: https://ever-speak-backend-ilaos.replit.app/api/personas
-3. Swagger docs: https://ever-speak-backend-ilaos.replit.app/api-docs
-
-## 🎯 Quick Checklist
-
-Before redeploying, verify:
-
-- [ ] Run command is `npm start` (NOT `npm run dev`)
-- [ ] Build command is `npm run build`
-- [ ] `NODE_ENV=production` is set in environment variables
-- [ ] `OPENAI_API_KEY` is set in environment variables
-- [ ] `SESSION_SECRET` is set in environment variables
-- [ ] Root directory is empty or `/`
-- [ ] Build logs show successful compilation
-
-## 📞 Still Having Issues?
-
-If you're still seeing errors:
-
-1. Share the deployment logs (copy/paste the error messages)
-2. Verify the deployment settings match the checklist above
-3. Try stopping and starting the deployment
-
-## ✅ Expected Successful Deployment Logs
-
-When working correctly, you should see:
+**Diagnosis:** SSH into server and run:
+```bash
+sudo -u deploy git fetch origin
 ```
-> rest-express@1.0.0 build
-> vite build && esbuild server/index.ts...
-✓ built in Xs
+If you see "Permission denied", that's the problem.
 
-> rest-express@1.0.0 start
-> NODE_ENV=production node dist/index.js
-🚀 Everspeak Backend is running on port XXXX
-🌐 Web UI available at http://localhost:XXXX
-📚 API Documentation available at http://localhost:XXXX/api-docs
+**Fix:**
+```bash
+chown -R deploy:deploy /var/www/everspeak
 ```
+
+**Why this happens:** When you SSH as `root` and run git commands, files get owned by root, locking out the `deploy` user.
+
+---
+
+### Issue: GitHub Actions workflow fails
+
+**Symptoms:** Red X on the Actions page.
+
+**Diagnosis:** Click on the failed workflow, expand "Deploy to server" step.
+
+**Common causes:**
+1. **SSH key issue** - The `DO_SSH_KEY` secret may be invalid
+2. **Server unreachable** - Server might be down
+3. **Git conflict** - Merge conflict on server
+
+**Fix for git conflicts:**
+```bash
+ssh root@165.22.44.109
+cd /var/www/everspeak
+git status                    # See what's conflicting
+git checkout -- <file>        # Discard local changes
+git pull origin main
+chown -R deploy:deploy /var/www/everspeak
+pm2 restart everspeak
+```
+
+---
+
+### Issue: Site is down / 502 error
+
+**Symptoms:** Site shows "502 Bad Gateway" or doesn't load.
+
+**Diagnosis:** SSH and check PM2:
+```bash
+pm2 list
+pm2 logs everspeak --lines 50
+```
+
+**Common causes:**
+1. **PM2 crashed** - Run `pm2 restart everspeak`
+2. **Port conflict** - Check if another process is using the port
+3. **Missing .env** - Ensure `.env` file exists on server
+
+---
+
+### Issue: API works but static files don't load
+
+**Symptoms:** API endpoints work, but HTML/CSS/JS files return 404.
+
+**Cause:** Server might be looking in wrong directory.
+
+**Check:** The server should serve from `public/` folder. Verify in `server/index.ts`:
+```javascript
+const publicPath = path.join(__dirname, '..', 'public');
+```
+
+---
+
+## Manual Deployment Steps
+
+If automated deployment isn't working:
+
+```bash
+# SSH to server
+ssh root@165.22.44.109
+
+# Navigate to project
+cd /var/www/everspeak
+
+# Pull latest code
+git fetch origin
+git pull origin main
+
+# Fix permissions (important!)
+chown -R deploy:deploy /var/www/everspeak
+
+# Restart app
+pm2 restart everspeak
+
+# Verify it's running
+pm2 list
+```
+
+---
+
+## Verifying Deployment
+
+### Check server has latest commit:
+```bash
+cd /var/www/everspeak
+git log --oneline -1
+```
+Compare the commit hash with what's on GitHub.
+
+### Check file was updated:
+```bash
+head -20 public/index.html
+```
+Look for your recent changes.
+
+### Check HTTP response:
+```bash
+curl -I https://everspeak.almaseo.com
+```
+Look at `Last-Modified` header to see when file was last changed.
+
+---
+
+## Server Access
+
+**SSH as root:**
+```bash
+ssh root@165.22.44.109
+```
+
+**Server details:**
+- IP: 165.22.44.109
+- Project path: /var/www/everspeak
+- Process manager: PM2
+- Process name: everspeak
+
+---
+
+## Prevention
+
+To avoid deployment issues:
+
+1. **Don't run git commands as root** - If you must, always run `chown -R deploy:deploy /var/www/everspeak` afterward
+
+2. **Don't edit files directly on server** - Make changes locally, push to GitHub, let automation deploy
+
+3. **Check Actions after pushing** - Verify the workflow succeeded before assuming changes are live

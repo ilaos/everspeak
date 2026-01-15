@@ -2970,7 +2970,8 @@ function initializeVoiceRecorders() {
 
   recorderContainers.forEach(container => {
     const fieldId = container.dataset.field;
-    const toggleBtn = container.querySelector('.btn-record-toggle');
+    const startBtn = container.querySelector('.btn-start-record');
+    const stopBtn = container.querySelector('.btn-stop-record');
     const reRecordBtn = container.querySelector('.btn-re-record');
     const typeInsteadBtn = container.querySelector('.btn-type-instead');
     const useVoiceBtn = container.querySelector('.btn-use-voice');
@@ -2980,9 +2981,14 @@ function initializeVoiceRecorders() {
       injectPreviewState(container);
     }
 
-    // Toggle recording (new single-button approach)
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => toggleVoiceRecording(container));
+    // Start recording (WhatsApp-style - click mic to start)
+    if (startBtn) {
+      startBtn.addEventListener('click', () => startVoiceRecording(container));
+    }
+
+    // Stop recording (click stop button)
+    if (stopBtn) {
+      stopBtn.addEventListener('click', () => stopVoiceRecording(container));
     }
 
     // Re-record (from complete state)
@@ -3281,28 +3287,42 @@ async function startVoiceRecording(container) {
 
 // Start waveform animation based on audio input
 function startWaveformAnimation(container) {
+  // Try new dot-style waveform first, fall back to bar-style
+  const waveformDots = container.querySelectorAll('.waveform-dot');
   const waveformBars = container.querySelectorAll('.waveform-bar');
-  if (!waveformBars.length || !audioAnalyser) return;
+  const waveformElements = waveformDots.length > 0 ? waveformDots : waveformBars;
+
+  if (!waveformElements.length || !audioAnalyser) return;
 
   const dataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+  const isDots = waveformDots.length > 0;
 
   function animate() {
     audioAnalyser.getByteFrequencyData(dataArray);
 
-    // Map audio data to waveform bars
-    const barCount = waveformBars.length;
-    for (let i = 0; i < barCount; i++) {
-      // Get a frequency value for this bar
-      const dataIndex = Math.floor((i / barCount) * dataArray.length);
+    // Map audio data to waveform elements
+    const count = waveformElements.length;
+    for (let i = 0; i < count; i++) {
+      // Get a frequency value for this element
+      const dataIndex = Math.floor((i / count) * dataArray.length);
       const value = dataArray[dataIndex] || 0;
 
-      // Map 0-255 to 8-40px height
-      const minHeight = 8;
-      const maxHeight = 40;
-      const height = minHeight + (value / 255) * (maxHeight - minHeight);
-
-      waveformBars[i].style.height = `${height}px`;
-      waveformBars[i].style.animation = 'none'; // Override CSS animation
+      if (isDots) {
+        // For dots: scale transform (1 to 5)
+        const minScale = 1;
+        const maxScale = 5;
+        const scale = minScale + (value / 255) * (maxScale - minScale);
+        waveformElements[i].style.transform = `scaleY(${scale})`;
+        waveformElements[i].style.opacity = 0.4 + (value / 255) * 0.6;
+        waveformElements[i].style.animation = 'none';
+      } else {
+        // For bars: height-based animation
+        const minHeight = 8;
+        const maxHeight = 40;
+        const height = minHeight + (value / 255) * (maxHeight - minHeight);
+        waveformElements[i].style.height = `${height}px`;
+        waveformElements[i].style.animation = 'none';
+      }
     }
 
     waveformAnimationId = requestAnimationFrame(animate);
@@ -3407,28 +3427,19 @@ async function processVoiceRecording(container, audioBlob) {
 
 // Show recording state UI
 function showRecordingState(container) {
-  const bar = container.querySelector('.voice-recorder-bar');
-  const micIcon = container.querySelector('.mic-icon');
-  const stopIcon = container.querySelector('.stop-icon');
-  const statusText = container.querySelector('.recording-status');
+  const idleState = container.querySelector('.voice-recorder-idle');
+  const activeState = container.querySelector('.voice-recorder-active');
   const timerEl = container.querySelector('.recording-timer');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
   const previewState = container.querySelector('.voice-recorder-preview');
 
-  // Update bar state
-  if (bar) {
-    bar.dataset.recording = 'true';
-    bar.classList.add('recording');
-  }
+  // Hide idle state, show active state (WhatsApp-style reveal)
+  if (idleState) idleState.style.display = 'none';
+  if (activeState) activeState.style.display = 'flex';
 
-  // Toggle icons
-  if (micIcon) micIcon.style.display = 'none';
-  if (stopIcon) stopIcon.style.display = 'block';
-
-  // Toggle status/timer
-  if (statusText) statusText.style.display = 'none';
-  if (timerEl) timerEl.style.display = 'block';
+  // Reset timer
+  if (timerEl) timerEl.textContent = '0:00';
 
   // Hide other states
   if (processingState) processingState.style.display = 'none';
@@ -3438,12 +3449,14 @@ function showRecordingState(container) {
 
 // Show processing state UI
 function showProcessingState(container) {
-  const bar = container.querySelector('.voice-recorder-bar');
+  const idleState = container.querySelector('.voice-recorder-idle');
+  const activeState = container.querySelector('.voice-recorder-active');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
 
-  if (bar) bar.style.display = 'none';
+  if (idleState) idleState.style.display = 'none';
+  if (activeState) activeState.style.display = 'none';
   if (previewState) previewState.style.display = 'none';
   if (processingState) processingState.style.display = 'flex';
   if (completeState) completeState.style.display = 'none';
@@ -3451,14 +3464,16 @@ function showProcessingState(container) {
 
 // Show complete state UI with transcription
 function showCompleteState(container, transcription) {
-  const bar = container.querySelector('.voice-recorder-bar');
+  const idleState = container.querySelector('.voice-recorder-idle');
+  const activeState = container.querySelector('.voice-recorder-active');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
   const transcriptionText = container.querySelector('.transcription-text');
   const typeFallback = container.querySelector('.type-fallback');
 
-  if (bar) bar.style.display = 'none';
+  if (idleState) idleState.style.display = 'none';
+  if (activeState) activeState.style.display = 'none';
   if (previewState) previewState.style.display = 'none';
   if (processingState) processingState.style.display = 'none';
   if (completeState) completeState.style.display = 'flex';
@@ -3468,33 +3483,20 @@ function showCompleteState(container, transcription) {
 
 // Reset to default/idle state
 function resetVoiceRecorder(container) {
-  const bar = container.querySelector('.voice-recorder-bar');
-  const micIcon = container.querySelector('.mic-icon');
-  const stopIcon = container.querySelector('.stop-icon');
-  const statusText = container.querySelector('.recording-status');
+  const idleState = container.querySelector('.voice-recorder-idle');
+  const activeState = container.querySelector('.voice-recorder-active');
   const timerEl = container.querySelector('.recording-timer');
   const previewState = container.querySelector('.voice-recorder-preview');
   const processingState = container.querySelector('.voice-recorder-processing');
   const completeState = container.querySelector('.voice-recorder-complete');
   const typeFallback = container.querySelector('.type-fallback');
 
-  // Reset bar to idle state
-  if (bar) {
-    bar.dataset.recording = 'false';
-    bar.classList.remove('recording');
-    bar.style.display = 'flex';
-  }
+  // Show idle state, hide active state (WhatsApp-style)
+  if (idleState) idleState.style.display = 'flex';
+  if (activeState) activeState.style.display = 'none';
 
-  // Toggle icons back to mic
-  if (micIcon) micIcon.style.display = 'block';
-  if (stopIcon) stopIcon.style.display = 'none';
-
-  // Toggle status/timer back to status
-  if (statusText) statusText.style.display = 'block';
-  if (timerEl) {
-    timerEl.style.display = 'none';
-    timerEl.textContent = '0:00';
-  }
+  // Reset timer
+  if (timerEl) timerEl.textContent = '0:00';
 
   // Hide other states
   if (previewState) previewState.style.display = 'none';

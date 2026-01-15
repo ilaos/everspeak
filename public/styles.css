@@ -2989,28 +2989,19 @@ button[type="submit"]:active {
 }
 
 /* ========================================
-   VOICE RECORDER BAR - Single bar for idle and recording states
+   VOICE RECORDER - WhatsApp-style idle/active states
    ======================================== */
-.voice-recorder-bar {
+
+/* Idle state - just a mic button */
+.voice-recorder-idle {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #faf8f5 0%, #f5f0ea 100%);
-  border-radius: 50px;
-  border: 1px solid #e8e0d5;
-  transition: all 0.3s ease;
+  justify-content: center;
+  padding: 20px 0;
 }
 
-.voice-recorder-bar.recording {
-  background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
-  border-color: #e8c0c0;
-}
-
-.voice-recorder-bar .btn-record-toggle {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
+.voice-recorder-idle .btn-start-record {
+  width: 64px;
+  height: 64px;
   padding: 0;
   display: flex;
   align-items: center;
@@ -3019,80 +3010,126 @@ button[type="submit"]:active {
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(166, 137, 102, 0.3);
+  box-shadow: 0 4px 16px rgba(166, 137, 102, 0.4);
   transition: all 0.2s ease;
 }
 
-.voice-recorder-bar .btn-record-toggle:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(166, 137, 102, 0.4);
+.voice-recorder-idle .btn-start-record:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(166, 137, 102, 0.5);
 }
 
-.voice-recorder-bar .btn-record-toggle:active {
-  transform: scale(0.98);
+.voice-recorder-idle .btn-start-record:active {
+  transform: scale(0.95);
 }
 
-.voice-recorder-bar.recording .btn-record-toggle {
-  background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%);
-  box-shadow: 0 4px 12px rgba(217, 83, 79, 0.4);
-}
-
-.voice-recorder-bar .btn-record-toggle svg {
-  width: 24px;
-  height: 24px;
+.voice-recorder-idle .btn-start-record svg {
+  width: 28px;
+  height: 28px;
   color: white;
   fill: white;
 }
 
-.voice-recorder-bar .waveform-container {
-  flex: 1;
+/* Active/Recording state - timer, waveform, stop button */
+.voice-recorder-active {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  height: 40px;
+  gap: 16px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
+  border-radius: 50px;
+  border: 1px solid #e8c0c0;
 }
 
-.voice-recorder-bar .waveform-bar {
-  width: 4px;
-  height: 12px;
-  background: #c4b5a3;
-  border-radius: 2px;
-  transition: height 0.1s ease;
-}
-
-.voice-recorder-bar.recording .waveform-bar {
-  background: #d9534f;
-  animation: waveform-idle 1s ease-in-out infinite;
-}
-
-.voice-recorder-bar.recording .waveform-bar:nth-child(1) { animation-delay: 0s; }
-.voice-recorder-bar.recording .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
-.voice-recorder-bar.recording .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
-.voice-recorder-bar.recording .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
-.voice-recorder-bar.recording .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
-.voice-recorder-bar.recording .waveform-bar:nth-child(6) { animation-delay: 0.3s; }
-.voice-recorder-bar.recording .waveform-bar:nth-child(7) { animation-delay: 0.2s; }
-.voice-recorder-bar.recording .waveform-bar:nth-child(8) { animation-delay: 0.1s; }
-.voice-recorder-bar.recording .waveform-bar:nth-child(9) { animation-delay: 0s; }
-
-@keyframes waveform-idle {
-  0%, 100% { height: 12px; }
-  50% { height: 28px; }
-}
-
-.voice-recorder-bar .recording-status {
-  font-size: 0.95rem;
-  color: #8b7d6f;
-  white-space: nowrap;
-}
-
-.voice-recorder-bar .recording-timer {
-  font-size: 1rem;
+.voice-recorder-active .recording-timer {
+  font-size: 1.1rem;
   font-weight: 600;
   color: #d9534f;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  min-width: 45px;
+}
+
+.voice-recorder-active .waveform-dots {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 32px;
+}
+
+.voice-recorder-active .waveform-dot {
+  width: 4px;
+  height: 4px;
+  background: #d9534f;
+  border-radius: 50%;
+  animation: waveform-dot-pulse 1.2s ease-in-out infinite;
+}
+
+/* Staggered animation for dots */
+.voice-recorder-active .waveform-dot:nth-child(1) { animation-delay: 0s; }
+.voice-recorder-active .waveform-dot:nth-child(2) { animation-delay: 0.06s; }
+.voice-recorder-active .waveform-dot:nth-child(3) { animation-delay: 0.12s; }
+.voice-recorder-active .waveform-dot:nth-child(4) { animation-delay: 0.18s; }
+.voice-recorder-active .waveform-dot:nth-child(5) { animation-delay: 0.24s; }
+.voice-recorder-active .waveform-dot:nth-child(6) { animation-delay: 0.30s; }
+.voice-recorder-active .waveform-dot:nth-child(7) { animation-delay: 0.36s; }
+.voice-recorder-active .waveform-dot:nth-child(8) { animation-delay: 0.42s; }
+.voice-recorder-active .waveform-dot:nth-child(9) { animation-delay: 0.48s; }
+.voice-recorder-active .waveform-dot:nth-child(10) { animation-delay: 0.54s; }
+.voice-recorder-active .waveform-dot:nth-child(11) { animation-delay: 0.48s; }
+.voice-recorder-active .waveform-dot:nth-child(12) { animation-delay: 0.42s; }
+.voice-recorder-active .waveform-dot:nth-child(13) { animation-delay: 0.36s; }
+.voice-recorder-active .waveform-dot:nth-child(14) { animation-delay: 0.30s; }
+.voice-recorder-active .waveform-dot:nth-child(15) { animation-delay: 0.24s; }
+.voice-recorder-active .waveform-dot:nth-child(16) { animation-delay: 0.18s; }
+.voice-recorder-active .waveform-dot:nth-child(17) { animation-delay: 0.12s; }
+.voice-recorder-active .waveform-dot:nth-child(18) { animation-delay: 0.06s; }
+.voice-recorder-active .waveform-dot:nth-child(19) { animation-delay: 0s; }
+.voice-recorder-active .waveform-dot:nth-child(20) { animation-delay: 0.06s; }
+
+@keyframes waveform-dot-pulse {
+  0%, 100% {
+    transform: scaleY(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scaleY(4);
+    opacity: 1;
+  }
+}
+
+.voice-recorder-active .btn-stop-record {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(217, 83, 79, 0.4);
+  transition: all 0.2s ease;
+}
+
+.voice-recorder-active .btn-stop-record:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(217, 83, 79, 0.5);
+}
+
+.voice-recorder-active .btn-stop-record:active {
+  transform: scale(0.95);
+}
+
+.voice-recorder-active .btn-stop-record svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+  fill: white;
 }
 
 /* Legacy classes for backwards compatibility */

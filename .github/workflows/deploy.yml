@@ -17,5 +17,6 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           script: |
             cd /var/www/everspeak
-            git pull
+            git fetch origin
+            git pull origin main
             pm2 restart everspeak

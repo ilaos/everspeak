@@ -2127,13 +2127,31 @@ function getDisplayName(fieldId, fallback = 'them') {
   // First try the extracted display name
   const displayInput = document.getElementById(`${fieldId}-display`);
   if (displayInput?.value?.trim()) {
+    console.log(`[getDisplayName] Using extracted name for ${fieldId}:`, displayInput.value.trim());
     return displayInput.value.trim();
   }
-  // Fall back to raw input value
+  // Fall back to raw input value - but try to extract a name as simple fallback
   const rawInput = document.getElementById(fieldId);
   if (rawInput?.value?.trim()) {
-    return rawInput.value.trim();
+    const rawValue = rawInput.value.trim();
+    // If raw value looks like a sentence (more than 3 words), try to find a proper name
+    const words = rawValue.split(/\s+/);
+    if (words.length > 3) {
+      // Common words to skip when looking for names
+      const skipWords = ['in', 'the', 'his', 'her', 'my', 'a', 'an', 'was', 'is', 'but', 'and', 'or', 'to', 'of', 'for', 'professional', 'world', 'everyone', 'everybody', 'called', 'name'];
+      // Find capitalized words that look like names (not common words)
+      const matches = rawValue.match(/\b([A-Z][a-z]+)\b/g) || [];
+      for (const match of matches) {
+        if (!skipWords.includes(match.toLowerCase())) {
+          console.log(`[getDisplayName] Extracted fallback name from raw value:`, match);
+          return match;
+        }
+      }
+    }
+    console.log(`[getDisplayName] Using raw value for ${fieldId}:`, rawValue.substring(0, 30) + '...');
+    return rawValue;
   }
+  console.log(`[getDisplayName] Using fallback for ${fieldId}:`, fallback);
   return fallback;
 }
 

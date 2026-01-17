@@ -12,7 +12,9 @@ class WizardEngine {
     this.answers = {};
     this.personaId = null;
     this.userName = '';
+    this.userNameDisplay = ''; // Extracted display name for user
     this.lovedOneName = '';
+    this.lovedOneNameDisplay = ''; // Extracted display name for loved one
     this.isRecording = false;
     this.mediaRecorder = null;
     this.audioChunks = [];
@@ -480,18 +482,73 @@ class WizardEngine {
     if (value) {
       this.answers[fieldId] = value;
 
-      // Track special fields
+      // Track special fields and extract display names
       if (fieldId === 'user_name') {
         this.userName = value;
+        // Extract display name for user
+        const extracted = await this.extractDisplayName(value, 'user_name');
+        this.userNameDisplay = extracted;
+        this.showConfirmationToast(`Got it, ${extracted}.`);
       } else if (fieldId === 'loved_one_name') {
         this.lovedOneName = value;
-        // Update completion step name
+        // Extract display name for loved one
+        const extracted = await this.extractDisplayName(value, 'name');
+        this.lovedOneNameDisplay = extracted;
+        // Update completion step name with display name
         const completionName = document.getElementById('completion-name');
-        if (completionName) completionName.textContent = value;
+        if (completionName) completionName.textContent = extracted;
+        this.showConfirmationToast(`Understood, we're talking about ${extracted}.`);
       }
 
       // Save to onboarding API for Deep Synthesis hydration
       await this.saveToOnboardingAPI(questionId, value, isVoiceTranscript, selectedOption);
+    }
+  }
+
+  // Extract display name from verbose transcript using AI
+  async extractDisplayName(transcript, type = 'name') {
+    try {
+      const response = await fetch('/api/extract-name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript, type })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result.display_name || transcript;
+      }
+    } catch (error) {
+      console.error('Error extracting display name:', error);
+    }
+    // Fallback: return first word if extraction fails
+    return transcript.split(/\s+/)[0] || transcript;
+  }
+
+  // Show a brief confirmation toast
+  showConfirmationToast(message) {
+    // Remove any existing toast
+    const existingToast = document.querySelector('.wizard-toast');
+    if (existingToast) existingToast.remove();
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'wizard-toast';
+    toast.textContent = message;
+
+    // Add to wizard content
+    const wizardContent = document.querySelector('.wizard-content');
+    if (wizardContent) {
+      wizardContent.appendChild(toast);
+
+      // Animate in
+      setTimeout(() => toast.classList.add('show'), 10);
+
+      // Remove after delay
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
     }
   }
 

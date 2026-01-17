@@ -2122,6 +2122,21 @@ function getStepProgressText(step) {
   return progressTexts[step] || '';
 }
 
+// Get display name for a field (uses extracted name if available, falls back to raw value)
+function getDisplayName(fieldId, fallback = 'them') {
+  // First try the extracted display name
+  const displayInput = document.getElementById(`${fieldId}-display`);
+  if (displayInput?.value?.trim()) {
+    return displayInput.value.trim();
+  }
+  // Fall back to raw input value
+  const rawInput = document.getElementById(fieldId);
+  if (rawInput?.value?.trim()) {
+    return rawInput.value.trim();
+  }
+  return fallback;
+}
+
 function updateWizardUI() {
   // Hide all steps
   for (let i = 1; i <= WIZARD_TOTAL_STEPS; i++) {
@@ -2149,12 +2164,12 @@ function updateWizardUI() {
     }
   } else if (wizardCurrentStep === 4) {
     // Special handling for Step 4: Relationship with name insertion
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const firstName = getDisplayName('wizard-first-name', 'them');
     const acknowledgmentEl = document.getElementById('step-4-acknowledgment');
     const questionEl = document.getElementById('step-4-question');
 
     if (acknowledgmentEl) {
-      acknowledgmentEl.textContent = `Thank you for sharing that with me. ${firstName}.`;
+      acknowledgmentEl.textContent = `Thank you for sharing that with me, ${firstName}.`;
       acknowledgmentEl.style.display = 'block';
     }
     if (questionEl) {
@@ -2163,7 +2178,7 @@ function updateWizardUI() {
     }
   } else if (wizardCurrentStep === 5) {
     // Special handling for Step 5: Date of Passing with name insertion and relationship acknowledgment
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const firstName = getDisplayName('wizard-first-name', 'them');
     const relationship = document.getElementById('wizard-relationship')?.value.trim() || 'loved one';
     const acknowledgmentEl = document.getElementById('step-5-acknowledgment');
     const questionEl = document.getElementById('step-5-question');
@@ -2189,7 +2204,7 @@ function updateWizardUI() {
     }
   } else if (wizardCurrentStep === 6) {
     // Special handling for Step 6: Circumstances with name insertion and date acknowledgment
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const firstName = getDisplayName('wizard-first-name', 'them');
     const datePassed = document.getElementById('wizard-date-passed')?.value.trim() || '';
     const acknowledgmentEl = document.getElementById('step-6-acknowledgment');
     const questionEl = document.getElementById('step-6-question');
@@ -2215,7 +2230,7 @@ function updateWizardUI() {
     }
   } else if (wizardCurrentStep === 7) {
     // Special handling for Step 7: Relationship Dynamics with name and pronoun insertion
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const firstName = getDisplayName('wizard-first-name', 'them');
     const relationship = document.getElementById('wizard-relationship')?.value.trim().toLowerCase() || '';
     const questionEl = document.getElementById('step-7-question');
 
@@ -2256,7 +2271,7 @@ function updateWizardUI() {
     }
   } else if (wizardCurrentStep === 9) {
     // Special handling for Step 9: Share a Memory with name insertion
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const firstName = getDisplayName('wizard-first-name', 'them');
     const questionEl = document.getElementById('step-9-question');
 
     if (questionEl) {
@@ -2265,7 +2280,7 @@ function updateWizardUI() {
     }
   } else if (wizardCurrentStep === 10) {
     // Special handling for Step 10: Things Left Unsaid with name and pronoun insertion
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'them';
+    const firstName = getDisplayName('wizard-first-name', 'them');
     const relationship = document.getElementById('wizard-relationship')?.value.trim().toLowerCase() || '';
     const questionEl = document.getElementById('step-10-question');
 
@@ -2286,7 +2301,7 @@ function updateWizardUI() {
     }
   } else if (wizardCurrentStep === 11) {
     // Special handling for Step 11: Wrapping Up with name insertion
-    const firstName = document.getElementById('wizard-first-name')?.value.trim() || 'this person';
+    const firstName = getDisplayName('wizard-first-name', 'this person');
     const acknowledgmentEl = document.getElementById('step-11-acknowledgment');
 
     if (acknowledgmentEl) {
@@ -3538,6 +3553,11 @@ async function processVoiceRecording(container, audioBlob) {
         hiddenInput.value = result.text;
       }
 
+      // For name fields, extract display name using AI
+      if (fieldId === 'wizard-first-name' || fieldId === 'wizard-user-name') {
+        await extractAndStoreDisplayName(result.text, fieldId);
+      }
+
       // Show the transcription in the complete state
       showCompleteState(container, result.text);
       console.log('[Voice Recorder] Transcription successful:', result.text.substring(0, 50) + '...');
@@ -3549,6 +3569,81 @@ async function processVoiceRecording(container, audioBlob) {
     console.error('[Voice Recorder] Transcription error:', error);
     showError('Could not transcribe audio. Please try again.');
     resetVoiceRecorder(container);
+  }
+}
+
+// Extract display name from verbose transcript and store in hidden field
+async function extractAndStoreDisplayName(transcript, fieldId) {
+  try {
+    const type = fieldId === 'wizard-user-name' ? 'user_name' : 'name';
+    const response = await fetch('/api/extract-name', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript, type })
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      const displayName = result.display_name || transcript;
+
+      // Store display name in a separate hidden field
+      let displayNameInput = document.getElementById(`${fieldId}-display`);
+      if (!displayNameInput) {
+        // Create the hidden input if it doesn't exist
+        displayNameInput = document.createElement('input');
+        displayNameInput.type = 'hidden';
+        displayNameInput.id = `${fieldId}-display`;
+        document.body.appendChild(displayNameInput);
+      }
+      displayNameInput.value = displayName;
+
+      // Show confirmation toast
+      const message = fieldId === 'wizard-user-name'
+        ? `Got it, ${displayName}.`
+        : `Understood, we're talking about ${displayName}.`;
+      showWizardToast(message);
+
+      console.log(`[Name Extraction] Extracted "${displayName}" from "${transcript.substring(0, 50)}..."`);
+    }
+  } catch (error) {
+    console.error('[Name Extraction] Error:', error);
+    // Fallback: use first word
+    const firstWord = transcript.split(/\s+/)[0] || transcript;
+    let displayNameInput = document.getElementById(`${fieldId}-display`);
+    if (!displayNameInput) {
+      displayNameInput = document.createElement('input');
+      displayNameInput.type = 'hidden';
+      displayNameInput.id = `${fieldId}-display`;
+      document.body.appendChild(displayNameInput);
+    }
+    displayNameInput.value = firstWord;
+  }
+}
+
+// Show a brief confirmation toast in the wizard
+function showWizardToast(message) {
+  // Remove any existing toast
+  const existingToast = document.querySelector('.wizard-toast');
+  if (existingToast) existingToast.remove();
+
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.className = 'wizard-toast';
+  toast.textContent = message;
+
+  // Add to wizard modal content
+  const wizardContent = document.querySelector('.wizard-modal .modal-content') || document.querySelector('.wizard-content');
+  if (wizardContent) {
+    wizardContent.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Remove after delay
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
   }
 }
 

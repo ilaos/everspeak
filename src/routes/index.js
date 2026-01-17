@@ -284,6 +284,56 @@ router.post('/transcribe', upload.single('audio'), handleMulterError, transcript
 
 /**
  * @swagger
+ * /api/extract-name:
+ *   post:
+ *     summary: Extract display name from transcript
+ *     description: Uses AI to extract the primary name/nickname from a verbose transcript for display in subsequent questions
+ *     tags: [Transcription]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - transcript
+ *             properties:
+ *               transcript:
+ *                 type: string
+ *                 description: The full transcript to extract a name from
+ *                 example: "His professional name was Jim, but anyone close to him called him Jimmy"
+ *               type:
+ *                 type: string
+ *                 enum: [name, user_name]
+ *                 description: Type of extraction (name = loved one, user_name = user's name)
+ *                 default: name
+ *     responses:
+ *       200:
+ *         description: Name extracted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 display_name:
+ *                   type: string
+ *                   description: The extracted name for display
+ *                   example: "Jimmy"
+ *                 full_transcript:
+ *                   type: string
+ *                   description: The original transcript (preserved for context)
+ *       400:
+ *         description: Transcript is required
+ *       500:
+ *         description: Extraction failed
+ */
+router.post('/extract-name', transcriptionController.extractName);
+
+/**
+ * @swagger
  * /api/examples:
  *   get:
  *     summary: Get all examples

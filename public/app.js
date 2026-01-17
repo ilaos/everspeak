@@ -2024,6 +2024,21 @@ function getAnswerForStep(step) {
 async function wizardNextStep() {
   console.log('[Wizard Next] wizardNextStep called, current step:', wizardCurrentStep);
 
+  // Check for unprocessed voice recording on current step and auto-process it
+  const currentStepEl = document.getElementById(`wizard-step-${wizardCurrentStep}`);
+  if (currentStepEl) {
+    const voiceRecorder = currentStepEl.querySelector('.voice-recorder, .voice-recorder-container');
+    if (voiceRecorder && voiceRecorder._audioBlob) {
+      // There's an unprocessed recording - check if it hasn't been transcribed yet
+      const hiddenInput = voiceRecorder.querySelector('input[type="hidden"]');
+      if (hiddenInput && !hiddenInput.value.trim()) {
+        console.log('[Wizard Next] Found unprocessed recording, auto-processing...');
+        showProcessingState(voiceRecorder);
+        await processVoiceRecording(voiceRecorder, voiceRecorder._audioBlob);
+      }
+    }
+  }
+
   // Steps that should get breathing exercise (skip step 1 welcome, skip step 11 final)
   const shouldShowBreathing = wizardCurrentStep >= 2 && wizardCurrentStep <= 10;
   console.log('[Wizard Next] shouldShowBreathing:', shouldShowBreathing);

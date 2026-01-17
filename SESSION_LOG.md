@@ -628,3 +628,264 @@ e3800ed Switch all AI text features from OpenAI to Google Gemini
 GEMINI_API_KEY=AIzaSy...  ✓
 OPENAI_API_KEY=sk-proj... ✓ (for TTS)
 ```
+
+---
+
+## Session: January 16, 2026
+
+### Summary
+This session focused on fixing two critical issues reported during wizard testing:
+1. **Name extraction not preferring personal names** - When user says "professionally Jim, but to me Jimmy", it was still using "Jim" instead of "Jimmy"
+2. **Voice recording error** - User got an error when recording on the "things left unsaid" question
+
+---
+
+## Issues Fixed
+
+### 1. Name Extraction Priority Fix
+
+**Problem:** When the user provided verbose name answers like:
+- "In the professional world, everyone knew him as Jim, but to me, I knew him as Jimmy"
+
+The subsequent questions would use "Jim" instead of the personal name "Jimmy".
+
+**Root Cause:** The LLM extraction prompt wasn't explicit enough about prioritizing personal names over professional names.
+
+**Solution:** Completely rewrote the extraction prompt with explicit priority ordering:
+
+**File:** `src/controllers/transcriptionController.js` (lines 8-29)
+
+**Before:**
+```javascript
+const EXTRACTION_PROMPTS = {
+  name: `Extract the primary name or nickname the user wants to use for this person.
+Rules:
+- If multiple names are given, prefer the nickname or the name "everyone close to them" used
+- Return ONLY the name itself, nothing else
+...`
+```
+
+**After:**
+```javascript
+const EXTRACTION_PROMPTS = {
+  name: `Extract the PERSONAL name the user wants to use for this person.
+
+CRITICAL PRIORITY ORDER:
+1. ALWAYS prefer the name the user personally used: "to me he was", "I called him", "I knew him as"
+2. Second choice: nicknames used by close people: "everyone close called him", "family called her"
+3. LAST choice: professional/formal names: "professionally known as", "in the professional world"
+
+Rules:
+- Return ONLY the single name itself, nothing else
+- NEVER return the professional/formal name if a personal nickname is given
+- Examples:
+  - "In the professional world he was Jim, but to me he was Jimmy" → "Jimmy"
+  - "His name was James but everyone called him Jimmy" → "Jimmy"
+  - "Everyone knew him as Jim but I called him Jimmy" → "Jimmy"
+  - "Professionally Jim, but to me Jimmy" → "Jimmy"
+  - "Sarah" → "Sarah"
+- If no clear name is found, return "them"
+- Never return explanations, just the name
+
+Transcript: `
+```
+
+**Also added logging** for debugging:
+```javascript
+console.log(`[Name Extraction] Input transcript: "${trimmedTranscript}"`);
+// ... LLM call ...
+console.log(`[Name Extraction] LLM returned: "${extractedName}"`);
+```
+
+**Commit:** `5bf04ab`
+
+---
+
+### 2. Voice Recording Error Handling Improvements
+
+**Problem:** User recorded a deep memory on the "things left unsaid" question, clicked stop, and got an error saying it wasn't recorded.
+
+**Root Cause:** Could be one of several issues:
+- Empty audio blob
+- Server transcription error
+- Empty transcription result (no speech detected)
+
+The previous error handling was generic and unhelpful.
+
+**Solution:** Improved error handling in `public/app.js` (lines 3567-3629):
+
+**Added:**
+1. **Audio blob validation** - Check if blob is empty before sending:
+```javascript
+if (!audioBlob || audioBlob.size === 0) {
+  console.error('[Voice Recorder] Audio blob is empty or invalid');
+  showError('No audio was captured. Please try recording again.');
+  resetVoiceRecorder(container);
+  return;
+}
+```
+
+2. **Audio size logging**:
+```javascript
+console.log(`[Voice Recorder] Processing audio: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+```
+
+3. **Server response error handling**:
+```javascript
+if (!response.ok) {
+  const errorText = await response.text();
+  console.error('[Voice Recorder] Server error:', response.status, errorText);
+  showError('Server error while transcribing. Please try again.');
+  resetVoiceRecorder(container);
+  return;
+}
+```
+
+4. **Empty transcription detection**:
+```javascript
+} else if (result.success && !result.text) {
+  console.warn('[Voice Recorder] Transcription returned empty text');
+  showError('Could not hear any speech. Please speak clearly and try again.');
+  resetVoiceRecorder(container);
+}
+```
+
+**Also added server-side logging** in `transcriptionController.js` (lines 74-81):
+```javascript
+console.error('Transcription error:', error.message || error);
+console.error('Transcription error details:', {
+  name: error.name,
+  code: error.code,
+  status: error.status,
+  fileSize: req.file?.size,
+  mimeType: req.file?.mimetype
+});
+```
+
+**Commit:** `5bf04ab`
+
+---
+
+## Current Deployment
+
+**Verification command:**
+```bash
+cd /var/www/everspeak && git log -1 --oneline
+```
+
+**Expected output:**
+```
+5bf04ab Fix name extraction to prefer personal names and improve error handling
+```
+
+---
+
+## Two Wizard Systems Reminder
+
+The app has **TWO** wizard systems that both need to be maintained:
+
+| System | File | Used When |
+|--------|------|-----------|
+| Legacy wizard | `public/app.js` | Hardcoded wizard in index.html |
+| New wizard | `public/wizardEngine.js` | API-driven wizard with questions from backend |
+
+Both systems call:
+- `/api/transcribe` - For voice transcription
+- `/api/extract-name` - For extracting display names from verbose answers
+
+Both store display names:
+- Legacy: Creates hidden input `{fieldId}-display`
+- New: Uses `this.userNameDisplay` and `this.lovedOneNameDisplay`
+
+---
+
+## Name Extraction Flow (How It Works)
+
+1. User records voice answer for "What was their name?"
+2. Audio sent to `/api/transcribe` → Returns full transcript
+3. Full transcript stored in hidden input (for Deep Synthesis later)
+4. Transcript sent to `/api/extract-name` → Returns extracted display name
+5. Display name stored in separate `-display` hidden input
+6. `getDisplayName()` function uses display name for subsequent question text
+7. Toast shows "Understood, we're talking about Jimmy."
+
+**Files involved:**
+- `src/controllers/transcriptionController.js` - Both endpoints
+- `public/app.js` - `extractAndStoreDisplayName()`, `getDisplayName()`, `showWizardToast()`
+- `public/wizardEngine.js` - `extractDisplayName()`, `showConfirmationToast()`
+
+---
+
+## Testing Instructions
+
+To verify fixes work:
+
+1. **Test name extraction:**
+   - Start new persona wizard
+   - On "What was their name?" question, record: "Professionally everyone knew him as Jim, but to me he was always Jimmy"
+   - Toast should say: "Understood, we're talking about Jimmy."
+   - Next question should say: "Could you tell me about your relationship with Jimmy?"
+
+2. **Test recording error handling:**
+   - Try recording with no audio (stay silent)
+   - Should show: "Could not hear any speech. Please speak clearly and try again."
+   - Check browser console for detailed logging
+
+---
+
+## Known Issues / Still To Investigate
+
+1. **SSH authentication failing** - Could not check server PM2 logs during this session:
+   ```
+   Permission denied, please try again.
+   root@165.22.44.109: Permission denied (publickey,password).
+   ```
+
+   May need to re-add SSH key or check if key has expired.
+
+2. **Recording error specifics unknown** - Without server logs, we couldn't determine exactly why the "things left unsaid" recording failed. The improved logging will help diagnose this next time it happens.
+
+---
+
+## Files Changed This Session
+
+| File | Changes |
+|------|---------|
+| `src/controllers/transcriptionController.js` | Rewrote name extraction prompt, added detailed logging |
+| `public/app.js` | Improved voice recording error handling with specific messages |
+
+---
+
+## Git Commits This Session
+
+```
+5bf04ab Fix name extraction to prefer personal names and improve error handling
+```
+
+---
+
+## Next Steps When Resuming
+
+1. **Test the name extraction fix** - Have user try wizard again with "professionally X, but to me Y" phrasing
+2. **Test recording on "things left unsaid"** - Try to reproduce the recording error
+3. **Check server logs if error recurs** - The new logging will show exactly what failed
+4. **Fix SSH access** - May need to regenerate or re-add SSH keys
+5. **Continue wizard testing** - User was at question ~10 of 29 when they stopped
+
+---
+
+## Quick Reference Commands
+
+```bash
+# Deploy latest code (from local)
+cd "C:\Users\ishla\Desktop\EVERSPEAK" && git pull origin main && git merge festive-leakey --no-edit && git push origin main
+
+# Verify deployment (on server)
+cd /var/www/everspeak && git log -1 --oneline
+
+# Check server logs (on server)
+pm2 logs everspeak --lines 50 --nostream
+
+# Restart app (on server)
+pm2 restart everspeak
+```

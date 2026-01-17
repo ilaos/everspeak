@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { testController } from '../controllers/testController.js';
 import { exampleController } from '../controllers/exampleController.js';
-import { handleMessage } from '../controllers/messageController.js';
+import { handleMessage, handleFirstContact } from '../controllers/messageController.js';
 import { personaController } from '../controllers/personaController.js';
 import { transcriptionController } from '../controllers/transcriptionController.js';
 import { onboardingController } from '../controllers/onboardingController.js';
@@ -171,6 +171,75 @@ router.get('/test', testController.getTest);
  *         description: Persona not found (if persona_id provided)
  */
 router.post('/message', handleMessage);
+
+/**
+ * @swagger
+ * /api/first-contact:
+ *   post:
+ *     summary: Generate first contact icebreaker message
+ *     description: Auto-initiates a conversation using Q23 ("If they walked in right now") data to generate an authentic first message from the persona
+ *     tags: [Message]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - persona_id
+ *             properties:
+ *               persona_id:
+ *                 type: string
+ *                 description: The persona ID to generate first contact for
+ *                 example: "uuid-of-persona"
+ *               session_id:
+ *                 type: string
+ *                 description: Optional session ID for Flight Recorder logging
+ *                 example: "session-uuid"
+ *               debug_mode:
+ *                 type: boolean
+ *                 description: Enable scrutiny mode for this request
+ *                 example: false
+ *     responses:
+ *       200:
+ *         description: First contact message generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     first_message:
+ *                       type: string
+ *                       description: The generated icebreaker message
+ *                     persona_id:
+ *                       type: string
+ *                     persona_name:
+ *                       type: string
+ *                     session_id:
+ *                       type: string
+ *                     meta:
+ *                       type: object
+ *                       properties:
+ *                         q23_source:
+ *                           type: string
+ *                           description: The Q23 data used as template
+ *                         generated_at:
+ *                           type: string
+ *                           format: date-time
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Validation error - persona_id is required
+ *       404:
+ *         description: Persona not found or no onboarding data
+ */
+router.post('/first-contact', handleFirstContact);
 
 /**
  * @swagger

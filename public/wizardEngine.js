@@ -443,28 +443,35 @@ class WizardEngine {
     }
   }
 
-  // Save current answer to local state
+  // Save current answer to local state AND to onboarding API
   async saveCurrentAnswer() {
     if (this.currentStep === 0 || this.currentStep > this.questions.length) return;
 
     const currentQuestion = this.questions[this.currentStep - 1];
     const fieldId = currentQuestion.fieldId;
+    const questionId = currentQuestion.id; // e.g., 'q1', 'q2', etc.
 
     // Get value from hidden input or text input
     const hiddenInput = document.getElementById(`answer-${fieldId}`);
     const textInput = document.getElementById(`text-${fieldId}`);
 
     let value = '';
+    let isVoiceTranscript = false;
+
     if (hiddenInput?.value) {
       value = hiddenInput.value;
+      isVoiceTranscript = true; // Hidden input is set by voice transcription
     } else if (textInput?.value) {
       value = textInput.value;
+      isVoiceTranscript = false;
     }
 
     // For select inputs, get the selected radio value
+    let selectedOption = null;
     if (currentQuestion.inputType === 'select') {
       const selected = document.querySelector(`input[name="select-${fieldId}"]:checked`);
       if (selected) {
+        selectedOption = selected.value;
         value = selected.value;
         if (hiddenInput) hiddenInput.value = value;
       }
@@ -482,6 +489,44 @@ class WizardEngine {
         const completionName = document.getElementById('completion-name');
         if (completionName) completionName.textContent = value;
       }
+
+      // Save to onboarding API for Deep Synthesis hydration
+      await this.saveToOnboardingAPI(questionId, value, isVoiceTranscript, selectedOption);
+    }
+  }
+
+  // Persist answer to the onboarding API
+  async saveToOnboardingAPI(questionId, value, isVoiceTranscript, selectedOption) {
+    if (!this.personaId || !questionId) return;
+
+    try {
+      const payload = {};
+
+      if (selectedOption) {
+        // Select-type question
+        payload.selectedOption = selectedOption;
+      } else if (isVoiceTranscript) {
+        // Voice transcription
+        payload.voiceTranscript = value;
+      } else {
+        // Text input
+        payload.textResponse = value;
+      }
+
+      const response = await fetch(`/api/personas/${this.personaId}/onboarding/${questionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        console.warn(`Failed to save answer for ${questionId}:`, response.status);
+      } else {
+        console.log(`Saved ${questionId} to onboarding API`);
+      }
+    } catch (error) {
+      console.error(`Error saving ${questionId} to onboarding API:`, error);
+      // Don't block the wizard flow on API errors
     }
   }
 
@@ -751,6 +796,28 @@ class WizardEngine {
     if (timerEl) timerEl.textContent = '0:00';
   }
 
+  // Toggle playback for recorded audio
+  togglePlayback(btn) {
+    const container = btn.closest('.voice-recorder') || btn.closest('.voice-recorder-container');
+    if (!container) return;
+
+    const audio = container.querySelector('.recorder-audio');
+    const playIcon = btn.querySelector('.icon-play');
+    const pauseIcon = btn.querySelector('.icon-pause');
+
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play();
+      if (playIcon) playIcon.style.display = 'none';
+      if (pauseIcon) pauseIcon.style.display = 'block';
+    } else {
+      audio.pause();
+      if (playIcon) playIcon.style.display = 'block';
+      if (pauseIcon) pauseIcon.style.display = 'none';
+    }
+  }
+
   // Show microphone permission help
   showMicrophoneHelp() {
     const modal = document.getElementById('permission-help-modal');
@@ -843,22 +910,33 @@ class WizardEngine {
       };
     }
 
-    // Voice recording - start button
-    document.querySelectorAll('.btn-start-record').forEach(btn => {
+    // Voice recording - new UI (.recorder-mic) and legacy (.btn-start-record)
+    document.querySelectorAll('.recorder-mic, .btn-start-record').forEach(btn => {
       btn.onclick = () => {
         const step = btn.dataset.step;
         this.startRecording(parseInt(step));
       };
     });
 
-    // Voice recording - stop button
-    document.querySelectorAll('.btn-stop-record').forEach(btn => {
+    // Voice recording - stop button (new bar UI and legacy)
+    // For new UI, the left button in recorder-bar stops recording
+    document.querySelectorAll('.bar-btn-left, .btn-stop-record').forEach(btn => {
       btn.onclick = () => {
-        this.stopRecording();
+        const bar = btn.closest('.recorder-bar');
+        if (bar && bar.dataset.mode === 'recording') {
+          this.stopRecording();
+        } else if (bar && bar.dataset.mode === 'playback') {
+          // Toggle play/pause for playback
+          this.togglePlayback(btn);
+        } else {
+          // Legacy stop
+          this.stopRecording();
+        }
       };
     });
 
-    document.querySelectorAll('.btn-re-record').forEach(btn => {
+    // Re-record buttons (new .recorder-again and legacy .btn-re-record)
+    document.querySelectorAll('.recorder-again, .btn-re-record').forEach(btn => {
       btn.onclick = () => {
         const container = btn.closest('.voice-recorder') || btn.closest('.voice-recorder-container');
         if (container) {

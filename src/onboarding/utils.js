@@ -155,10 +155,11 @@ export async function getOnboardingProgress(personaId) {
     a.media.photos.length > 0 || a.media.audio.length > 0 || a.media.video.length > 0
   );
 
+  const TOTAL_QUESTIONS = 29;
   return {
-    totalQuestions: 21,
+    totalQuestions: TOTAL_QUESTIONS,
     answeredCount: answeredQuestions.length,
     answeredQuestionIds: answeredQuestions.map(a => a.questionId),
-    percentComplete: Math.round((answeredQuestions.length / 21) * 100)
+    percentComplete: Math.round((answeredQuestions.length / TOTAL_QUESTIONS) * 100)
   };
 }

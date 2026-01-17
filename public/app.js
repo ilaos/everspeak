@@ -3569,6 +3569,16 @@ async function processVoiceRecording(container, audioBlob) {
   const fieldId = container.dataset.field;
 
   try {
+    // Check if audio blob is valid
+    if (!audioBlob || audioBlob.size === 0) {
+      console.error('[Voice Recorder] Audio blob is empty or invalid');
+      showError('No audio was captured. Please try recording again.');
+      resetVoiceRecorder(container);
+      return;
+    }
+
+    console.log(`[Voice Recorder] Processing audio: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+
     const formData = new FormData();
     formData.append('audio', audioBlob, 'wizard-recording.webm');
 
@@ -3576,6 +3586,14 @@ async function processVoiceRecording(container, audioBlob) {
       method: 'POST',
       body: formData
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Voice Recorder] Server error:', response.status, errorText);
+      showError('Server error while transcribing. Please try again.');
+      resetVoiceRecorder(container);
+      return;
+    }
 
     const result = await response.json();
 
@@ -3594,13 +3612,18 @@ async function processVoiceRecording(container, audioBlob) {
       // Show the transcription in the complete state
       showCompleteState(container, result.text);
       console.log('[Voice Recorder] Transcription successful:', result.text.substring(0, 50) + '...');
+    } else if (result.success && !result.text) {
+      // API succeeded but returned empty text
+      console.warn('[Voice Recorder] Transcription returned empty text');
+      showError('Could not hear any speech. Please speak clearly and try again.');
+      resetVoiceRecorder(container);
     } else {
       showError(result.error || 'Could not transcribe audio. Please try again.');
       resetVoiceRecorder(container);
     }
   } catch (error) {
     console.error('[Voice Recorder] Transcription error:', error);
-    showError('Could not transcribe audio. Please try again.');
+    showError('Could not transcribe audio. Please check your connection and try again.');
     resetVoiceRecorder(container);
   }
 }

@@ -7,12 +7,22 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Extraction prompts for different question types
 const EXTRACTION_PROMPTS = {
-  name: `Extract the primary name or nickname the user wants to use for this person.
+  name: `Extract the PERSONAL name the user wants to use for this person.
+
+CRITICAL PRIORITY ORDER:
+1. ALWAYS prefer the name the user personally used: "to me he was", "I called him", "I knew him as"
+2. Second choice: nicknames used by close people: "everyone close called him", "family called her"
+3. LAST choice: professional/formal names: "professionally known as", "in the professional world"
+
 Rules:
-- If multiple names are given, prefer the nickname or the name "everyone close to them" used
-- Return ONLY the name itself, nothing else
-- If the answer is something like "His name was James but everyone called him Jimmy", return "Jimmy"
-- If the answer is "Sarah", return "Sarah"
+- Return ONLY the single name itself, nothing else
+- NEVER return the professional/formal name if a personal nickname is given
+- Examples:
+  - "In the professional world he was Jim, but to me he was Jimmy" → "Jimmy"
+  - "His name was James but everyone called him Jimmy" → "Jimmy"
+  - "Everyone knew him as Jim but I called him Jimmy" → "Jimmy"
+  - "Professionally Jim, but to me Jimmy" → "Jimmy"
+  - "Sarah" → "Sarah"
 - If no clear name is found, return "them"
 - Never return explanations, just the name
 
@@ -71,7 +81,14 @@ export const transcriptionController = {
       if (error instanceof AppError) {
         next(error);
       } else {
-        console.error('Transcription error:', error);
+        console.error('Transcription error:', error.message || error);
+        console.error('Transcription error details:', {
+          name: error.name,
+          code: error.code,
+          status: error.status,
+          fileSize: req.file?.size,
+          mimeType: req.file?.mimetype
+        });
         next(new AppError('Failed to transcribe audio. Please try again.', 500));
       }
     } finally {
@@ -110,9 +127,11 @@ export const transcriptionController = {
       const prompt = EXTRACTION_PROMPTS[type] || EXTRACTION_PROMPTS.name;
       const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
+      console.log(`[Name Extraction] Input transcript: "${trimmedTranscript}"`);
       const result = await model.generateContent(prompt + trimmedTranscript);
       const response = await result.response;
       let extractedName = response.text().trim();
+      console.log(`[Name Extraction] LLM returned: "${extractedName}"`)
 
       // Clean up any quotes or extra formatting
       extractedName = extractedName.replace(/^["']|["']$/g, '').trim();

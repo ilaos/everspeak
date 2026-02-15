@@ -2,8 +2,14 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AppError } from '../utils/errorHandler.js';
 import fs from 'node:fs';
 import { unlink } from 'node:fs/promises';
+import crypto from 'node:crypto';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+if (!process.env.GEMINI_API_KEY) {
+  console.error('[Transcription] GEMINI_API_KEY is not set — transcription will fail');
+}
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 // Extraction prompts for different question types
 const EXTRACTION_PROMPTS = {
@@ -40,25 +46,34 @@ Transcript: `
 export const transcriptionController = {
   // POST /api/transcribe - Transcribe audio to text
   async transcribe(req, res, next) {
+    const reqId = crypto.randomUUID().slice(0, 8);
     let tempFilePath = null;
 
     try {
+      if (!process.env.GEMINI_API_KEY) {
+        console.error(`[Transcribe ${reqId}] GEMINI_API_KEY is not configured`);
+        return next(Object.assign(
+          new AppError('Transcription service is not configured.', 500),
+          { error_code: 'MISSING_API_KEY' }
+        ));
+      }
+
       // Validate that a file was uploaded
       if (!req.file) {
         throw new AppError('No audio file provided', 400);
       }
 
       tempFilePath = req.file.path;
+      const mimeType = req.file.mimetype || 'audio/webm';
+
+      console.log(`[Transcribe ${reqId}] file=${req.file.originalname} size=${req.file.size} mime=${mimeType}`);
 
       // Read the audio file and convert to base64
       const audioBuffer = fs.readFileSync(tempFilePath);
       const base64Audio = audioBuffer.toString('base64');
 
-      // Determine MIME type from file extension or use default
-      const mimeType = req.file.mimetype || 'audio/webm';
-
       // Use Gemini to transcribe the audio
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+      const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
       const result = await model.generateContent([
         {
@@ -73,6 +88,8 @@ export const transcriptionController = {
       const response = await result.response;
       const transcribedText = response.text().trim();
 
+      console.log(`[Transcribe ${reqId}] success, length=${transcribedText.length}`);
+
       res.status(200).json({
         success: true,
         text: transcribedText
@@ -81,15 +98,28 @@ export const transcriptionController = {
       if (error instanceof AppError) {
         next(error);
       } else {
-        console.error('Transcription error:', error.message || error);
-        console.error('Transcription error details:', {
+        const errorCode = error.status === 403 || error.code === 403 ? 'AUTH_FAILED'
+          : error.status === 429 || error.code === 429 ? 'RATE_LIMITED'
+          : error.message?.includes('not found') ? 'MODEL_NOT_FOUND'
+          : error.message?.includes('API key') ? 'INVALID_API_KEY'
+          : 'PROVIDER_ERROR';
+
+        console.error(`[Transcribe ${reqId}] ${errorCode}:`, {
+          message: error.message,
           name: error.name,
           code: error.code,
           status: error.status,
+          errorDetails: error.errorDetails || error.response?.data,
           fileSize: req.file?.size,
-          mimeType: req.file?.mimetype
+          mimeType: req.file?.mimetype,
+          model: GEMINI_MODEL
         });
-        next(new AppError('Failed to transcribe audio. Please try again.', 500));
+
+        const appError = new AppError(
+          `Transcription failed (${errorCode}). Please try again.`, 500
+        );
+        appError.error_code = errorCode;
+        next(appError);
       }
     } finally {
       // Clean up temporary file
@@ -97,7 +127,7 @@ export const transcriptionController = {
         try {
           await unlink(tempFilePath);
         } catch (cleanupError) {
-          console.error('Failed to delete temp file:', cleanupError);
+          console.error(`[Transcribe ${reqId}] Failed to delete temp file:`, cleanupError.message);
         }
       }
     }
@@ -125,7 +155,7 @@ export const transcriptionController = {
 
       // Use LLM to extract the name
       const prompt = EXTRACTION_PROMPTS[type] || EXTRACTION_PROMPTS.name;
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+      const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
       console.log(`[Name Extraction] Input transcript: "${trimmedTranscript}"`);
       const result = await model.generateContent(prompt + trimmedTranscript);

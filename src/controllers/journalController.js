@@ -37,7 +37,7 @@ Simply reflect back a gentle, grounding observation.`;
     : `Journal entry:\n${text}`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const result = await model.generateContent({
       contents: [

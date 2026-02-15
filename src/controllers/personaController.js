@@ -602,7 +602,7 @@ export const personaController = {
       }
 
       const importedMemories = [];
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       // Process each segment with AI categorization and weighting
       for (const segment of rawSegments) {
@@ -752,7 +752,7 @@ Extract 5-15 memories. Focus on specific, concrete details rather than general d
       let extractedMemories = [];
 
       try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         const result = await model.generateContent({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -930,7 +930,7 @@ DO NOT:
 
 Just acknowledge what they shared with warmth and presence.`;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -1042,7 +1042,7 @@ BOUNDARY FLAGS:
 
 Return ONLY the JSON object, nothing else.`;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
